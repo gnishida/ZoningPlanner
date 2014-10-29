@@ -1,0 +1,36 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QtGui/QMainWindow>
+#include "ui_MainWindow.h"
+#include "GLWidget3D.h"
+#include "UrbanGeometry.h"
+
+class MainWindow : public QMainWindow
+{
+	Q_OBJECT
+
+public:
+	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0);
+	~MainWindow();
+
+public:
+	Ui::MainWindow ui;
+	//ControlWidget* controlWidget;
+	//PropertyWidget* propertyWidget;
+	GLWidget3D* glWidget;
+	UrbanGeometry* urbanGeometry;
+
+	int mode;
+
+public slots:
+	void onLoadRoads();
+	void onGenerateBlocks();
+	void onGenerateParcels();
+	void onGenerateBuildings();
+	void onGenerateVegetation();
+	void onGenerateAll();
+
+};
+
+#endif // MAINWINDOW_H
