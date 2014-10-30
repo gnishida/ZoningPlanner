@@ -248,24 +248,18 @@ void VBOPm::generateParcelModels(VBORenderManager& rendManager, BlockSet& blocks
 }
 
 bool VBOPm::generateBuildings(VBORenderManager& rendManager, BlockSet& blocks, Zoning& zones) {
-	QTime timer;
-
 	rendManager.removeStaticGeometry("3d_building");
 	rendManager.removeStaticGeometry("3d_building_fac");
 		
 	Block::parcelGraphVertexIter vi, viEnd;
 	for (int bN = 0; bN < blocks.size(); bN++) {
-		printf("building %d\n", bN);
 		if (blocks[bN].zone.type == ZoneType::TYPE_PARK) continue;//skip those with parks
-		int x = 0;
 		for (boost::tie(vi, viEnd) = boost::vertices(blocks[bN].myParcels); vi != viEnd; ++vi) {
-			printf("   x: %d\n", x);
-			x++;
 			if (blocks[bN].myParcels[*vi].zone.type == ZoneType::TYPE_PARK) continue;
 			if (blocks[bN].myParcels[*vi].myBuilding.buildingFootprint.contour.size() < 3) continue;
 
-			int building_type = 0;//placeTypes.myPlaceTypes[blocks[bN].getMyPlaceTypeIdx()].getInt("building_type");
-			VBOGeoBuilding::generateBuilding(rendManager,blocks[bN].myParcels[*vi].myBuilding, building_type);
+			int building_type = 1;//placeTypes.myPlaceTypes[blocks[bN].getMyPlaceTypeIdx()].getInt("building_type");
+			VBOGeoBuilding::generateBuilding(rendManager,blocks[bN].myParcels[*vi].myBuilding, building_type);				
 		}
 	}
 	printf("Building generation is done.\n");

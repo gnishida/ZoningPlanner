@@ -125,18 +125,18 @@ public:
 		Loop3D &pgonInset);
 
 
-	inline void setMyPlaceTypeIdx(int inIdx){
+	/*inline void setMyPlaceTypeIdx(int inIdx){
 		myPlaceTypeIdx = inIdx;
-	}
+	}*/
 
-	inline int getMyPlaceTypeIdx(void){
+	/*inline int getMyPlaceTypeIdx(void){
 		return myPlaceTypeIdx;
-	}
+	}*/
 
 	BBox3D bbox;
 	boost::geometry::ring_type<Polygon3D>::type bg_parcelContour;
 private:	
-	int myPlaceTypeIdx;
+	//int myPlaceTypeIdx;
 
 };
 

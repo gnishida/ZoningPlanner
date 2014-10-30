@@ -105,8 +105,9 @@ bool computeBuildingFootprintPolygon(float maxFrontage, float maxDepth,
 	buildingFootprint.push_back(rearPtA);
 	buildingFootprint.push_back(rearPtB);
 	buildingFootprint.push_back(frontPtB);
-	buildingFootprint.push_back(frontPtA);	
+	buildingFootprint.push_back(frontPtA);
 	printf("buildingFootprint %d\n",buildingFootprint.size());
+
 	return true;
 }
 
@@ -118,9 +119,9 @@ bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parc
 	float probEmptyParcel = 0.0f;
 	Loop3D pContourCpy;
 
-	if(inParcel.getMyPlaceTypeIdx() == -1){
+	/*if(inParcel.getMyPlaceTypeIdx() == -1){
 		return false;
-	}
+	}*/
 
 	//if parcel is park, process
 	if(inParcel.zone.type == ZoneType::TYPE_PARK) { //park
@@ -164,6 +165,7 @@ bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parc
 		inParcel.myBuilding.buildingFootprint.contour))
 	{
 		printf("!computeBuildingFootprintPolygon\n");
+		inParcel.myBuilding.buildingFootprint.clear();
 		return false;
 	}
 

@@ -137,11 +137,6 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 		parcel1.setContour(pgon1);
 		parcel2.setContour(pgon2);
 
-		float hoge1 = fabs(boost::geometry::area(parcel1.bg_parcelContour));
-		printf("hoge1: %lf\n", hoge1);
-		float hoge2 = fabs(boost::geometry::area(parcel2.bg_parcelContour));
-		printf("hoge2: %lf\n", hoge2);
-
 		//call recursive function for both parcels
 		subdivideParcel(block, parcel1, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
 		subdivideParcel(block, parcel2, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
