@@ -79,10 +79,8 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 {
 	//printf("subdivideParcel\n");
 	//check if parcel is subdividable
-	float thresholdArea = 1000;//areaMean + areaStd*areaMean*(((float)qrand()/RAND_MAX)*2.0f-1.0f);//LC::misctools::genRand(-1.0f, 1.0f)
+	float thresholdArea = areaMean + areaStd*areaMean*(((float)qrand()/RAND_MAX)*2.0f-1.0f);//LC::misctools::genRand(-1.0f, 1.0f)
 	
-	float hoge = fabs(boost::geometry::area(parcel.bg_parcelContour));
-	printf("%lf\n", hoge);
 	if( (fabs(boost::geometry::area(parcel.bg_parcelContour))) <= std::max(thresholdArea, areaMin)) {
 		//printf("a: %.3f %.3f", boost::geometry::area(parcel.bg_parcelContour));
 		//boost::geometry::correct(parcel.bg_parcelContour);
