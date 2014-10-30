@@ -6,6 +6,8 @@
 #include "RoadGraph.h"
 #include "BlockSet.h"
 #include "Zoning.h"
+#include "Person.h"
+#include "Office.h"
 
 class MainWindow;
 
@@ -15,10 +17,16 @@ public:
 	int depth;
 	MainWindow* mainWin;
 
-	//PlaceTypesMainClass placeTypes;
 	Zoning zones;
 	RoadGraph roads;
 	BlockSet blocks;
+	std::vector<Person> people;
+	std::vector<Office> offices;
+	std::vector<Office> schools;
+	std::vector<Office> stores;
+	std::vector<Office> restaurants;
+	std::vector<Office> amusements;
+	std::vector<Office> parks;
 
 public:
 	UrbanGeometry(MainWindow* mainWin);
@@ -47,4 +55,5 @@ public:
 	void loadBlocks(const QString& filename);
 	void saveBlocks(const QString& filename);
 
+	void allocateAll();
 };

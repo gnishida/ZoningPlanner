@@ -14,6 +14,7 @@
 #include "VBOPlaceType.h"
 #include "RoadGraph.h"
 #include "BlockSet.h"
+#include "Person.h"
 
 class VBORenderManager;
 
@@ -30,6 +31,7 @@ public:
 	static bool generateVegetation(VBORenderManager& rendManager, BlockSet& blocks, Zoning& zones);
 
 	static void generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks);
+	static void generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person>& people);
 	static void generatePopulationJobDistribution(BlockSet& blocks);
 
 private:

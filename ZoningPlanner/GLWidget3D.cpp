@@ -166,6 +166,7 @@ void GLWidget3D::drawScene(int drawMode) {
 	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
 	vboRenderManager.renderStaticGeometry("zoning");
+	vboRenderManager.renderStaticGeometry("people");
 	vboRenderManager.renderStaticGeometry(QString("sky"));
 	vboRenderManager.vboWater.render(vboRenderManager);
 

@@ -67,9 +67,6 @@
     <ClCompile Include="GLWidget3D_Shadows.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
-    <ClCompile Include="LandUse.cpp">
-      <Filter>Main Files</Filter>
-    </ClCompile>
     <ClCompile Include="LC_Layer.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
@@ -186,6 +183,12 @@
     </ClCompile>
     <ClCompile Include="Zoning.cpp">
       <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Person.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Office.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -317,9 +320,6 @@
     <ClInclude Include="HeatMapColorTable.h">
       <Filter>Main Files</Filter>
     </ClInclude>
-    <ClInclude Include="LandUse.h">
-      <Filter>Main Files</Filter>
-    </ClInclude>
     <ClInclude Include="LC_Layer.h">
       <Filter>Main Files</Filter>
     </ClInclude>
@@ -349,6 +349,12 @@
     </ClInclude>
     <ClInclude Include="Zoning.h">
       <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Person.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Office.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

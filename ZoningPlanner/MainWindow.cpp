@@ -63,6 +63,8 @@ void MainWindow::onGenerateBlocks() {
 void MainWindow::onGenerateParcels() {
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	//VBOPm::generateBlockMesh(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
+	urbanGeometry->allocateAll();
+	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 	glWidget->updateGL();
 }
 

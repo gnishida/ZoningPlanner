@@ -306,6 +306,22 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 	}
 }
 
+void VBOPm::generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person>& people) {
+	// 3Dモデルを生成する
+	rendManager.removeStaticGeometry("people");
+	for (int i = 0; i < people.size(); ++i) {
+		// 人の3Dモデルを生成
+		{
+			std::vector<Vertex> vert;
+
+			QVector3D color(0.1f, 0.1f, 0.1f);
+
+			vert.push_back(Vertex(QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 200), color, QVector3D(), QVector3D()));
+			rendManager.addStaticGeometry("people", vert, "", GL_POINTS, 1);
+		}
+	}
+}
+
 void VBOPm::generatePopulationJobDistribution(BlockSet& blocks) {
 	QVector2D cbd(1000, 1000);
 
