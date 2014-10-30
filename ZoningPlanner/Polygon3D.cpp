@@ -5,6 +5,20 @@
 
 #include "clipper.hpp"
 
+void Polygon3D::correct() {
+	int next;
+	float tmpSum = 0.0f;
+
+	for (int i = 0; i < contour.size(); ++i) {
+		next = (i + 1) % contour.size();
+		tmpSum = tmpSum + (contour[next].x() - contour[i].x()) * (contour[next].y() + contour[i].y());
+	}			
+
+	if (tmpSum > 0.0f) {
+		std::reverse(contour.begin(), contour.end());
+	}
+}
+
 double angleBetweenVectors(QVector3D &vec1, QVector3D &vec2)
 {	
 	return acos( 0.999*(QVector3D::dotProduct(vec1, vec2)) / ( vec1.length() * vec2.length() ) );

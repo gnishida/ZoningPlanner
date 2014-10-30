@@ -1,4 +1,4 @@
-#include "VBORenderManager.h"
+﻿#include "VBORenderManager.h"
 //#include "triangle\triangle.c"
 
 
@@ -344,6 +344,10 @@
 
 	using namespace boost::polygon::operators;
 
+	/**
+	 * 指定されたポリゴンに基づいて、ジオメトリを生成する。
+	 * 凹型のポリゴンにも対応するよう、ポリゴンは台形にtessellateする。
+	 */
 	bool VBORenderManager::addStaticGeometry2(QString geoName,std::vector<QVector3D>& pos,float zShift,bool inverseLoop,QString textureName,GLenum geometryType,int shaderMode,QVector3D texScale,QVector3D color){
 		if(pos.size()<3){
 			return false;
@@ -377,14 +381,16 @@
 		for(int pN=0;pN<allP.size();pN++){
 			//glColor3ub(qrand()%255,qrand()%255,qrand()%255);
 			boost::polygon::polygon_with_holes_data<double>::iterator_type itPoly=allP[pN].begin();
-			std::vector<QVector3D> points;
+
+			Polygon3D points;
+			//std::vector<QVector3D> points;
 			std::vector<QVector3D> texP;
 			while(itPoly!=allP[pN].end()){
 				pointP cP=*itPoly;
 				if(inverseLoop==false)
 					points.push_back(QVector3D(cP.x(),cP.y(),pos[0].z()+zShift));
 				else
-					points.insert(points.begin(),QVector3D(cP.x(),cP.y(),pos[0].z()+zShift));
+					points.contour.insert(points.contour.begin(),QVector3D(cP.x(),cP.y(),pos[0].z()+zShift));
 
 				//if(texZeroToOne==true){
 					//texP.push_back(QVector3D((cP.x()-minX)/(maxX-minX),(cP.y()-minY)/(maxY-minY),0.0f));
@@ -393,9 +399,16 @@
 				//}
 				itPoly++;
 			}
-			if(points.size()==0)continue;
-			while(points.size()<4)
-				points.push_back(points.back());
+			if(points.contour.size()==0)continue;
+			while(points.contour.size()<4)
+				points.push_back(points.contour.back());
+
+			// GEN 
+			// Sometimes, the polygon is formed in CW order, so we have to reorient it in CCW order.
+			if(inverseLoop==false) {
+				points.correct();
+			}
+
 			/*if(points.size()==4){//last vertex repited
 				addTexTriang(texInd,points,texP,col,norm);
 			}

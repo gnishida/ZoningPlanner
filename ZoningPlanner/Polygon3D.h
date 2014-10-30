@@ -63,6 +63,8 @@ public:
 
 	void clear() { contour.clear(); }
 
+	void correct();
+
 	/**
 	* Acessor to point at index idx
 	**/
