@@ -11,7 +11,6 @@
 #include "VBOBlock.h"
 #include "VBOParcel.h"
 #include "VBOBuilding.h"
-#include "VBOPlaceType.h"
 #include "RoadGraph.h"
 #include "BlockSet.h"
 #include "Zoning.h"

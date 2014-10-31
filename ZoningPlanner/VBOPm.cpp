@@ -263,13 +263,13 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 			if (i == blocks.selectedBlockIndex) {
 				color = QColor(255, 255, 255, 100);
 			} else if (blocks[i].zone.type == ZoneType::TYPE_RESIDENTIAL) {
-				color = QColor(255, 0, 0, 100);
+				color = QColor(255 - (blocks[i].zone.level - 1) * 50, 0, 0, 100);
 			} else if (blocks[i].zone.type == ZoneType::TYPE_COMMERCIAL) {
-				color = QColor(0, 0, 255, 100);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_PARK) {
-				color = QColor(0, 255, 0, 100);
+				color = QColor(0, 0, 255 - (blocks[i].zone.level - 1) * 50, 100);
+			} else if (blocks[i].zone.type == ZoneType::TYPE_MANUFACTURING) {
+				color = QColor(0, 255 - (blocks[i].zone.level - 1) * 50, 0, 100);
 			} else {
-				color = QColor(0, 128, 192, 100);
+				color = QColor(128, 128, 128, 100);
 			}
 
 			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 3, false, "", GL_QUADS, 1, QVector3D(1, 1, 1), color);

@@ -136,9 +136,6 @@
     <ClCompile Include="VBOParcel.cpp">
       <Filter>VBO</Filter>
     </ClCompile>
-    <ClCompile Include="VBOPlaceType.cpp">
-      <Filter>VBO</Filter>
-    </ClCompile>
     <ClCompile Include="VBOPm.cpp">
       <Filter>VBO</Filter>
     </ClCompile>
@@ -264,9 +261,6 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="VBOParcel.h">
-      <Filter>VBO</Filter>
-    </ClInclude>
-    <ClInclude Include="VBOPlaceType.h">
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="VBOPm.h">

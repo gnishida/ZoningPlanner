@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "VBOPlaceType.h"
 #include "VBOBlock.h"
 #include "Zoning.h"
 

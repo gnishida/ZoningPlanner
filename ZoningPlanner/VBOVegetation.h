@@ -1,7 +1,6 @@
 #pragma once
 
 #include "VBOBlock.h"
-#include "VBOPlaceType.h"
 #include "VBOModel_StreetElements.h"
 
 
