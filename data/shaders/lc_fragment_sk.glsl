@@ -1,7 +1,7 @@
 #version 330
 //#extension GL_EXT_gpu_shader4 : enable
 
-in vec3 outColor;
+in vec4 outColor;
 in vec3 outUV;
 in vec3 origVertex;// L
 
@@ -143,7 +143,7 @@ void main(){
 
 
 
-	outputF =vec4(outColor,1.0);
+	outputF = outColor;
 
 	// SHADOW: From light
 	if(shadowState==2){// no tex/color/shadows
@@ -172,10 +172,7 @@ void main(){
 		int texInd=int(height/25);
 		float interpTex=mod(height,25.0);
 		// texture
-		outputF=mix(
-			texture( tex_3D, vec3(outUV.rg,texInd) ),
-			texture( tex_3D, vec3(outUV.rg,texInd+1) ),
-			interpTex/25.0);
+		outputF=mix(texture(tex_3D, vec3(outUV.rg,texInd)), texture(tex_3D, vec3(outUV.rg,texInd+1)), interpTex/25.0);
 	}
 
 	//////////////
@@ -281,6 +278,7 @@ void main(){
 	// SHADOW Disable
 	if(shadowState==0){// 0 SHADOW Disable
 		outputF=(ambientIllumination+diffuseIllumination)*outputF;
+		outputF.a = outColor.a;
 		return;
 	}
 
@@ -289,6 +287,7 @@ void main(){
 		float shadow_coef=0.95;
 		shadow_coef= shadowCoef();
 		outputF=(ambientIllumination+(shadow_coef+0.05)*diffuseIllumination)*outputF;
+		outputF.a = outColor.a;
 		return;
 	}
 

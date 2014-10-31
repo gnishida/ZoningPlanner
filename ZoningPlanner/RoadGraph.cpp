@@ -170,10 +170,10 @@ void RoadGraph::updateRoadGraph(VBORenderManager& rendManager) {
 						b2 = a2;
 					}
 					//printf("a %f %f b %f %f %f %f\n",a2.z(),a1.z(),b0.z(),b1.z(),b2.z(),b3.z());
-					vertROAD[type].push_back(Vertex(b0,QVector3D(),QVector3D(0,0,1.0f),QVector3D(1,lengthMovedR / dW,0)));
-					vertROAD[type].push_back(Vertex(b1,QVector3D(),QVector3D(0,0,1.0f),QVector3D(1,(lengthMovedR + segmentLengR) / dW,0)));
-					vertROAD[type].push_back(Vertex(b2,QVector3D(),QVector3D(0,0,1.0f),QVector3D(0,(lengthMovedL + segmentLengL) / dW,0)));
-					vertROAD[type].push_back(Vertex(b3,QVector3D(),QVector3D(0,0,1.0f),QVector3D(0,lengthMovedL / dW,0)));
+					vertROAD[type].push_back(Vertex(b0,QColor(),QVector3D(0,0,1.0f),QVector3D(1,lengthMovedR / dW,0)));
+					vertROAD[type].push_back(Vertex(b1,QColor(),QVector3D(0,0,1.0f),QVector3D(1,(lengthMovedR + segmentLengR) / dW,0)));
+					vertROAD[type].push_back(Vertex(b2,QColor(),QVector3D(0,0,1.0f),QVector3D(0,(lengthMovedL + segmentLengL) / dW,0)));
+					vertROAD[type].push_back(Vertex(b3,QColor(),QVector3D(0,0,1.0f),QVector3D(0,lengthMovedL / dW,0)));
 
 					lengthMovedR+=segmentLengR;
 					lengthMovedL+=segmentLengL;
@@ -554,7 +554,7 @@ void RoadGraph::updateRoadGraph(VBORenderManager& rendManager) {
 						}
 					}
 
-					rendManager.addStaticGeometry2("3d_roads_interCom",interPoints,0.0f,false,"../data/textures/roads/road_0lines.jpg",GL_QUADS,2,QVector3D(1.0f/7.5f,1.0f/7.5f,1),QVector3D());//0.0f (moved before)
+					rendManager.addStaticGeometry2("3d_roads_interCom",interPoints,0.0f,false,"../data/textures/roads/road_0lines.jpg",GL_QUADS,2,QVector3D(1.0f/7.5f,1.0f/7.5f,1),QColor());//0.0f (moved before)
 				}
 				rendManager.addStaticGeometry("3d_roads_interCom",interPedX,"../data/textures/roads/road_pedX.jpg",GL_QUADS,2);
 				rendManager.addStaticGeometry("3d_roads_interCom",interPedXLineR,"../data/textures/roads/road_pedXLineR.jpg",GL_QUADS,2);

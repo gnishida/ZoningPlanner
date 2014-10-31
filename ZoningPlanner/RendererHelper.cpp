@@ -6,7 +6,7 @@ void RendererHelper::renderPoint(VBORenderManager &renderManager, const QString 
 
 	std::vector<Vertex> vertP;
 
-	Vertex v(pt.x(), pt.y(), height, color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+	Vertex v(pt.x(), pt.y(), height, color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
 	vertP.push_back(v);
 
 	renderManager.addStaticGeometry(pointsN, vertP, "", GL_POINTS, 1);
@@ -28,14 +28,14 @@ void RendererHelper::renderPolyline(VBORenderManager &renderManager, const QStri
 	std::vector<Vertex> vert(num - 1);
 
 	for (int i = 0; i < num; ++i) {
-		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), polyline[i].z(), color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), polyline[i].z(), color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
 		vertP.push_back(v);//add point
 	}
 
 	// add lines
 	for (int i = 0; i < num - 1; i++) {
-		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), polyline[i].z(), color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
-		Vertex v2=Vertex(polyline[i+1].x(), polyline[i+1].y(), polyline[i+1].z(), color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), polyline[i].z(), color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+		Vertex v2=Vertex(polyline[i+1].x(), polyline[i+1].y(), polyline[i+1].z(), color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
 		vertL.push_back(v);//add line
 		vertL.push_back(v2);//add line
 	}
@@ -61,14 +61,14 @@ void RendererHelper::renderPolyline(VBORenderManager &renderManager, const QStri
 	std::vector<Vertex> vert(num - 1);
 
 	for (int i = 0; i < num; ++i) {
-		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), renderManager.getTerrainHeight(polyline[i].x(), polyline[i].y()) + heightOffset, color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), renderManager.getTerrainHeight(polyline[i].x(), polyline[i].y()) + heightOffset, color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
 		vertP.push_back(v);//add point
 	}
 
 	// add lines
 	for (int i = 0; i < num - 1; i++) {
-		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), renderManager.getTerrainHeight(polyline[i].x(), polyline[i].y()) + heightOffset, color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
-		Vertex v2=Vertex(polyline[i+1].x(), polyline[i+1].y(), renderManager.getTerrainHeight(polyline[i+1].x(), polyline[i+1].y()) + heightOffset, color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+		Vertex v=Vertex(polyline[i].x(), polyline[i].y(), renderManager.getTerrainHeight(polyline[i].x(), polyline[i].y()) + heightOffset, color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+		Vertex v2=Vertex(polyline[i+1].x(), polyline[i+1].y(), renderManager.getTerrainHeight(polyline[i+1].x(), polyline[i+1].y()) + heightOffset, color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
 		vertL.push_back(v);//add line
 		vertL.push_back(v2);//add line
 	}
@@ -90,7 +90,7 @@ void RendererHelper::renderCircle(VBORenderManager &renderManager, const QString
 		float th = i * M_PI / 10.0f;
 		float x = center.x() + radius * cosf(th);
 		float y = center.y() + radius * sinf(th);
-		Vertex v(x, y, renderManager.getTerrainHeight(x, y) + heightOffset, color.redF(), color.greenF(), color.blueF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
+		Vertex v(x, y, renderManager.getTerrainHeight(x, y) + heightOffset, color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0);//pos color normal tex
 		circleP.push_back(v);
 	}
 

@@ -18,7 +18,7 @@ static std::vector<QString> windowTex;
 static std::vector<QString> roofTex;
 
 void addTexConvexPoly(VBORenderManager& rendManager,QString geoName,QString textureName,GLenum geometryType,int shaderMode,
-	Loop3D& pos,QVector3D col,QVector3D norm,float zShift,bool inverseLoop,bool texZeroToOne,QVector3D texScale){
+	Loop3D& pos,QColor col,QVector3D norm,float zShift,bool inverseLoop,bool texZeroToOne,QVector3D texScale){
 
 		if(pos.size()<3){
 			return;
@@ -99,7 +99,7 @@ void addTexConvexPoly(VBORenderManager& rendManager,QString geoName,QString text
 }//
 
 
-void addFirstFloor(VBORenderManager& rendManager,std::vector<QVector3D>& footprint,QVector3D floorColor,float initHeight,float floorHeight){
+void addFirstFloor(VBORenderManager& rendManager,std::vector<QVector3D>& footprint,QColor floorColor,float initHeight,float floorHeight){
 
 	for(int sN=0;sN<footprint.size();sN++){
 		int ind1=sN;
@@ -119,14 +119,14 @@ void addFirstFloor(VBORenderManager& rendManager,std::vector<QVector3D>& footpri
 	}
 }//
 
-void addBox(VBORenderManager& rendManager, Loop3D& roofOffCont,QVector3D boxColor,float initHeight,float boxSize){
+void addBox(VBORenderManager& rendManager, Loop3D& roofOffCont,QColor boxColor,float initHeight,float boxSize){
 	addTexConvexPoly(rendManager,"3d_building","",GL_QUADS,1|mode_Lighting,	roofOffCont,boxColor,QVector3D(0,0,1.0f), initHeight+boxSize, false, true,QVector3D(1,1,1));
 	addTexConvexPoly(rendManager,"3d_building","",GL_QUADS,1|mode_Lighting,	roofOffCont,boxColor,QVector3D(0,0,-1.0f), initHeight, true, true,QVector3D(1,1,1));
 
 	addFirstFloor(rendManager,roofOffCont,boxColor,initHeight,boxSize);
 }//
 
-void addRoof(VBORenderManager& rendManager, Loop3D& roofOffCont,QVector3D boxColor,float initHeight,float boxSize){
+void addRoof(VBORenderManager& rendManager, Loop3D& roofOffCont,QColor boxColor,float initHeight,float boxSize){
 	addTexConvexPoly(rendManager,"3d_building",roofTex[qrand()%roofTex.size()],GL_QUADS,2|mode_Lighting,//|LC::mode_AdaptTerrain|LC::mode_Lighting, "../data/textures/LC/roof/roof0.jpg"
 		roofOffCont,boxColor,QVector3D(0,0,1.0f),initHeight+boxSize,false,true,QVector3D(1,1,1));
 	addTexConvexPoly(rendManager,"3d_building","",GL_QUADS,1|mode_Lighting,//|LC::mode_AdaptTerrain|LC::mode_Lighting,
@@ -186,23 +186,23 @@ void addWindow(VBORenderManager& rendManager,
 		type=0;*/
 
 		frameBoder=((int)randN.y())%2;
-		QVector3D color;
+		QColor color;
 		int randCol=((int)randN.z())%5;
 		switch(randCol){
 		case 0:
-			color=QVector3D(0.3f,0.3f,0.3f);
+			color=QColor(0.3f,0.3f,0.3f);
 			break;
 		case 1:
-			color=QVector3D(0.345, 0.171, 0.075);//brown
+			color=QColor(0.345, 0.171, 0.075);//brown
 			break;
 		case 2:
-			color=QVector3D(0.412, 0.412, 0.412);//grey
+			color=QColor(0.412, 0.412, 0.412);//grey
 			break;
 		case 3:
-			color=QVector3D(0.02, 0.02, 0.13);//blue
+			color=QColor(0.02, 0.02, 0.13);//blue
 			break;
 		case 4:
-			color=QVector3D(0.961, 0.961, 0.863);//beige
+			color=QColor(0.961, 0.961, 0.863);//beige
 			break;
 		}
 		// NO WINDOW, JUST DEPTH
@@ -224,7 +224,7 @@ void addWindow(VBORenderManager& rendManager,
 			vert[6]=initPoint+dirUp*height+dirR*width;
 			vert[7]=initPoint+perI*depth+dirUp*height+dirR*width;
 			int texN=-1;
-			QVector3D color(0.5f,0.5f,0.5f);
+			QColor color(0.5f,0.5f,0.5f);
 			// LEFT
 			//addTexQuad(texN,vert[0],vert[1],vert[2],vert[3],tex,color,QVector3D(),true);
 			QVector3D norm;
@@ -352,10 +352,10 @@ void addColumnGeometry(VBORenderManager& rendManager,
 				QVector3D(),
 				true);*/
 				QVector3D norm=QVector3D::crossProduct(columnContour[ind2]-columnContour[ind1],QVector3D(0,0,1.0f));
-				vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,heightB),QVector3D(),norm,QVector3D(accPerimeter*uS,heightB*vS,0.0f)));
-				vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,heightB),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,heightB*vS,0.0f)));
-				vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,heightT),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,heightT*vS,0.0f)));
-				vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,heightT),QVector3D(),norm,QVector3D((accPerimeter)*uS,heightT*vS,0.0f)));
+				vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,heightB),QColor(),norm,QVector3D(accPerimeter*uS,heightB*vS,0.0f)));
+				vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,heightB),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,heightB*vS,0.0f)));
+				vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,heightT),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,heightT*vS,0.0f)));
+				vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,heightT),QColor(),norm,QVector3D((accPerimeter)*uS,heightT*vS,0.0f)));
 
 
 			}else{
@@ -381,10 +381,10 @@ void addColumnGeometry(VBORenderManager& rendManager,
 					QVector3D(),
 					true);*/
 					norm=QVector3D::crossProduct(columnContour[ind2]-columnContour[ind1],QVector3D(0,0,1.0f));
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h0),QVector3D(),norm,QVector3D(accPerimeter*uS,h0*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h0),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,h0*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h1),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,h1*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h1),QVector3D(),norm,QVector3D((accPerimeter)*uS,h1*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h0),QColor(),norm,QVector3D(accPerimeter*uS,h0*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h0),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,h0*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h1),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,h1*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h1),QColor(),norm,QVector3D((accPerimeter)*uS,h1*vS,0.0f)));
 					// TOP
 					/*em.clear();//calculate coordenates (respect the perimeter)
 					em.push_back(QVector3D(accPerimeter*uS,h2*vS,0.0f));
@@ -401,10 +401,10 @@ void addColumnGeometry(VBORenderManager& rendManager,
 					QVector3D(),
 					true);*/
 					norm=QVector3D::crossProduct(columnContour[ind2]-columnContour[ind1],QVector3D(0,0,1.0f));//h3-h2
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h2),QVector3D(),norm,QVector3D(accPerimeter*uS,h2*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h2),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,h2*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h3),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,h3*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h3),QVector3D(),norm,QVector3D((accPerimeter)*uS,h3*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h2),QColor(),norm,QVector3D(accPerimeter*uS,h2*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h2),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,h2*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h3),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,h3*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h3),QColor(),norm,QVector3D((accPerimeter)*uS,h3*vS,0.0f)));
 					// LEFT
 					QVector3D dirW=(columnContour[ind2]-columnContour[ind1]);
 					float windWidth=dirW.length();
@@ -424,10 +424,10 @@ void addColumnGeometry(VBORenderManager& rendManager,
 					QVector3D(),
 					true);*/
 					norm=QVector3D::crossProduct(dirW*horHoleSize,QVector3D(0,0,1.0f)).normalized();//h2-h1
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h1),QVector3D(),norm,QVector3D(accPerimeter*uS,h1*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h1)+dirW*horHoleSize,QVector3D(),norm,QVector3D((accPerimeter+horHoleSize)*uS,h1*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h2)+dirW*horHoleSize,QVector3D(),norm,QVector3D((accPerimeter+horHoleSize)*uS,h2*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h2),QVector3D(),norm,QVector3D((accPerimeter)*uS,h2*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h1),QColor(),norm,QVector3D(accPerimeter*uS,h1*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h1)+dirW*horHoleSize,QColor(),norm,QVector3D((accPerimeter+horHoleSize)*uS,h1*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h2)+dirW*horHoleSize,QColor(),norm,QVector3D((accPerimeter+horHoleSize)*uS,h2*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind1]+QVector3D(0,0,h2),QColor(),norm,QVector3D((accPerimeter)*uS,h2*vS,0.0f)));
 					// RIGHT
 					/*em.clear();//calculate coordenates (respect the perimeter)
 					em.push_back(QVector3D((accPerimeter+sideLenght-horHoleSize)*uS,h1*vS,0.0f));
@@ -444,10 +444,10 @@ void addColumnGeometry(VBORenderManager& rendManager,
 					QVector3D(),
 					true);*/
 					norm=QVector3D::crossProduct(dirW*horHoleSize,QVector3D(0,0,1.0f)).normalized();//h2-h1
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h1)-dirW*horHoleSize,QVector3D(),norm,QVector3D((accPerimeter+sideLenght-horHoleSize)*uS,h1*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h1),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,h1*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h2),QVector3D(),norm,QVector3D((accPerimeter+sideLenght)*uS,h2*vS,0.0f)));
-					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h2)-dirW*horHoleSize,QVector3D(),norm,QVector3D((accPerimeter+sideLenght-horHoleSize)*uS,h2*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h1)-dirW*horHoleSize,QColor(),norm,QVector3D((accPerimeter+sideLenght-horHoleSize)*uS,h1*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h1),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,h1*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h2),QColor(),norm,QVector3D((accPerimeter+sideLenght)*uS,h2*vS,0.0f)));
+					vert.push_back(Vertex(columnContour[ind2]+QVector3D(0,0,h2)-dirW*horHoleSize,QColor(),norm,QVector3D((accPerimeter+sideLenght-horHoleSize)*uS,h2*vS,0.0f)));
 
 					////////// INSIDE
 					addWindow(rendManager,0,randN,false,columnContour[ind1]+QVector3D(0,0,h1)+dirW*horHoleSize,dirW,QVector3D(0,0,1.0f),windWidth-2*horHoleSize,h2-h1);
@@ -514,7 +514,7 @@ void VBOGeoBuilding::generateBuilding(VBORenderManager& rendManager,Building& bu
 		int nextN;
 		QVector3D normal;
 		float rndColod=((0.7f*(float)qrand())/RAND_MAX)+0.3f;
-		QVector3D color(rndColod,rndColod,rndColod);
+		QColor color(rndColod,rndColod,rndColod);
 		for(int curN=0;curN<footprint.contour.size();curN++){
 			nextN=(curN+1)%footprint.contour.size();
 			normal=QVector3D::crossProduct(footprint[nextN]-footprint[curN],QVector3D(0,0,1)).normalized();
@@ -562,7 +562,7 @@ void VBOGeoBuilding::generateBuilding(VBORenderManager& rendManager,Building& bu
 		////////////////////////////
 		// FLOORS
 		float randC=(0.8*qrand())/RAND_MAX;
-		QVector3D bldgColor = QVector3D(randC,randC,randC);
+		QColor bldgColor(randC,randC,randC);
 		///////////////////////////
 		// First floor
 		addFirstFloor(rendManager,footprint.contour,bldgColor,0,firstFloorHeigh);
@@ -602,8 +602,8 @@ void VBOGeoBuilding::generateBuilding(VBORenderManager& rendManager,Building& bu
 		std::vector<Vertex> sideVert;
 		int nextN;
 		QVector3D normal;
-		QVector3D colorW(1.0f,1.0f,1.0f);
-		QVector3D colorB(0.0f,0.0f,0.0f);
+		QColor colorW(1.0f,1.0f,1.0f);
+		QColor colorB(0.0f,0.0f,0.0f);
 		QVector3D a,b,c,d;
 		float sideWalkEl=1.5f;
 
@@ -685,22 +685,22 @@ void VBOGeoBuilding::generateBuilding(VBORenderManager& rendManager,Building& bu
 
 				sideVert.push_back(Vertex(
 					QVector3D(footprint[curN].x(),footprint[curN].y(),0.0f+sideWalkEl),
-					QVector3D(0,0,windNumber),
+					QColor(0,0,windNumber),
 					normal,
 					QVector3D(leng,height,0)));//max
 				sideVert.push_back(Vertex(
 					QVector3D(footprint[nextN].x(),footprint[nextN].y(),0.0f+sideWalkEl),
-					QVector3D(leng,0,windNumber),
+					QColor(leng,0,windNumber),
 					normal,
 					QVector3D(leng,height,0)));//max
 				sideVert.push_back(Vertex(
 					QVector3D(footprint[nextN].x(),footprint[nextN].y(),0.0f+height+sideWalkEl),
-					QVector3D(leng,height,windNumber),
+					QColor(leng,height,windNumber),
 					normal,
 					QVector3D(leng,height,0)));//max
 				sideVert.push_back(Vertex(
 					QVector3D(footprint[curN].x(),footprint[curN].y(),0.0f+height+sideWalkEl),
-					QVector3D(0,height,windNumber),
+					QColor(0,height,windNumber),
 					normal,
 					QVector3D(leng,height,0)));//max
 			/*sideVert.push_back(Vertex(QVector3D(footprint[curN].x(),footprint[curN].y(),0.0f+sideWalkEl),colorW,normal,QVector3D()));
@@ -722,7 +722,7 @@ void VBOGeoBuilding::generateBuilding(VBORenderManager& rendManager,Building& bu
 		Polygon3D roofRed;
 		footprint.computeInset(blackWidth,roofRed.contour,false);
 		//rendManager.addStaticGeometry2("3d_building",roofRed.contour,height+sideWalkEl,false,"",GL_QUADS,1,QVector3D(1,1,1),colorW);
-		rendManager.addStaticGeometry2("3d_building",footprint.contour,height-0.2+sideWalkEl,false,"hatching_array",GL_QUADS,10|mode_TexArray,QVector3D(1,1,1),QVector3D(0.1f,0.1f,0.1f));
+		rendManager.addStaticGeometry2("3d_building",footprint.contour,height-0.2+sideWalkEl,false,"hatching_array",GL_QUADS,10|mode_TexArray,QVector3D(1,1,1),QColor(0.1f,0.1f,0.1f));
 	}
 }//
 
@@ -741,7 +741,7 @@ void VBOGeoBuilding::generateHouse(VBORenderManager& rendManager,Building& build
 	int nextN;
 	QVector3D normal;
 	float rndColod=((0.7f*(float)qrand())/RAND_MAX)+0.3f;
-	QVector3D color(rndColod,rndColod,rndColod);
+	QColor color(rndColod,rndColod,rndColod);
 
 	std::vector<QVector3D> pts(4);
 	pts[0] = (footprint[1] - footprint[0]).normalized() * 2 + footprint[0];

@@ -156,11 +156,11 @@
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),0);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)(3*sizeof(float)));
+		glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)(4*sizeof(float)));
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)(6*sizeof(float)));
+		glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)(8*sizeof(float)));
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)(9*sizeof(float)));
+		glVertexAttribPointer(3,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)(12*sizeof(float)));
 
 		// Draw the triangles 
 		glDrawElements(
@@ -209,7 +209,7 @@
 				float z = rendManager.getTerrainHeight(pos.x(), pos.y());
 				pos.setZ(z + 50.0f);
 
-				points[i]=Vertex(pos.x(),pos.y(),pos.z(),0,0,1.0f,0,0,0,0,0,0);
+				points[i]=Vertex(pos.x(),pos.y(),pos.z(),0,0,1.0f,1.0f,0,0,0,0,0,0);
 			}
 
 

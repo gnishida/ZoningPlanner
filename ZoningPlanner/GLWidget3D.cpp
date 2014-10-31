@@ -118,6 +118,9 @@ void GLWidget3D::initializeGL() {
 	glCullFace(GL_BACK);
 	glPointSize(10.0f);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	////////////////////////////////
 	G::global()["3d_render_mode"]=0;
 	// init hatch tex
@@ -165,9 +168,6 @@ void GLWidget3D::drawScene(int drawMode) {
 	
 	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
-	if (mainWin->ui.actionViewZoning->isChecked()) {
-		vboRenderManager.renderStaticGeometry("zoning");
-	}
 	vboRenderManager.renderStaticGeometry("people");
 	vboRenderManager.renderStaticGeometry(QString("sky"));
 	vboRenderManager.vboWater.render(vboRenderManager);
@@ -178,8 +178,6 @@ void GLWidget3D::drawScene(int drawMode) {
 
 	vboRenderManager.renderStaticGeometry(QString("3d_sidewalk"));
 	vboRenderManager.renderStaticGeometry(QString("3d_parcel"));
-	vboRenderManager.renderStaticGeometry(QString("3d_building"));
-	vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
 
 	vboRenderManager.renderStaticGeometry(QString("3d_trees"));//hatch
 	vboRenderManager.renderAllStreetElementName("tree");//LC
@@ -188,6 +186,13 @@ void GLWidget3D::drawScene(int drawMode) {
 	vboRenderManager.renderStaticGeometry(QString("3d_roads"));			
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_inter"));//
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));//
+
+	if (mainWin->ui.actionViewZoning->isChecked()) {
+		vboRenderManager.renderStaticGeometry("zoning");
+	} else {
+		vboRenderManager.renderStaticGeometry(QString("3d_building"));
+		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
+	}
 
 
 	// draw the selected vertex and edge
