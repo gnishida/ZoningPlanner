@@ -637,8 +637,9 @@ int Polygon3D::cleanLoop(Loop3D &pin, Loop3D &pout, float threshold=1.0f)
 }//
 
 /**
-* Get polygon oriented bounding box
-**/
+ * Get polygon oriented bounding box
+ * xformMat is a matrix that transform the oriented bounding box to the original polygon.
+ */
 void Polygon3D::getLoopOBB(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat){
 	float alpha = 0.0f;			
 	float deltaAlpha = 0.05*3.14159265359f;
@@ -677,11 +678,59 @@ void Polygon3D::getLoopOBB(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat){
 		//alpha += deltaAlpha;
 	}
 
-	xformMat.setToIdentity();											
+	xformMat.setToIdentity();										
 	xformMat.rotate(57.2957795f*(bestAlpha), 0.0f, 0.0f, 1.0f);//57.2957795 rad2degree
 	xformMat.setRow(3, QVector4D(origMidPt.x(), origMidPt.y(), origMidPt.z(), 1.0f));			
 	size = bestBoxSz;
 }//
+
+/**
+ * Get polygon oriented bounding box
+ * xformMat is a matrix that transform the original polygon to the axis aligned bounding box centered at the origin.
+ */
+void Polygon3D::getLoopOBB2(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat){
+	float alpha = 0.0f;			
+	float deltaAlpha = 0.05*3.14159265359f;
+	float bestAlpha;
+
+	Loop3D rotLoop;
+	QMatrix4x4 rotMat;
+	QVector3D minPt, maxPt;
+	QVector3D origMidPt;
+	QVector3D boxSz;
+	QVector3D bestBoxSz;
+	float curArea;
+	float minArea = FLT_MAX;
+
+	rotLoop = pin;
+	int cSz = pin.size();
+	QVector3D difVec;
+	for(int i=0; i<pin.size(); ++i){
+		difVec = (pin.at((i+1)%cSz) - pin.at(i)).normalized();
+		alpha = atan2(difVec.y(), difVec.x());
+		rotMat.setToIdentity();				
+		rotMat.rotate(57.2957795f*(-alpha), 0.0f, 0.0f, 1.0f);//57.2957795 rad2degree				
+
+		transformLoop(pin, rotLoop, rotMat);
+		boxSz = Polygon3D::getLoopAABB(rotLoop, minPt, maxPt);
+		curArea = boxSz.x() * boxSz.y();
+		if(curArea < minArea){
+			minArea = curArea;
+			bestAlpha = alpha;
+			bestBoxSz = boxSz;
+		}
+	}
+
+	xformMat.setToIdentity();											
+	xformMat.rotate(57.2957795f*(-bestAlpha), 0.0f, 0.0f, 1.0f);//57.2957795 rad2degree
+			
+	size = bestBoxSz;
+
+	transformLoop(pin, rotLoop, xformMat);
+	Polygon3D::getLoopAABB(rotLoop, minPt, maxPt);
+	QVector3D midPt = (minPt + maxPt) * 0.5f;
+	xformMat.setColumn(3, QVector4D(-midPt.x(), -midPt.y(), -midPt.z(), 1.0f));	
+}
 
 void Polygon3D::getMyOBB(QVector3D &size, QMatrix4x4 &xformMat){
 	Polygon3D::getLoopOBB(this->contour, size, xformMat);

@@ -18,7 +18,7 @@ static std::vector<QString> windowTex;
 static std::vector<QString> roofTex;
 
 void addTexConvexPoly(VBORenderManager& rendManager,QString geoName,QString textureName,GLenum geometryType,int shaderMode,
-	std::vector<QVector3D> pos,QVector3D col,QVector3D norm,float zShift,bool inverseLoop,bool texZeroToOne,QVector3D texScale){
+	Loop3D& pos,QVector3D col,QVector3D norm,float zShift,bool inverseLoop,bool texZeroToOne,QVector3D texScale){
 
 		if(pos.size()<3){
 			return;
@@ -27,18 +27,29 @@ void addTexConvexPoly(VBORenderManager& rendManager,QString geoName,QString text
 		VBORenderManager::PolygonSetP polySet;
 		VBORenderManager::polygonP tempPolyP;
 
-		std::vector<VBORenderManager::pointP> vP;
-		vP.resize(pos.size());
+		// GEN (to find the OBB of the polygon)
+		QVector3D size;
+		QMatrix4x4 xformMat;
+		Polygon3D::getLoopOBB2(pos, size, xformMat);
+		Loop3D xformPos;
+		Polygon3D::transformLoop(pos, xformPos, xformMat);
+
 		float minX=FLT_MAX,minY=FLT_MAX;
 		float maxX=-FLT_MAX,maxY=-FLT_MAX;
 
-		for(int pN=0;pN<pos.size();pN++){
+		std::vector<VBORenderManager::pointP> vP;
+		vP.resize(pos.size());
+		for(int pN=0;pN<xformPos.size();pN++){
 			vP[pN]=boost::polygon::construct<VBORenderManager::pointP>(pos[pN].x(),pos[pN].y());
-			minX=std::min<float>(minX,pos[pN].x());
-			minY=std::min<float>(minY,pos[pN].y());
-			maxX=std::max<float>(maxX,pos[pN].x());
-			maxY=std::max<float>(maxY,pos[pN].y());
+			minX=std::min<float>(minX,xformPos[pN].x());
+			minY=std::min<float>(minY,xformPos[pN].y());
+			maxX=std::max<float>(maxX,xformPos[pN].x());
+			maxY=std::max<float>(maxY,xformPos[pN].y());
 		}
+		// GEN
+
+
+
 
 		boost::polygon::set_points(tempPolyP,vP.begin(),vP.end());
 		polySet+=tempPolyP;
@@ -58,9 +69,11 @@ void addTexConvexPoly(VBORenderManager& rendManager,QString geoName,QString text
 					points.insert(points.begin(),QVector3D(cP.x(),cP.y(),pos[0].z()+zShift));
 
 				if(texZeroToOne==true){
-					texP.push_back(QVector3D((cP.x()-minX)/(maxX-minX),(cP.y()-minY)/(maxY-minY),0.0f));
+					QVector3D cP2 = xformMat * QVector3D(cP.x(), cP.y(), 0);
+					texP.push_back(QVector3D((cP2.x() - minX) / size.x(), (cP2.y() - minY) / size.y(), 0.0f));
 				}else{
-					texP.push_back(QVector3D((cP.x()-minX)*texScale.x(),(cP.y()-minY)*texScale.y(),0.0f));
+					QVector3D cP2 = xformMat * QVector3D(cP.x(), cP.y(), 0);
+					texP.push_back(QVector3D((cP2.x() - minX) * texScale.x(), (cP2.y() - minY) * texScale.y(), 0.0f));
 				}
 				itPoly++;
 			}
@@ -106,14 +119,14 @@ void addFirstFloor(VBORenderManager& rendManager,std::vector<QVector3D>& footpri
 	}
 }//
 
-void addBox(VBORenderManager& rendManager,std::vector<QVector3D>& roofOffCont,QVector3D boxColor,float initHeight,float boxSize){
+void addBox(VBORenderManager& rendManager, Loop3D& roofOffCont,QVector3D boxColor,float initHeight,float boxSize){
 	addTexConvexPoly(rendManager,"3d_building","",GL_QUADS,1|mode_Lighting,	roofOffCont,boxColor,QVector3D(0,0,1.0f), initHeight+boxSize, false, true,QVector3D(1,1,1));
 	addTexConvexPoly(rendManager,"3d_building","",GL_QUADS,1|mode_Lighting,	roofOffCont,boxColor,QVector3D(0,0,-1.0f), initHeight, true, true,QVector3D(1,1,1));
 
 	addFirstFloor(rendManager,roofOffCont,boxColor,initHeight,boxSize);
 }//
 
-void addRoof(VBORenderManager& rendManager,std::vector<QVector3D>& roofOffCont,QVector3D boxColor,float initHeight,float boxSize){
+void addRoof(VBORenderManager& rendManager, Loop3D& roofOffCont,QVector3D boxColor,float initHeight,float boxSize){
 	addTexConvexPoly(rendManager,"3d_building",roofTex[qrand()%roofTex.size()],GL_QUADS,2|mode_Lighting,//|LC::mode_AdaptTerrain|LC::mode_Lighting, "../data/textures/LC/roof/roof0.jpg"
 		roofOffCont,boxColor,QVector3D(0,0,1.0f),initHeight+boxSize,false,true,QVector3D(1,1,1));
 	addTexConvexPoly(rendManager,"3d_building","",GL_QUADS,1|mode_Lighting,//|LC::mode_AdaptTerrain|LC::mode_Lighting,

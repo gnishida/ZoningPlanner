@@ -180,6 +180,7 @@ public:
 	static QVector3D getLoopAABB(Loop3D &pin, QVector3D &minCorner, QVector3D &maxCorner);
 
 	static void getLoopOBB(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat);
+	static void getLoopOBB2(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat);
 
 	void getMyOBB(QVector3D &size, QMatrix4x4 &xformMat);
 
