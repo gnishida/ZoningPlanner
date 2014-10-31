@@ -82,6 +82,7 @@ void MainWindow::onGenerateVegetation() {
 
 void MainWindow::onGenerateAll() {
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateVegetation(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);

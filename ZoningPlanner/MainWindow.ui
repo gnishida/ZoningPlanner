@@ -1,320 +1,332 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-  <class>MainWindow</class>
-  <widget class="QMainWindow" name="MainWindow">
-    <property name="geometry">
-      <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>1006</width>
-        <height>800</height>
-      </rect>
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1006</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1000</width>
+    <height>800</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>FBC Designer</string>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1006</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
     </property>
-    <property name="minimumSize">
-      <size>
-        <width>1000</width>
-        <height>800</height>
-      </size>
+    <addaction name="actionNewTerrain"/>
+    <addaction name="actionOpenTerrain"/>
+    <addaction name="actionSaveTerrain"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadPlaceTypes"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadRoads"/>
+    <addaction name="actionSaveRoads"/>
+    <addaction name="actionClearRoads"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadBlocks"/>
+    <addaction name="actionSaveBlocks"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveImage"/>
+    <addaction name="actionSaveImageHD"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadCamera"/>
+    <addaction name="actionSaveCamera"/>
+    <addaction name="actionResetCamera"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
     </property>
-    <property name="windowTitle">
-      <string>FBC Designer</string>
+    <addaction name="actionControlWidget"/>
+    <addaction name="actionPropertyWidget"/>
+   </widget>
+   <widget class="QMenu" name="menuPM">
+    <property name="title">
+     <string>PM</string>
     </property>
-    <widget class="QWidget" name="centralWidget"/>
-    <widget class="QMenuBar" name="menuBar">
-      <property name="geometry">
-        <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1006</width>
-          <height>21</height>
-        </rect>
-      </property>
-      <widget class="QMenu" name="menuFile">
-        <property name="title">
-          <string>File</string>
-        </property>
-        <addaction name="actionNewTerrain"/>
-        <addaction name="actionOpenTerrain"/>
-        <addaction name="actionSaveTerrain"/>
-        <addaction name="separator"/>
-        <addaction name="actionLoadPlaceTypes"/>
-        <addaction name="separator"/>
-        <addaction name="actionLoadRoads"/>
-        <addaction name="actionSaveRoads"/>
-        <addaction name="actionClearRoads"/>
-        <addaction name="separator"/>
-        <addaction name="actionLoadBlocks"/>
-        <addaction name="actionSaveBlocks"/>
-        <addaction name="separator"/>
-        <addaction name="actionSaveImage"/>
-        <addaction name="actionSaveImageHD"/>
-        <addaction name="separator"/>
-        <addaction name="actionLoadCamera"/>
-        <addaction name="actionSaveCamera"/>
-        <addaction name="actionResetCamera"/>
-        <addaction name="separator"/>
-        <addaction name="actionExit"/>
-      </widget>
-      <widget class="QMenu" name="menuWindow">
-        <property name="title">
-          <string>Window</string>
-        </property>
-        <addaction name="actionControlWidget"/>
-        <addaction name="actionPropertyWidget"/>
-      </widget>
-      <widget class="QMenu" name="menuPM">
-        <property name="title">
-          <string>PM</string>
-        </property>
-        <addaction name="actionGenerateBlocks"/>
-        <addaction name="actionGenerateParcels"/>
-        <addaction name="actionGenerateBuildings"/>
-        <addaction name="actionGenerateVegetation"/>
-        <addaction name="actionGenerateAll"/>
-      </widget>
-      <widget class="QMenu" name="menuMode">
-        <property name="title">
-          <string>Mode</string>
-        </property>
-        <addaction name="actionModeDefault"/>
-        <addaction name="actionModePlaceType"/>
-        <addaction name="actionModeBlock"/>
-        <addaction name="actionModeParcel"/>
-      </widget>
-      <widget class="QMenu" name="menuCamera">
-        <property name="title">
-          <string>Camera</string>
-        </property>
-        <addaction name="actionCameraDefault"/>
-        <addaction name="actionCameraCar"/>
-      </widget>
-      <addaction name="menuFile"/>
-      <addaction name="menuMode"/>
-      <addaction name="menuPM"/>
-      <addaction name="menuWindow"/>
-      <addaction name="menuCamera"/>
-    </widget>
-    <widget class="QToolBar" name="fileToolBar">
-      <attribute name="toolBarArea">
-        <enum>TopToolBarArea</enum>
-      </attribute>
-      <attribute name="toolBarBreak">
-        <bool>false</bool>
-      </attribute>
-    </widget>
-    <widget class="QToolBar" name="modeToolBar">
-      <attribute name="toolBarArea">
-        <enum>TopToolBarArea</enum>
-      </attribute>
-      <attribute name="toolBarBreak">
-        <bool>false</bool>
-      </attribute>
-    </widget>
-    <widget class="QStatusBar" name="statusBar"/>
-    <action name="actionExit">
-      <property name="text">
-        <string>Exit</string>
-      </property>
-    </action>
-    <action name="actionControlWidget">
-      <property name="text">
-        <string>Control Widget</string>
-      </property>
-    </action>
-    <action name="actionDeleteEdge">
-      <property name="icon">
-        <iconset>
-          <normaloff>:/MainWindow/Resources/Delete_24x24.png</normaloff>:/MainWindow/Resources/Delete_24x24.png
-        </iconset>
-      </property>
-      <property name="text">
-        <string>Delete Edge</string>
-      </property>
-      <property name="shortcut">
-        <string>Del</string>
-      </property>
-    </action>
-    <action name="actionSaveTerrain">
-      <property name="text">
-        <string>Save Terrain</string>
-      </property>
-      <property name="shortcut">
-        <string/>
-      </property>
-    </action>
-    <action name="actionSaveRoads">
-      <property name="icon">
-        <iconset resource="MainWindow.qrc">
-          <normaloff>:/MainWindow/Resources/Save_24x24.png</normaloff>:/MainWindow/Resources/Save_24x24.png
-        </iconset>
-      </property>
-      <property name="text">
-        <string>Save Roads</string>
-      </property>
-    </action>
-    <action name="actionPropertyWidget">
-      <property name="text">
-        <string>Property Widget</string>
-      </property>
-    </action>
-    <action name="actionLoadRoads">
-      <property name="icon">
-        <iconset resource="MainWindow.qrc">
-          <normaloff>:/MainWindow/Resources/Open_24x24.png</normaloff>:/MainWindow/Resources/Open_24x24.png
-        </iconset>
-      </property>
-      <property name="text">
-        <string>Load Roads</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+O</string>
-      </property>
-    </action>
-    <action name="actionLoadAreas">
-      <property name="text">
-        <string>Load Areas</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+A</string>
-      </property>
-    </action>
-    <action name="actionSaveAreas">
-      <property name="text">
-        <string>Save Areas</string>
-      </property>
-    </action>
-    <action name="actionSaveImage">
-      <property name="text">
-        <string>Save Image</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+L</string>
-      </property>
-    </action>
-    <action name="actionGenerateAll">
-      <property name="text">
-        <string>Generate All</string>
-      </property>
-    </action>
-    <action name="actionLoadCamera">
-      <property name="text">
-        <string>Load Camera</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+1</string>
-      </property>
-    </action>
-    <action name="actionSaveCamera">
-      <property name="text">
-        <string>Save Camera</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+2</string>
-      </property>
-    </action>
-    <action name="actionSaveImageHD">
-      <property name="text">
-        <string>Save Image HD</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+S</string>
-      </property>
-    </action>
-    <action name="actionResetCamera">
-      <property name="text">
-        <string>Reset Camera</string>
-      </property>
-    </action>
-    <action name="actionModeDefault">
-      <property name="checkable">
-        <bool>true</bool>
-      </property>
-      <property name="text">
-        <string>Default</string>
-      </property>
-    </action>
-    <action name="actionModeBlock">
-      <property name="checkable">
-        <bool>true</bool>
-      </property>
-      <property name="text">
-        <string>Block</string>
-      </property>
-    </action>
-    <action name="actionLoadBlocks">
-      <property name="text">
-        <string>Load Blocks</string>
-      </property>
-    </action>
-    <action name="actionSaveBlocks">
-      <property name="text">
-        <string>Save Blocks</string>
-      </property>
-    </action>
-    <action name="actionGenerateBlocks">
-      <property name="text">
-        <string>Generate Blocks</string>
-      </property>
-    </action>
-    <action name="actionNewTerrain">
-      <property name="text">
-        <string>New Terrain</string>
-      </property>
-    </action>
-    <action name="actionOpenTerrain">
-      <property name="text">
-        <string>Open Terrain</string>
-      </property>
-    </action>
-    <action name="actionClearRoads">
-      <property name="text">
-        <string>Clear Roads</string>
-      </property>
-    </action>
-    <action name="actionGenerateParcels">
-      <property name="text">
-        <string>Generate Parcels</string>
-      </property>
-    </action>
-    <action name="actionGenerateBuildings">
-      <property name="text">
-        <string>Generate Buildings</string>
-      </property>
-    </action>
-    <action name="actionGenerateVegetation">
-      <property name="text">
-        <string>Generate Vegetation</string>
-      </property>
-    </action>
-    <action name="actionModeParcel">
-      <property name="text">
-        <string>Parcel</string>
-      </property>
-    </action>
-    <action name="actionModePlaceType">
-      <property name="text">
-        <string>Place Type</string>
-      </property>
-    </action>
-    <action name="actionLoadPlaceTypes">
-      <property name="text">
-        <string>Load Place Types</string>
-      </property>
-    </action>
-    <action name="actionCameraDefault">
-      <property name="text">
-        <string>Default</string>
-      </property>
-    </action>
-    <action name="actionCameraCar">
-      <property name="text">
-        <string>Car</string>
-      </property>
-    </action>
+    <addaction name="actionGenerateBlocks"/>
+    <addaction name="actionGenerateParcels"/>
+    <addaction name="actionGenerateBuildings"/>
+    <addaction name="actionGenerateVegetation"/>
+    <addaction name="actionGenerateAll"/>
+   </widget>
+   <widget class="QMenu" name="menuMode">
+    <property name="title">
+     <string>Mode</string>
+    </property>
+    <addaction name="actionModeDefault"/>
+    <addaction name="actionModePlaceType"/>
+    <addaction name="actionModeBlock"/>
+    <addaction name="actionModeParcel"/>
+   </widget>
+   <widget class="QMenu" name="menuCamera">
+    <property name="title">
+     <string>Camera</string>
+    </property>
+    <addaction name="actionCameraDefault"/>
+    <addaction name="actionCameraCar"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionViewZoning"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuMode"/>
+   <addaction name="menuPM"/>
+   <addaction name="menuWindow"/>
+   <addaction name="menuCamera"/>
+   <addaction name="menuView"/>
   </widget>
-  <layoutdefault spacing="6" margin="11"/>
-  <resources>
-    <include location="MainWindow.qrc"/>
-  </resources>
-  <connections/>
+  <widget class="QToolBar" name="fileToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="modeToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionControlWidget">
+   <property name="text">
+    <string>Control Widget</string>
+   </property>
+  </action>
+  <action name="actionDeleteEdge">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/MainWindow/Resources/Delete_24x24.png</normaloff>:/MainWindow/Resources/Delete_24x24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Edge</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionSaveTerrain">
+   <property name="text">
+    <string>Save Terrain</string>
+   </property>
+   <property name="shortcut">
+    <string/>
+   </property>
+  </action>
+  <action name="actionSaveRoads">
+   <property name="icon">
+    <iconset resource="MainWindow.qrc">
+     <normaloff>:/MainWindow/Resources/Save_24x24.png</normaloff>:/MainWindow/Resources/Save_24x24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Roads</string>
+   </property>
+  </action>
+  <action name="actionPropertyWidget">
+   <property name="text">
+    <string>Property Widget</string>
+   </property>
+  </action>
+  <action name="actionLoadRoads">
+   <property name="icon">
+    <iconset resource="MainWindow.qrc">
+     <normaloff>:/MainWindow/Resources/Open_24x24.png</normaloff>:/MainWindow/Resources/Open_24x24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Roads</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionLoadAreas">
+   <property name="text">
+    <string>Load Areas</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionSaveAreas">
+   <property name="text">
+    <string>Save Areas</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="text">
+    <string>Save Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionGenerateAll">
+   <property name="text">
+    <string>Generate All</string>
+   </property>
+  </action>
+  <action name="actionLoadCamera">
+   <property name="text">
+    <string>Load Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
+  </action>
+  <action name="actionSaveCamera">
+   <property name="text">
+    <string>Save Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
+  </action>
+  <action name="actionSaveImageHD">
+   <property name="text">
+    <string>Save Image HD</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionResetCamera">
+   <property name="text">
+    <string>Reset Camera</string>
+   </property>
+  </action>
+  <action name="actionModeDefault">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionModeBlock">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Block</string>
+   </property>
+  </action>
+  <action name="actionLoadBlocks">
+   <property name="text">
+    <string>Load Blocks</string>
+   </property>
+  </action>
+  <action name="actionSaveBlocks">
+   <property name="text">
+    <string>Save Blocks</string>
+   </property>
+  </action>
+  <action name="actionGenerateBlocks">
+   <property name="text">
+    <string>Generate Blocks</string>
+   </property>
+  </action>
+  <action name="actionNewTerrain">
+   <property name="text">
+    <string>New Terrain</string>
+   </property>
+  </action>
+  <action name="actionOpenTerrain">
+   <property name="text">
+    <string>Open Terrain</string>
+   </property>
+  </action>
+  <action name="actionClearRoads">
+   <property name="text">
+    <string>Clear Roads</string>
+   </property>
+  </action>
+  <action name="actionGenerateParcels">
+   <property name="text">
+    <string>Generate Parcels</string>
+   </property>
+  </action>
+  <action name="actionGenerateBuildings">
+   <property name="text">
+    <string>Generate Buildings</string>
+   </property>
+  </action>
+  <action name="actionGenerateVegetation">
+   <property name="text">
+    <string>Generate Vegetation</string>
+   </property>
+  </action>
+  <action name="actionModeParcel">
+   <property name="text">
+    <string>Parcel</string>
+   </property>
+  </action>
+  <action name="actionModePlaceType">
+   <property name="text">
+    <string>Place Type</string>
+   </property>
+  </action>
+  <action name="actionLoadPlaceTypes">
+   <property name="text">
+    <string>Load Place Types</string>
+   </property>
+  </action>
+  <action name="actionCameraDefault">
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionCameraCar">
+   <property name="text">
+    <string>Car</string>
+   </property>
+  </action>
+  <action name="actionViewZoning">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoning</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="MainWindow.qrc"/>
+ </resources>
+ <connections/>
 </ui>

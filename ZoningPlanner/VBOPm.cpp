@@ -296,12 +296,16 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 				color = QVector3D(0.0f, 0.5f, 0.8f);
 			}
 
+			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 10, false, "", GL_QUADS, 1, QVector3D(1, 1, 1), color);
+
+			/*
 			for(int sN=0;sN<blocks[i].blockContour.contour.size();sN++){
 				int next = (sN+1) % blocks[i].blockContour.contour.size();
 				vert.push_back(Vertex(QVector3D(blocks[i].blockContour.contour[sN].x(),blocks[i].blockContour.contour[sN].y(), 100), color, QVector3D(), QVector3D()));
 				vert.push_back(Vertex(QVector3D(blocks[i].blockContour.contour[next].x(),blocks[i].blockContour.contour[next].y(), 100), color, QVector3D(), QVector3D()));
 			}
 			rendManager.addStaticGeometry("zoning",vert,"",GL_LINES,1);
+			*/
 		}
 	}
 }
