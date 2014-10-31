@@ -21,9 +21,8 @@ public:
 	GLWidget3D* glWidget;
 	UrbanGeometry* urbanGeometry;
 
-	int mode;
-
 public slots:
+	void onLoadZoning();
 	void onLoadRoads();
 	void onGenerateBlocks();
 	void onGenerateParcels();

@@ -143,8 +143,6 @@ float VBORenderManager::getTerrainHeight(float xP,float xY){
 	float xM=1.0f-(side/2.0f-xP)/side;
 	float yM=1.0f-(side/2.0f-xY)/side;
 	return vboTerrain.getTerrainHeight(xM,yM);
-	//return 90.0f;
-	//vboTerrain.updateTerrain(coordX,coordY,change,rad);
 }
 
 void VBORenderManager::changeTerrainDimensions(float terrainSide,int resolution){

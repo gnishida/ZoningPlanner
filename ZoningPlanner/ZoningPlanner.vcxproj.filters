@@ -70,9 +70,6 @@
     <ClCompile Include="LC_Layer.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
-    <ClCompile Include="RendererHelper.cpp">
-      <Filter>Main Files</Filter>
-    </ClCompile>
     <ClCompile Include="RoadEdge.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
@@ -321,9 +318,6 @@
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="LC_Layer.h">
-      <Filter>Main Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RendererHelper.h">
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="RoadEdge.h">

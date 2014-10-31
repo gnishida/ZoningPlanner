@@ -278,17 +278,17 @@ public:
 //BOOST_GEOMETRY_REGISTER_POINT_2D_GET_SET(QVector3D, double, boost::geometry::cs::cartesian, x, y, setX, setY)
 BOOST_GEOMETRY_REGISTER_RING(Loop3D)
 
-	namespace boost {
-		namespace geometry {
+namespace boost {
+	namespace geometry {
 
-			namespace traits {
+		namespace traits {
 
-				template<> struct tag<Polygon3D> { typedef polygon_tag type; };
+			template<> struct tag<Polygon3D> { typedef polygon_tag type; };
 
-			} // namespace traits
+		} // namespace traits
 
-			template<> struct ring_type<Polygon3D> { typedef Loop3D type; };
+		template<> struct ring_type<Polygon3D> { typedef Loop3D type; };
 
-		} // namespace geometry
+	} // namespace geometry
 } // namespace boost
 

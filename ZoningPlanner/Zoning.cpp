@@ -1,4 +1,6 @@
 #include "Zoning.h"
+#include <QFile>
+#include <QDomDocument>
 
 void ZoneType::init() {
 	park_percentage = 0.05;
@@ -19,7 +21,7 @@ void ZoneType::init() {
 }
 
 Zoning::Zoning() {
-	Polygon2D polygon;
+/*	Polygon2D polygon;
 	polygon.push_back(QVector2D(-5000, -5000));
 	polygon.push_back(QVector2D(5000, -5000));
 	polygon.push_back(QVector2D(5000, 5000));
@@ -32,4 +34,37 @@ Zoning::Zoning() {
 	polygon.push_back(QVector2D(200, 200));
 	polygon.push_back(QVector2D(-200, 200));
 	zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 1)));
+	*/
+}
+
+void Zoning::load(const QString& filename) {
+	zones.clear();
+
+	QFile file(filename);
+
+	QDomDocument doc;
+	doc.setContent(&file, true);
+	QDomElement root = doc.documentElement();
+
+	QDomNode node = root.firstChild();
+	while (!node.isNull()) {
+		if (node.toElement().tagName() == "zone") {
+			int type = node.toElement().attribute("type").toInt();
+			int level = node.toElement().attribute("level").toInt();
+			ZoneType zone(type, level);
+
+			Polygon2D polygon;
+			QDomNode polygonNode = node.childNodes().at(0);
+			for (int i = 0; i < polygonNode.childNodes().size(); ++i) {
+				QDomNode pointNode = polygonNode.childNodes().at(i);
+				float x = pointNode.toElement().attribute("x").toFloat();
+				float y = pointNode.toElement().attribute("y").toFloat();
+				polygon.push_back(QVector2D(x, y));
+			}
+
+			zones.push_back(std::make_pair(polygon, zone));
+		}
+
+		node = node.nextSibling();
+	}
 }

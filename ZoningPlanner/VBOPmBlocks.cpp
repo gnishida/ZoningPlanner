@@ -380,15 +380,6 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 					assigned = true;
 				}
 			}
-			/*
-			for (QMap<Polygon2D, ZoneType>::iterator it = zoning.zones.begin(); it != zoning.zones.end(); ++it) {
-				if (it.key().contains(QVector2D(testPt))) {
-					blocks[i].zone = it.value();
-					assigned = true;
-					break;
-				}
-			}
-			*/
 
 			if (!assigned) {
 				printf("ERROR: no zone is assigned to this block.\n");

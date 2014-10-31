@@ -10,18 +10,12 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	// setup the toolbar
 	ui.fileToolBar->addAction(ui.actionLoadRoads);
 	ui.fileToolBar->addAction(ui.actionSaveRoads);
-	ui.modeToolBar->addAction(ui.actionModeDefault);
-	ui.modeToolBar->addAction(ui.actionModeBlock);
-	ui.modeToolBar->addAction(ui.actionModeParcel);
 
 	ui.actionModeDefault->setChecked(true);
 
 	// register the menu's action handlers
-	connect(ui.actionLoadPlaceTypes, SIGNAL(triggered()), this, SLOT(onLoadPlaceTypes()));
+	connect(ui.actionLoadPlaceTypes, SIGNAL(triggered()), this, SLOT(onLoadZoning()));
 	connect(ui.actionLoadRoads, SIGNAL(triggered()), this, SLOT(onLoadRoads()));
-	connect(ui.actionLoadBlocks, SIGNAL(triggered()), this, SLOT(onLoadBlocks()));
-	connect(ui.actionSaveBlocks, SIGNAL(triggered()), this, SLOT(onSaveBlocks()));
-	connect(ui.actionSaveRoads, SIGNAL(triggered()), this, SLOT(onSaveRoads()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
 	connect(ui.actionGenerateBlocks, SIGNAL(triggered()), this, SLOT(onGenerateBlocks()));
@@ -42,6 +36,16 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::onLoadZoning() {
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open zone file..."), "", tr("Zone Files (*.xml)"));
+	if (filename.isEmpty()) return;
+
+	urbanGeometry->loadRoads(filename);
+	glWidget->shadow.makeShadowMap(glWidget);
+
+	glWidget->updateGL();
 }
 
 void MainWindow::onLoadRoads() {

@@ -72,15 +72,6 @@
     <addaction name="actionGenerateVegetation"/>
     <addaction name="actionGenerateAll"/>
    </widget>
-   <widget class="QMenu" name="menuMode">
-    <property name="title">
-     <string>Mode</string>
-    </property>
-    <addaction name="actionModeDefault"/>
-    <addaction name="actionModePlaceType"/>
-    <addaction name="actionModeBlock"/>
-    <addaction name="actionModeParcel"/>
-   </widget>
    <widget class="QMenu" name="menuCamera">
     <property name="title">
      <string>Camera</string>
@@ -95,21 +86,12 @@
     <addaction name="actionViewZoning"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuMode"/>
    <addaction name="menuPM"/>
+   <addaction name="menuView"/>
    <addaction name="menuWindow"/>
    <addaction name="menuCamera"/>
-   <addaction name="menuView"/>
   </widget>
   <widget class="QToolBar" name="fileToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QToolBar" name="modeToolBar">
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>

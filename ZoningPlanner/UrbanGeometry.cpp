@@ -4,7 +4,6 @@
 #include <QFile>
 #include "common.h"
 #include "global.h"
-#include "RendererHelper.h"
 #include "GraphUtil.h"
 #include "MainWindow.h"
 #include "Util.h"
@@ -16,7 +15,7 @@
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
 
-	//placeTypes.load("placetypes.xml");
+	zones.load("zoning.xml");
 }
 
 UrbanGeometry::~UrbanGeometry() {

@@ -46,3 +46,22 @@ public:
  */
 BOOST_GEOMETRY_REGISTER_RING(Polygon2D)
 
+/**
+ * order the points in CCW
+ */
+namespace boost { namespace geometry { namespace traits {
+template <>
+struct point_order<Polygon2D> {
+  static const order_selector value = counterclockwise;
+};
+}}}
+
+/**
+ * The points are open, not closed.
+ */
+namespace boost { namespace geometry { namespace traits {
+template <>
+struct closure<Polygon2D> {
+  static const closure_selector value = open;
+};
+}}}

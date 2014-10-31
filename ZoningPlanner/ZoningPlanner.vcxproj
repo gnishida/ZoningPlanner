@@ -168,7 +168,6 @@
     <ClCompile Include="Polygon3D.cpp" />
     <ClCompile Include="Polyline2D.cpp" />
     <ClCompile Include="Polyline3D.cpp" />
-    <ClCompile Include="RendererHelper.cpp" />
     <ClCompile Include="RoadEdge.cpp" />
     <ClCompile Include="RoadGraph.cpp" />
     <ClCompile Include="RoadVertex.cpp" />
@@ -261,7 +260,6 @@
     <ClInclude Include="Polygon3D.h" />
     <ClInclude Include="Polyline2D.h" />
     <ClInclude Include="Polyline3D.h" />
-    <ClInclude Include="RendererHelper.h" />
     <ClInclude Include="RoadEdge.h" />
     <ClInclude Include="RoadGraph.h" />
     <ClInclude Include="RoadVertex.h" />

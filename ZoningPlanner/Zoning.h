@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMap>
+#include <QString>
 #include "Polygon2D.h"
 
 class ZoneType
@@ -44,4 +45,5 @@ public:
 public:
 	Zoning();
 	size_t size() { return zones.size(); }
+	void load(const QString& filename);
 };
