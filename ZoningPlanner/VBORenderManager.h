@@ -113,10 +113,8 @@ public:
 	//static
 	bool addStaticGeometry(QString geoName,std::vector<Vertex>& vert,QString textureName,GLenum geometryType,int shaderMode);
 	bool addStaticGeometry2(QString geoName,std::vector<QVector3D>& pos,float zShift,bool inverseLoop,QString textureName,GLenum geometryType,int shaderMode,QVector3D texScale,QColor color);
-	bool addStaticConvexPoly(QString geoName,std::vector<QVector3D>& pos,float zShift,bool inverseLoop,QString textureName,int shaderMode,QVector3D texScale,bool tesselate=true,QColor* color=0);
 	bool removeStaticGeometry(QString geoName);
 	void renderStaticGeometry(QString geoName);
-	//void renderStaticTexArrayGeometry(QString geoName);
 	bool checkIfGeoNameInUse(QString geoName);
 
 	//grid
@@ -131,8 +129,6 @@ public:
 	void renderAllStreetElementName(QString name);
 	void removeAllStreetElementName(QString name);
 
-
-	void renderAll(bool cleanVertex);
 private:
 
 	QHash<QString,QHash<int,renderGrid>> geoName2RenderGrids;

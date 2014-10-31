@@ -27,11 +27,6 @@ GLWidget3D::GLWidget3D(MainWindow* mainWin) : QGLWidget(QGLFormat(QGL::SampleBuf
 
 	camera2D.setRotation(0, 0, 0);
 	camera2D.setTranslation(0, 0, 6000);
-
-	vertexSelected = false;
-	edgeSelected = false;
-
-	shadowEnabled=true;
 }
 
 QSize GLWidget3D::minimumSizeHint() const {
@@ -121,24 +116,10 @@ void GLWidget3D::initializeGL() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	////////////////////////////////
-	G::global()["3d_render_mode"]=0;
-	// init hatch tex
-	std::vector<QString> hatchFiles;
-	for(int i=0;i<=6;i++){//5 hatch + perlin + water normals
-		hatchFiles.push_back("../data/textures/LC/hatch/h"+QString::number(i)+"b.png");
-	}
-	for(int i=0;i<=0;i++){//1 win (3 channels)
-		hatchFiles.push_back("../data/textures/LC/hatch/win"+QString::number(i)+"b.png");//win0b
-	}
-	//vboRenderManager.loadArrayTexture("hatching_array",hatchFiles);
-
 	///
 	vboRenderManager.init();
 	updateCamera();
 	shadow.initShadow(vboRenderManager.program,this);
-	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);//SHADOW: Disable
-	//glUniform1i(glGetUniformLocation(vboRenderManager.program, "terrainMode"),1);//FLAT
 		
 	shadow.makeShadowMap(this);
 }
@@ -172,20 +153,20 @@ void GLWidget3D::drawScene(int drawMode) {
 	vboRenderManager.renderStaticGeometry(QString("sky"));
 	vboRenderManager.vboWater.render(vboRenderManager);
 
-	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 1);//SHADOW: Render Normal with Shadows
+	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 1);
 
 	vboRenderManager.vboTerrain.render(vboRenderManager);
 
 	vboRenderManager.renderStaticGeometry(QString("3d_sidewalk"));
 	vboRenderManager.renderStaticGeometry(QString("3d_parcel"));
 
-	vboRenderManager.renderStaticGeometry(QString("3d_trees"));//hatch
-	vboRenderManager.renderAllStreetElementName("tree");//LC
-	vboRenderManager.renderAllStreetElementName("streetLamp");//LC
+	vboRenderManager.renderStaticGeometry(QString("3d_trees"));
+	vboRenderManager.renderAllStreetElementName("tree");
+	vboRenderManager.renderAllStreetElementName("streetLamp");
 
 	vboRenderManager.renderStaticGeometry(QString("3d_roads"));			
-	vboRenderManager.renderStaticGeometry(QString("3d_roads_inter"));//
-	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));//
+	vboRenderManager.renderStaticGeometry(QString("3d_roads_inter"));
+	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));
 
 	if (mainWin->ui.actionViewZoning->isChecked()) {
 		vboRenderManager.renderStaticGeometry("zoning");
@@ -193,19 +174,6 @@ void GLWidget3D::drawScene(int drawMode) {
 		vboRenderManager.renderStaticGeometry(QString("3d_building"));
 		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
 	}
-
-
-	// draw the selected vertex and edge
-	if (vertexSelected) {
-		RendererHelper::renderPoint(vboRenderManager, "selected_vertex", selectedVertex->pt, QColor(0, 0, 255), selectedVertex->pt3D.z() + 2.0f);
-	}
-	if (edgeSelected) {
-		Polyline3D polyline(selectedEdge->polyline3D);
-		for (int i = 0; i < polyline.size(); ++i) polyline[i].setZ(polyline[i].z() + 10.0f);
-		RendererHelper::renderPolyline(vboRenderManager, "selected_edge_lines", "selected_edge_points", polyline, QColor(0, 0, 255));
-	}
-
-
 
 
 
@@ -220,9 +188,9 @@ void GLWidget3D::drawScene(int drawMode) {
 		vboRenderManager.renderStaticGeometry(QString("3d_building"));
 		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
 
-		vboRenderManager.renderStaticGeometry(QString("3d_trees"));//hatch
-		vboRenderManager.renderAllStreetElementName("tree");//LC
-		vboRenderManager.renderAllStreetElementName("streetLamp");//LC
+		vboRenderManager.renderStaticGeometry(QString("3d_trees"));
+		vboRenderManager.renderAllStreetElementName("tree");
+		vboRenderManager.renderAllStreetElementName("streetLamp");
 	}
 }
 
@@ -325,7 +293,6 @@ void GLWidget3D::updateCamera(){
 	glViewport(0, 0, (GLint)this->width(), (GLint)this->height());
 	camera->updatePerspective(this->width(),height);
 	camera->updateCamMatrix();
-	//if(G::global()["3d_render_mode"]==1) 		camera3D.updateCamMatrix();
 	// update uniforms
 	float mvpMatrixArray[16];
 	float mvMatrixArray[16];
@@ -348,27 +315,3 @@ void GLWidget3D::updateCamera(){
 	QVector3D light_dir(-0.40f,0.81f,-0.51f);//camera3D.light_dir.toVector3D();
 	glUniform3f(glGetUniformLocation(vboRenderManager.program, "lightDir"),light_dir.x(),light_dir.y(),light_dir.z());
 }//
-
-/*void GLWidget3D::generate3DGeometry(bool justRoads){
-	GraphUtil::cleanEdges(mainWin->urbanGeometry->roads);
-	GraphUtil::clean(mainWin->urbanGeometry->roads);
-
-	printf("generate3DGeometry\n");
-	G::global()["3d_render_mode"]=1;//LC
-
-	//1. update roadgraph geometry
-	if(justRoads){//just roads a bit higher
-		G::global()["3d_road_deltaZ"]=10.0f;
-		mainWin->controlWidget->ui.render_3DtreesCheckBox->setChecked(false);//not trees
-	}else{
-		G::global()["3d_road_deltaZ"]=1.0f;
-	}
-
-	//VBORoadGraph::updateRoadGraph(vboRenderManager, mainWin->urbanGeometry->roads);
-	//2. generate blocks, parcels and buildings and vegetation
-	VBOPm::generateBlocks(vboRenderManager, mainWin->urbanGeometry->roads, mainWin->urbanGeometry->blocks, mainWin->urbanGeometry->placeTypes);
-
-	shadow.makeShadowMap(this);
-
-	printf("<<generate3DGeometry\n");
-}*/

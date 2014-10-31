@@ -131,13 +131,8 @@
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
 		glActiveTexture(GL_TEXTURE8);
-		glBindTexture(GL_TEXTURE_2D,0); 
-		if(G::global().getInt("3d_render_mode")==0||G::global().getInt("3d_render_mode")==1){//EDITION or LC
-			glBindTexture(GL_TEXTURE_2D_ARRAY, grassText);
-		}
-		if(G::global().getInt("3d_render_mode")==2){//hatching
-			glBindTexture(GL_TEXTURE_2D_ARRAY, rendManager.nameToTexId["hatching_array"]);
-		}
+		glBindTexture(GL_TEXTURE_2D,0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, grassText);
 		
 		glActiveTexture(GL_TEXTURE0);
 

@@ -45,16 +45,8 @@ public:
 	float rotationSensitivity;
 	float zoomSensitivity;
 
-	RoadVertexDesc selectedVertexDesc;
-	RoadVertexPtr selectedVertex;
-	RoadEdgeDesc selectedEdgeDesc;
-	RoadEdgePtr selectedEdge;
-	bool vertexSelected;
-	bool edgeSelected;
-
 	VBORenderManager vboRenderManager;
 	GLWidgetSimpleShadow shadow;
-	bool shadowEnabled;
 
 public:
 	GLWidget3D(MainWindow *parent);

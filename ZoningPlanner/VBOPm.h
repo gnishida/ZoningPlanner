@@ -32,7 +32,6 @@ public:
 
 	static void generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks);
 	static void generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person>& people);
-	static void generatePopulationJobDistribution(BlockSet& blocks);
 
 private:
 

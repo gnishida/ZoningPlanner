@@ -140,20 +140,12 @@ float facade(vec2 coordFac,vec2 maxFac,int windNumber){
 }//
 
 void main(){
-
-
-
 	outputF = outColor;
 
-	// SHADOW: From light
-	if(shadowState==2){// no tex/color/shadows
+	// shadow mapping
+	if (shadowState == 2) {
 		return;
 	}
-
-	// COLOR
-	/*if(mode==1){
-		outputF =vec4(outColor,1.0);
-	}*/
 
 	// TEXTURE
 	if((mode&0xFF)==2||(mode&0xFF)==4||(mode&0xFF)==6){// tex / water / model texture
@@ -197,32 +189,6 @@ void main(){
 		return;
 	}
 
-	//////////////
-	// HATCH WATER
-	if((mode&0xFF)==11){
-		vec2 coordFac=outUV.xy;
-		//vec2 coord0=coordFac+vec2(waterMove);
-		vec2 coord0=(coordFac+vec2(waterMove*3))*0.33;
-		vec2 coord1=(coordFac+vec2(-waterMove*4))*0.25;
-		vec3 normalC=texture( tex_3D, vec3(coord0,6.0) ).xyz;//6 water normal
-		vec3 normalC2=texture( tex_3D, vec3(coord1,6.0) ).xyz;//6 water normal
-
-		normalC = normalC*2.0-vec3(1.0);
-		normalC2 = normalC2*2.0-vec3(1.0);
-		normalC = normalize((normalC+normalC2)*0.5);
-	
-		float intensity=1.0f;
-
-		intensity=1-(0.95*max(0.0, dot(normalize(-lightDir), normalize(normalC)))+0.05);
-		int darknessInt=int(99.999*(1.0-intensity));
-		int texInd=darknessInt/25;
-		int interpTex=darknessInt%25;
-		outputF=mix(
-			texture( tex_3D, vec3(coordFac.xy*0.1,texInd) ),
-			texture( tex_3D, vec3(coordFac.xy*0.1,texInd+1) ),
-			interpTex/25.0);
-		return;
-	}
 	//////////////
 	// FACADE ARRAY TEXTURE
 	if((mode&0xFF)==9||(mode&0xFF)==10){

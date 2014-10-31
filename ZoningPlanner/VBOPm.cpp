@@ -61,7 +61,7 @@ void VBOPm::initLC(){
  */
 bool VBOPm::generateBlocks(VBORenderManager& rendManager,RoadGraph &roadGraph, BlockSet& blocks, Zoning& zones){
 	// INIT
-	if(initializedLC==false){//&&G::global().getInt("3d_render_mode")==0){
+	if(initializedLC==false){
 		initLC();//init LC textures
 	}
 
@@ -85,27 +85,6 @@ void VBOPm::generateBlockModels(VBORenderManager& rendManager,RoadGraph &roadGra
 	rendManager.removeStaticGeometry("3d_block");
 	for (int i = 0; i < blocks.size(); ++i) {
 		blocks[i].adaptToTerrain(&rendManager);
-
-		// Blockの3Dモデルを生成（Block表示モードの時にのみ、表示される）
-		{
-			std::vector<Vertex> vert;
-
-			QColor color;
-			if (i == blocks.selectedBlockIndex) {
-				color = QColor(1.0f, 1.0f, 1.0f);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_PARK) {
-				color = QColor(0.8f, 0.8f, 0.0f);
-			} else {
-				color = QColor(0.0f, 0.5f, 0.8f);
-			}
-
-			for(int sN=0;sN<blocks[i].blockContour.contour.size();sN++){
-				int next = (sN+1) % blocks[i].blockContour.contour.size();
-				vert.push_back(Vertex(QVector3D(blocks[i].blockContour.contour[sN].x(),blocks[i].blockContour.contour[sN].y(), 1), color, QVector3D(), QVector3D()));
-				vert.push_back(Vertex(QVector3D(blocks[i].blockContour.contour[next].x(),blocks[i].blockContour.contour[next].y(), 1), color, QVector3D(), QVector3D()));
-			}
-			rendManager.addStaticGeometry("3d_block",vert,"",GL_LINES,1);
-		}
 
 		// 歩道の3Dモデルを生成（通常の表示モードの時にのみ、表示される）
 		{
@@ -180,9 +159,6 @@ bool VBOPm::generateParcels(VBORenderManager& rendManager, BlockSet& blocks, Zon
 		return false;
 	}
 	printf(">>Buildings contours were generated.\n");
-
-	// generate population distribution and job distribution
-	generatePopulationJobDistribution(blocks);
 		
 	return true;
 }
@@ -297,15 +273,6 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 			}
 
 			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 3, false, "", GL_QUADS, 1, QVector3D(1, 1, 1), color);
-
-			/*
-			for(int sN=0;sN<blocks[i].blockContour.contour.size();sN++){
-				int next = (sN+1) % blocks[i].blockContour.contour.size();
-				vert.push_back(Vertex(QVector3D(blocks[i].blockContour.contour[sN].x(),blocks[i].blockContour.contour[sN].y(), 100), color, QVector3D(), QVector3D()));
-				vert.push_back(Vertex(QVector3D(blocks[i].blockContour.contour[next].x(),blocks[i].blockContour.contour[next].y(), 100), color, QVector3D(), QVector3D()));
-			}
-			rendManager.addStaticGeometry("zoning",vert,"",GL_LINES,1);
-			*/
 		}
 	}
 }
@@ -326,69 +293,3 @@ void VBOPm::generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person
 	}
 }
 
-void VBOPm::generatePopulationJobDistribution(BlockSet& blocks) {
-	QVector2D cbd(1000, 1000);
-
-	int rows = 100;
-	int cols = 100;
-
-	cv::Mat population = cv::Mat(rows, cols, CV_32F, cv::Scalar(0.0f));
-	cv::Mat jobs = cv::Mat(rows, cols, CV_32F, cv::Scalar(0.0f));
-
-	for (int i = 0; i < blocks.size(); ++i) {
-		Block::parcelGraphVertexIter vi, viEnd;
-		for (boost::tie(vi, viEnd) = boost::vertices(blocks[i].myParcels); vi != viEnd; ++vi) {
-			if (blocks[i].myParcels[*vi].myBuilding.numStories <= 0) continue;
-
-			// area
-			boost::geometry::ring_type<Polygon3D>::type bg_footprint;
-			boost::geometry::assign(bg_footprint, blocks[i].myParcels[*vi].myBuilding.buildingFootprint.contour);
-			boost::geometry::correct(bg_footprint);
-			float area = fabs(boost::geometry::area(bg_footprint));
-			if (area <= 0) continue;
-
-			// population
-			float numPeople = area / 10.856f * blocks[i].myParcels[*vi].myBuilding.numStories;
-
-			// position
-			int c = (blocks[i].myParcels[*vi].bbox.midPt().x() + 5000.0f) / 100.0f;
-			if (c < 0) c = 0;
-			if (c >= cols) c = cols - 1;
-			int r = (blocks[i].myParcels[*vi].bbox.midPt().y() + 5000.0f) / 100.0f;
-			if (r < 0) r = 0;
-			if (r >= rows) r = rows - 1;
-
-			// residential / industrial ?
-			float sigma2 = 0.2f;
-			float dist_ratio = (cbd - blocks[i].myParcels[*vi].bbox.midPt()).length() / 5000.0f;
-			float rand = expf(-dist_ratio * dist_ratio / 2.0f / sigma2);// / sqrtf(2.0f * M_PI * sigma2);
-			if (rand > 1) rand = 1.0f;
-
-			// industrial
-			jobs.at<float>(r, c) += numPeople * rand;
-			// residential
-			population.at<float>(r, c) += numPeople * (1.0f - rand);
-		}
-	}
-
-	HeatMapColorTable ct(0, 255);
-
-	cv::Mat normalizedJobs(rows, cols, CV_8UC3, cv::Scalar(0, 0, 0));
-	cv::Mat normalizedPopulation(rows, cols, CV_8UC3, cv::Scalar(0, 0, 0));
-	for (int r = 0; r < jobs.rows; ++r) {
-		for (int c = 0; c < jobs.cols; ++c) {
-			int data= jobs.at<float>(r, c) * 255 / 1000;
-			if (data > 255) data = 255;
-			normalizedJobs.at<cv::Vec3b>(r, c) = cv::Vec3b(ct.getColor(data).blue(), ct.getColor(data).green(), ct.getColor(data).red());
-
-			data = population.at<float>(r, c) * 255 / 1000;
-			if (data > 255) data = 255;
-			normalizedPopulation.at<cv::Vec3b>(r, c) = cv::Vec3b(ct.getColor(data).blue(), ct.getColor(data).green(), ct.getColor(data).red());
-		}
-	}
-
-	cv::flip(normalizedJobs, normalizedJobs, 0);
-	cv::flip(normalizedPopulation, normalizedPopulation, 0);
-	cv::imwrite("jobs.png", normalizedJobs);
-	cv::imwrite("population.png", normalizedPopulation);
-}

@@ -22,10 +22,6 @@ uniform int mode;
 // MODE 5--> model obj: one color
 // MODE 6--> model obj: texture
 
-         // // MODE 9--> hatch
-		// // MODE 10--> hatch
-
-//0x0100 --> adapt terrain
 //0x0200 --> lighting
 
 uniform mat4 mvpMatrix;
@@ -54,6 +50,7 @@ void main(){
 	outColor=color;
 	outUV=uv;
 	origVertex=vertex;
+
 	//////////////////////////////////////
 	// 1. TRANSFORM MODEL
 	if(((mode&0x0FF)==0x05)||((mode&0xFF)==0x06)){
@@ -62,6 +59,7 @@ void main(){
 		origVertex=(modelTransf*vec4(origVertex,1.0)).xyz;//note 1.0
 
 	}
+
 	//////////////////////////////////////
 	// 2. ADAPT TO TERRAIN
 	if ((mode&0xFF)==0x03) {// terrain or adapt to terrain
@@ -76,6 +74,7 @@ void main(){
 		origVertex.z+=height;
 		//if(height<15.0f)//water height
 		//	origVertex.z=-100.0f;
+
 		if((mode&0xFF)==0x03){// terrain
 			// computer normal from heightmap
 			const vec2 size = vec2(1.0,0.0);
@@ -92,12 +91,14 @@ void main(){
 			varyingNormal=cross(va,vb);
 		}
 	}
+
 	//////////////////////////////////////
 	// SHADOW: From light
 	if(shadowState==2){
 		gl_Position = light_mvpMatrix * vec4(origVertex,1.0);
 		return;
 	}
+
 	//////////////////////////////////////
 	// WATER
 	if((mode&0xFF)==0x04){
@@ -109,6 +110,7 @@ void main(){
 		outUV.s = r.x/m + 0.5;
 		outUV.t = r.y/m + 0.5;
 	}
+
 	//////////////////////////////////////
 	// LIGHTING
 	if((mode&0x0200)==0x0200){
@@ -123,5 +125,4 @@ void main(){
 	}
 
 	gl_Position = mvpMatrix * vec4(origVertex,1.0);
-
 }
