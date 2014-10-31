@@ -283,12 +283,8 @@ void VBOPm::generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person
 	for (int i = 0; i < people.size(); ++i) {
 		// 人の3Dモデルを生成
 		{
-			std::vector<Vertex> vert;
-
-			QColor color(0.1f, 0.1f, 0.1f);
-
-			vert.push_back(Vertex(QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 200), color, QVector3D(), QVector3D()));
-			rendManager.addStaticGeometry("people", vert, "", GL_POINTS, 1);
+			QColor color(0.8f, 0.8f, 0.8f);
+			rendManager.addSphere("people", QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 5), 5.0, color);
 		}
 	}
 }

@@ -114,6 +114,8 @@ public:
 	void renderStaticGeometry(QString geoName);
 	bool checkIfGeoNameInUse(QString geoName);
 
+	void addSphere(QString geoName, const QVector3D& center, float radius, const QColor& color);
+
 	//grid
 	bool addGridGeometry(QString geoName,std::vector<Vertex>& vert,QString textureName);
 	bool removeGridGeometry(QString geoName);

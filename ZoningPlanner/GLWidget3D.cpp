@@ -148,7 +148,6 @@ void GLWidget3D::drawScene(int drawMode) {
 	
 	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
-	vboRenderManager.renderStaticGeometry("people");
 	vboRenderManager.renderStaticGeometry(QString("sky"));
 	vboRenderManager.vboWater.render(vboRenderManager);
 
@@ -159,19 +158,20 @@ void GLWidget3D::drawScene(int drawMode) {
 	vboRenderManager.renderStaticGeometry(QString("3d_sidewalk"));
 	vboRenderManager.renderStaticGeometry(QString("3d_parcel"));
 
-	vboRenderManager.renderStaticGeometry(QString("3d_trees"));
-	vboRenderManager.renderAllStreetElementName("tree");
-	vboRenderManager.renderAllStreetElementName("streetLamp");
-
 	vboRenderManager.renderStaticGeometry(QString("3d_roads"));			
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_inter"));
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));
 
 	if (mainWin->ui.actionViewZoning->isChecked()) {
+		vboRenderManager.renderStaticGeometry("people");
 		vboRenderManager.renderStaticGeometry("zoning");
 	} else {
 		vboRenderManager.renderStaticGeometry(QString("3d_building"));
 		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
+
+		vboRenderManager.renderStaticGeometry(QString("3d_trees"));
+		vboRenderManager.renderAllStreetElementName("tree");
+		vboRenderManager.renderAllStreetElementName("streetLamp");
 	}
 
 

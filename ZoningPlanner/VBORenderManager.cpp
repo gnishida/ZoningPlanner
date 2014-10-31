@@ -202,6 +202,47 @@ bool VBORenderManager::checkIfGeoNameInUse(QString geoName){
 	return (geoName2StaticRender.contains(geoName));
 }//
 
+void VBORenderManager::addSphere(QString geoName, const QVector3D& center, float radius, const QColor& color) {
+	int slice = 10;
+	int stack = 10;
+
+	std::vector<Vertex> vert;
+
+	for (int si = 0; si < slice; ++si) {
+		int next_si = (si + 1) % slice;
+		float theta1 = 2.0f * M_PI * (float)si / (float)slice;
+		float theta2 = 2.0f * M_PI * (float)next_si / (float)slice;
+
+		for (int ti = -stack; ti < stack; ++ti) {
+			int next_ti = ti + 1;
+			float phi1 = 0.5f * M_PI * (float)ti / (float)stack;
+			float phi2 = 0.5f * M_PI * (float)next_ti / (float)stack;
+
+			float dx = radius * cosf(phi1) * cosf(theta1);
+			float dy = radius * cosf(phi1) * sinf(theta1);
+			float dz = radius * sinf(phi1);
+			QVector3D d(dx, dy, dz);
+			vert.push_back(Vertex(center + d, color, d.normalized(), QVector3D()));
+
+			d.setX(radius * cosf(phi1) * cosf(theta2));
+			d.setY(radius * cosf(phi1) * sinf(theta2));
+			vert.push_back(Vertex(center + d, color, d.normalized(), QVector3D()));
+
+			d.setX(radius * cosf(phi2) * cosf(theta2));
+			d.setY(radius * cosf(phi2) * sinf(theta2));
+			d.setZ(radius * sinf(phi2));
+			vert.push_back(Vertex(center + d, color, d.normalized(), QVector3D()));
+
+			d.setX(radius * cosf(phi2) * cosf(theta1));
+			d.setY(radius * cosf(phi2) * sinf(theta1));
+			vert.push_back(Vertex(center + d, color, d.normalized(), QVector3D()));
+		}
+	}
+
+	addStaticGeometry(geoName, vert, "", GL_QUADS, 1);
+}
+
+
 using namespace boost::polygon::operators;
 
 /**

@@ -66,7 +66,6 @@ void MainWindow::onGenerateBlocks() {
 
 void MainWindow::onGenerateParcels() {
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
-	//VBOPm::generateBlockMesh(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 	glWidget->updateGL();
@@ -87,7 +86,11 @@ void MainWindow::onGenerateVegetation() {
 void MainWindow::onGenerateAll() {
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
+	urbanGeometry->allocateAll();
+	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+
 	VBOPm::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateVegetation(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	glWidget->shadow.makeShadowMap(glWidget);
