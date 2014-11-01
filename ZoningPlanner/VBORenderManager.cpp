@@ -242,6 +242,60 @@ void VBORenderManager::addSphere(QString geoName, const QVector3D& center, float
 	addStaticGeometry(geoName, vert, "", GL_QUADS, 1);
 }
 
+void VBORenderManager::addBox(QString geoName, const QVector3D& center, const QVector3D& size, const QColor& color) {
+	std::vector<Vertex> vert;
+
+	QVector3D pt(center - size * 0.5);
+	vert.push_back(Vertex(pt, color, QVector3D(0, -1, 0), QVector3D()));
+	pt.setX(pt.x() + size.x());
+	vert.push_back(Vertex(pt, color, QVector3D(0, -1, 0), QVector3D()));
+	pt.setZ(pt.z() + size.z());
+	vert.push_back(Vertex(pt, color, QVector3D(0, -1, 0), QVector3D()));
+	pt.setX(pt.x() - size.x());
+	vert.push_back(Vertex(pt, color, QVector3D(0, -1, 0), QVector3D()));
+
+	pt = center - size * 0.5;
+	pt.setX(pt.x() + size.x());
+	vert.push_back(Vertex(pt, color, QVector3D(1, 0, 0), QVector3D()));
+	pt.setY(pt.y() + size.y());
+	vert.push_back(Vertex(pt, color, QVector3D(1, 0, 0), QVector3D()));
+	pt.setZ(pt.z() + size.z());
+	vert.push_back(Vertex(pt, color, QVector3D(1, 0, 0), QVector3D()));
+	pt.setY(pt.y() - size.y());
+	vert.push_back(Vertex(pt, color, QVector3D(1, 0, 0), QVector3D()));
+
+	pt = center + size * 0.5;
+	pt.setZ(pt.z() - size.z());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 1, 0), QVector3D()));
+	pt.setX(pt.x() - size.x());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 1, 0), QVector3D()));
+	pt.setZ(pt.z() + size.z());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 1, 0), QVector3D()));
+	pt.setX(pt.x() + size.x());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 1, 0), QVector3D()));
+
+	pt = center - size * 0.5;
+	pt.setY(pt.y() + size.y());
+	vert.push_back(Vertex(pt, color, QVector3D(-1, 0, 0), QVector3D()));
+	pt.setY(pt.y() - size.y());
+	vert.push_back(Vertex(pt, color, QVector3D(-1, 0, 0), QVector3D()));
+	pt.setZ(pt.z() + size.z());
+	vert.push_back(Vertex(pt, color, QVector3D(-1, 0, 0), QVector3D()));
+	pt.setY(pt.y() + size.y());
+	vert.push_back(Vertex(pt, color, QVector3D(-1, 0, 0), QVector3D()));
+
+	pt = center - size * 0.5;
+	pt.setZ(pt.z() + size.z());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 0, 1), QVector3D()));
+	pt.setX(pt.x() + size.x());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 0, 1), QVector3D()));
+	pt.setY(pt.y() + size.y());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 0, 1), QVector3D()));
+	pt.setX(pt.x() - size.x());
+	vert.push_back(Vertex(pt, color, QVector3D(0, 0, 1), QVector3D()));
+
+	addStaticGeometry(geoName, vert, "", GL_QUADS, 1|mode_Lighting);
+}
 
 using namespace boost::polygon::operators;
 

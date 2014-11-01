@@ -115,6 +115,7 @@ public:
 	bool checkIfGeoNameInUse(QString geoName);
 
 	void addSphere(QString geoName, const QVector3D& center, float radius, const QColor& color);
+	void addBox(QString geoName, const QVector3D& center, const QVector3D& size, const QColor& color);
 
 	//grid
 	bool addGridGeometry(QString geoName,std::vector<Vertex>& vert,QString textureName);

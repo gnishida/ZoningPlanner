@@ -283,8 +283,9 @@ void VBOPm::generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person
 	for (int i = 0; i < people.size(); ++i) {
 		// 人の3Dモデルを生成
 		{
-			QColor color(0.8f, 0.8f, 0.8f);
-			rendManager.addSphere("people", QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 5), 5.0, color);
+			QColor color(255, 255, 255);
+			rendManager.addSphere("people", QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 80), 5.0, color);
+			//rendManager.addBox("people", QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 80), QVector3D(10, 10, 10), color);
 		}
 	}
 }
