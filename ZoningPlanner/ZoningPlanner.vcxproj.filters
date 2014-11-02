@@ -182,7 +182,7 @@
       <Filter>Main Files</Filter>
     </ClCompile>
     <ClCompile Include="Office.cpp">
-      <Filter>Generated Files</Filter>
+      <Filter>Main Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -342,7 +342,7 @@
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="Office.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

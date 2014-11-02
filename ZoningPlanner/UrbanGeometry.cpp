@@ -110,17 +110,37 @@ void UrbanGeometry::allocateAll() {
 			QVector2D location = QVector2D(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.getCentroid());
 
 			if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_RESIDENTIAL) {
-				float r = Util::genRand(0, 1);
-				if (r < 0.01) {
+				int num = Util::genRand(1, 5);
+				num = 1;
+				if (blocks[i].myParcels[*vi].zone.level == 2) {
+					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.05f;
+				} else if (blocks[i].myParcels[*vi].zone.level == 3) {
+					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.20f;
+				}
+
+				QVector3D size;
+				QMatrix4x4 xformMat;
+				Polygon3D::getLoopOBB(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.contour, size, xformMat);
+
+				if (Util::genRand(0, 1) < 0.01) {
 					schools.push_back(Office(location));
-				} else if (r < 0.2) {
-					people.push_back(Person(Person::TYPE_STUDENT, location));
-				} else if (r < 0.5) {
-					people.push_back(Person(Person::TYPE_HOUSEWIFE, location));
-				} else if (r < 0.8) {
-					people.push_back(Person(Person::TYPE_OFFICEWORKER, location));
-				} else {
-					people.push_back(Person(Person::TYPE_ELDERLY, location));
+				} else {					
+					for (int n = 0; n < num; ++n) {
+						QVector2D noise(Util::genRand(-size.x() * 0.5, size.x() * 0.5), Util::genRand(-size.y() * 0.5, size.y() * 0.5));
+						float r = Util::genRand(0, 1);
+						int type = Person::TYPE_UNKNOWN;
+						if (r < 0.2) {
+							type = Person::TYPE_STUDENT;
+						} else if (r < 0.5) {
+							type = Person::TYPE_HOUSEWIFE;
+						} else if (r < 0.8) {
+							type = Person::TYPE_OFFICEWORKER;
+						} else {
+							type = Person::TYPE_ELDERLY;
+						}
+
+						people.push_back(Person(type, location + noise));
+					}
 				}
 			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_COMMERCIAL) {
 				float r = Util::genRand(0, 1);

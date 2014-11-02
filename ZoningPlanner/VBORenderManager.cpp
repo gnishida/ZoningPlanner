@@ -203,8 +203,8 @@ bool VBORenderManager::checkIfGeoNameInUse(QString geoName){
 }//
 
 void VBORenderManager::addSphere(QString geoName, const QVector3D& center, float radius, const QColor& color) {
-	int slice = 10;
-	int stack = 10;
+	int slice = 8;
+	int stack = 2;
 
 	std::vector<Vertex> vert;
 
