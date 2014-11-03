@@ -37,13 +37,11 @@ public:
 
 class Zoning {
 public:
-	/*std::vector<Polygon2D> polygons;
-	std::vector<ZoneType> zones;*/
 	std::vector<std::pair<Polygon2D, ZoneType> > zones;
-	//QMap<Polygon2D, ZoneType> zones;
 
 public:
 	Zoning();
 	size_t size() { return zones.size(); }
+	int getZone(const QVector2D& pt);
 	void load(const QString& filename);
 };

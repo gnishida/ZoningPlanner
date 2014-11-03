@@ -146,12 +146,16 @@ void GLWidget3D::paintGL() {
 void GLWidget3D::drawScene(int drawMode) {
 	glLineWidth(10);
 	
-	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
+	if(drawMode==0){
+		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
-	vboRenderManager.renderStaticGeometry(QString("sky"));
-	vboRenderManager.vboWater.render(vboRenderManager);
+		vboRenderManager.renderStaticGeometry(QString("sky"));
+		vboRenderManager.vboWater.render(vboRenderManager);
 
-	glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 1);
+		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 1);
+	} else {
+		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 2);// SHADOW: From light
+	}
 
 	vboRenderManager.vboTerrain.render(vboRenderManager);
 
@@ -173,26 +177,7 @@ void GLWidget3D::drawScene(int drawMode) {
 		vboRenderManager.renderAllStreetElementName("tree");
 		vboRenderManager.renderAllStreetElementName("streetLamp");
 	}
-
-
-
-	
-
-	// SHADOWS
-	if(drawMode==1){
-		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 2);// SHADOW: From light
-
-		vboRenderManager.vboTerrain.render(vboRenderManager);
-
-		vboRenderManager.renderStaticGeometry(QString("3d_building"));
-		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
-
-		vboRenderManager.renderStaticGeometry(QString("3d_trees"));
-		vboRenderManager.renderAllStreetElementName("tree");
-		vboRenderManager.renderAllStreetElementName("streetLamp");
-	}
 }
-
 
 void GLWidget3D::keyPressEvent( QKeyEvent *e ){
 	shiftPressed=false;

@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include <QFileDialog>
 #include "VBOPm.h"
+#include "Util.h"
+#include "VBOPmParcels.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -24,6 +26,10 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionGenerateVegetation, SIGNAL(triggered()), this, SLOT(onGenerateVegetation()));
 	connect(ui.actionGenerateAll, SIGNAL(triggered()), this, SLOT(onGenerateAll()));
 
+	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
+	connect(ui.actionChangePropose, SIGNAL(triggered()), this, SLOT(onChangePropose()));
+	connect(ui.actionCameraCar, SIGNAL(triggered()), this, SLOT(onCameraCar()));
+
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -36,6 +42,14 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* e) {
+	glWidget->keyPressEvent(e);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent* e) {
+	glWidget->keyReleaseEvent(e);
 }
 
 void MainWindow::onLoadZoning() {
@@ -58,6 +72,35 @@ void MainWindow::onLoadRoads() {
 	glWidget->updateGL();
 }
 
+void MainWindow::onSaveImage() {
+	if (!QDir("screenshots").exists()) QDir().mkdir("screenshots");
+	QString fileName = "screenshots/" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("HHmmss") + ".png";
+	glWidget->grabFrameBuffer().save(fileName);
+}
+
+void MainWindow::onLoadCamera() {
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open Camera file..."), "", tr("Area Files (*.cam)"));
+	if (filename.isEmpty()) return;
+
+	glWidget->camera->loadCameraPose(filename);
+	glWidget->updateCamera();
+
+	glWidget->updateGL();
+}
+
+void MainWindow::onSaveCamera() {
+	QString filename = QFileDialog::getSaveFileName(this, tr("Save Camera file..."), "", tr("Area Files (*.cam)"));
+	if (filename.isEmpty()) return;
+	
+	glWidget->camera->saveCameraPose(filename);
+}
+
+void MainWindow::onResetCamera() {
+	glWidget->camera->resetCamera();
+	glWidget->updateCamera();
+	glWidget->updateGL();
+}
+
 void MainWindow::onGenerateBlocks() {
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
@@ -65,7 +108,7 @@ void MainWindow::onGenerateBlocks() {
 }
 
 void MainWindow::onGenerateParcels() {
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 	glWidget->updateGL();
@@ -87,7 +130,7 @@ void MainWindow::onGenerateAll() {
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
@@ -96,4 +139,36 @@ void MainWindow::onGenerateAll() {
 	glWidget->shadow.makeShadowMap(glWidget);
 
 	glWidget->updateGL();
+}
+
+void MainWindow::onViewZoning() {
+	glWidget->shadow.makeShadowMap(glWidget);
+	glWidget->updateGL();
+}
+
+void MainWindow::onChangePropose() {
+	// randomly swap the zone types
+	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
+		int r = Util::genRand(0, urbanGeometry->blocks.size());
+		ZoneType zone = urbanGeometry->blocks[i].zone;
+		urbanGeometry->blocks[i].zone = urbanGeometry->blocks[r].zone;
+		urbanGeometry->blocks[r].zone = zone;
+	}
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+	// re-generate parcels
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
+		VBOPmParcels::assignZoneType(urbanGeometry->blocks[i]);
+	}
+
+	urbanGeometry->allocateAll();
+	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+
+	glWidget->updateGL();
+}
+
+void MainWindow::onCameraCar() {
+	//glWidget->camera = &glWidget->carCamera;
 }

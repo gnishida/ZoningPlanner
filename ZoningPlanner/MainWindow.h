@@ -21,15 +21,25 @@ public:
 	GLWidget3D* glWidget;
 	UrbanGeometry* urbanGeometry;
 
+protected:
+	void keyPressEvent(QKeyEvent* e);
+	void keyReleaseEvent(QKeyEvent* e);
+
 public slots:
 	void onLoadZoning();
 	void onLoadRoads();
+	void onSaveImage();
+	void onLoadCamera();
+	void onSaveCamera();
+	void onResetCamera();
 	void onGenerateBlocks();
 	void onGenerateParcels();
 	void onGenerateBuildings();
 	void onGenerateVegetation();
 	void onGenerateAll();
-
+	void onViewZoning();
+	void onChangePropose();
+	void onCameraCar();
 };
 
 #endif // MAINWINDOW_H

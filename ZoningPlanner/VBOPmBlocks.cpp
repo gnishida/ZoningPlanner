@@ -370,23 +370,13 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 	for (int i = 0; i < blocks.size(); ++i) {
 		// assign a zone type to the block
 		{
-			QVector3D testPt = blocks[i].bbox.midPt();
-			bool assigned = false;
-
-			int validClosestPlaceTypeIdx = -1;
-			for (int j = 0; j < zoning.size(); ++j) {
-				if (zoning.zones[j].first.contains(QVector2D(testPt))) {
-					blocks[i].zone = zoning.zones[j].second;
-					assigned = true;
-				}
-			}
-
-			if (!assigned) {
+			int zoneId = zoning.getZone(QVector2D(blocks[i].bbox.midPt()));
+			if (zoneId >= 0) {
+				blocks[i].zone = zoning.zones[zoneId].second;
+				VBOPmParcels::assignZoneType(blocks[i]);
+			} else {
 				printf("ERROR: no zone is assigned to this block.\n");
 			}
 		}
-
-		// assign placetype to each parcel
-		VBOPmParcels::assignPlaceTypeToParcels(zoning, blocks[i]);
 	}
 }

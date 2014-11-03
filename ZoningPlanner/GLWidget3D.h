@@ -25,6 +25,7 @@ This file is part of QtUrban.
 #include <QKeyEvent>
 #include "Camera.h"
 #include "Camera2D.h"
+//#include "CarCamera.h"
 #include "RoadGraph.h"
 
 class MainWindow;
@@ -33,6 +34,7 @@ class GLWidget3D : public QGLWidget {
 public:
 	MainWindow* mainWin;
 	Camera2D camera2D;
+	//CarCamera carCamera;
 	Camera* camera;
 
 	bool shiftPressed;

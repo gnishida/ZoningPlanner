@@ -11,7 +11,7 @@
 class VBOPmBuildings{
 public:
 
-	static bool generateBuildings(VBORenderManager& rendManager, Zoning& zoning, std::vector< Block > &blocks);
+	static bool generateBuildings(VBORenderManager& rendManager, std::vector< Block > &blocks);
 
 };
 

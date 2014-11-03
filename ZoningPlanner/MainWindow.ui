@@ -85,11 +85,18 @@
     </property>
     <addaction name="actionViewZoning"/>
    </widget>
+   <widget class="QMenu" name="menuChange">
+    <property name="title">
+     <string>Change</string>
+    </property>
+    <addaction name="actionChangePropose"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
    <addaction name="menuView"/>
-   <addaction name="menuWindow"/>
+   <addaction name="menuChange"/>
    <addaction name="menuCamera"/>
+   <addaction name="menuWindow"/>
   </widget>
   <widget class="QToolBar" name="fileToolBar">
    <attribute name="toolBarArea">
@@ -303,6 +310,11 @@
    </property>
    <property name="text">
     <string>Zoning</string>
+   </property>
+  </action>
+  <action name="actionChangePropose">
+   <property name="text">
+    <string>Propose</string>
    </property>
   </action>
  </widget>

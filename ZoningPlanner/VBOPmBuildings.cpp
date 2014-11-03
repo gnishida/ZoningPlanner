@@ -5,13 +5,13 @@
 
 #include "VBOPmBuildings.h"
 
-bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock, Zoning& zoning);
+bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock);
 
-bool VBOPmBuildings::generateBuildings(VBORenderManager& rendManager, Zoning& zoning, std::vector< Block > &blocks){
+bool VBOPmBuildings::generateBuildings(VBORenderManager& rendManager, std::vector< Block > &blocks){
 	//For each block
 	for(int i=0; i<blocks.size(); ++i){
 		srand(blocks[i].randSeed);
-		generateBlockBuildings(rendManager, blocks[i], zoning);
+		generateBlockBuildings(rendManager, blocks[i]);
 	}
 	return true;
 }//
@@ -114,7 +114,7 @@ bool computeBuildingFootprintPolygon(float maxFrontage, float maxDepth,
 /**
  * 指定されたParcelの中に、ビルを建てる。
  */
-bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parcel &inParcel, Zoning& zoning)
+bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parcel &inParcel)
 {
 	float probEmptyParcel = 0.0f;
 	Loop3D pContourCpy;
@@ -208,13 +208,13 @@ bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parc
 /**
  * 指定されたブロック内に、ビルを建てる
  */
-bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock, Zoning& zoning)
+bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock)
 {
 	Block::parcelGraphVertexIter vi, viEnd;	
 
 	//For each parcel
 	for(boost::tie(vi, viEnd) = boost::vertices(inBlock.myParcels); vi != viEnd; ++vi){
-		if (!generateParcelBuildings(rendManager, inBlock, inBlock.myParcels[*vi], zoning)) {
+		if (!generateParcelBuildings(rendManager, inBlock, inBlock.myParcels[*vi])) {
 			inBlock.myParcels[*vi].zone.type = ZoneType::TYPE_PARK;
 		}
 	}

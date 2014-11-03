@@ -82,15 +82,15 @@ void UrbanGeometry::clearRoads() {
 	roads.updateRoadGraph(mainWin->glWidget->vboRenderManager);
 
 	blocks.clear();
-	VBOPm::generateBlockModels(mainWin->glWidget->vboRenderManager, roads, blocks, mainWin->urbanGeometry->zones);
-	VBOPm::generateParcelModels(mainWin->glWidget->vboRenderManager, blocks, mainWin->urbanGeometry->zones);
+	VBOPm::generateBlockModels(mainWin->glWidget->vboRenderManager, roads, blocks);
+	VBOPm::generateParcelModels(mainWin->glWidget->vboRenderManager, blocks);
 }
 
 void UrbanGeometry::loadBlocks(const QString& filename) {
 	blocks.load(filename);
 	VBOPmBlocks::assignZonesToBlocks(zones, blocks);
-	VBOPm::generateBlockModels(mainWin->glWidget->vboRenderManager, roads, blocks, mainWin->urbanGeometry->zones);
-	VBOPm::generateParcelModels(mainWin->glWidget->vboRenderManager, blocks, mainWin->urbanGeometry->zones);
+	VBOPm::generateBlockModels(mainWin->glWidget->vboRenderManager, roads, blocks);
+	VBOPm::generateParcelModels(mainWin->glWidget->vboRenderManager, blocks);
 }
 
 void UrbanGeometry::saveBlocks(const QString& filename) {
@@ -103,15 +103,26 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 void UrbanGeometry::allocateAll() {
 	people.clear();
 	offices.clear();
+	schools.clear();
+	stores.clear();
+	restaurants.clear();
+	amusements.clear();
+	parks.clear();
 	
 	Block::parcelGraphVertexIter vi, viEnd;
 	for (int i = 0; i < blocks.size(); ++i) {
+		if (blocks[i].zone.type == ZoneType::TYPE_PARK) {
+			QVector2D location = QVector2D(blocks[i].blockContour.getCentroid());
+			parks.push_back(Office(location));
+			continue;
+		}
+
 		for (boost::tie(vi, viEnd) = boost::vertices(blocks[i].myParcels); vi != viEnd; ++vi) {
 			QVector2D location = QVector2D(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.getCentroid());
 
 			if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_RESIDENTIAL) {
 				int num = Util::genRand(1, 5);
-				num = 1;
+				//num = 1;
 				if (blocks[i].myParcels[*vi].zone.level == 2) {
 					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.05f;
 				} else if (blocks[i].myParcels[*vi].zone.level == 3) {

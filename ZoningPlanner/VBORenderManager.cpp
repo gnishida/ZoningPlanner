@@ -239,7 +239,7 @@ void VBORenderManager::addSphere(QString geoName, const QVector3D& center, float
 		}
 	}
 
-	addStaticGeometry(geoName, vert, "", GL_QUADS, 1);
+	addStaticGeometry(geoName, vert, "", GL_QUADS, 1|mode_Lighting);
 }
 
 void VBORenderManager::addBox(QString geoName, const QVector3D& center, const QVector3D& size, const QColor& color) {

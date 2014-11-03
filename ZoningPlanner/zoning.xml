@@ -7,12 +7,98 @@
          <point x="-5000" y="5000"/>
       </polygon>
    </zone>
-   <zone type="2" level="1">
+   <zone type="1" level="2">
       <polygon>
-         <point x="-700" y="500"/>
-         <point x="0" y="500"/>
-         <point x="0" y="900"/>
-         <point x="-700" y="900"/>
+         <point x="62" y="969"/>
+         <point x="-100" y="722"/>
+         <point x="288" y="342"/>
+         <point x="422" y="487"/>
+         <point x="549" y="360"/>
+         <point x="848" y="657"/>
+         <point x="424" y="946"/>
+         <point x="258" y="834"/>
+      </polygon>
+   </zone>
+   <zone type="1" level="2">
+      <polygon>
+         <point x="-137" y="153"/>
+         <point x="-522" y="-246"/>
+         <point x="-272" y="-490"/>
+         <point x="115" y="-93"/>
+      </polygon>
+   </zone>
+   <zone type="1" level="2">
+      <polygon>
+         <point x="115" y="-93"/>
+         <point x="426" y="-399"/>
+         <point x="640" y="-179"/>
+         <point x="347" y="108"/>
+         <point x="189" y="189"/>
+      </polygon>
+   </zone>
+   <zone type="1" level="3">
+      <polygon>
+         <point x="361" y="419"/>
+         <point x="189" y="189"/>
+         <point x="347" y="108"/>
+         <point x="640" y="-179"/>
+         <point x="802" y="-11"/>
+      </polygon>
+   </zone>
+   <zone type="2" level="2">
+      <polygon>
+         <point x="-674" y="1698"/>
+         <point x="-1883" y="455"/>
+         <point x="-1648" y="225"/>
+         <point x="-446" y="1474"/>
+      </polygon>
+   </zone>
+   <zone type="2" level="2">
+      <polygon>
+         <point x="-100" y="722"/>
+         <point x="-443" y="448"/>
+         <point x="115" y="-93"/>
+         <point x="288" y="342"/>
+      </polygon>
+   </zone>
+   <zone type="2" level="3">
+      <polygon>
+         <point x="-644" y="1258"/>
+         <point x="-1102" y="788"/>
+         <point x="-882" y="580"/>
+         <point x="-429" y="1046"/>
+      </polygon>
+   </zone>
+   <zone type="3" level="2">
+      <polygon>
+         <point x="-944" y="-389"/>
+         <point x="-1124" y="-503"/>
+         <point x="-465" y="-1164"/>
+         <point x="-309" y="-975"/>
+      </polygon>
+   </zone>
+   <zone type="4" level="1">
+      <polygon>
+         <point x="115" y="-93"/>
+         <point x="-272" y="-490"/>
+         <point x="-14" y="-744"/>
+         <point x="426" y="-399"/>
+      </polygon>
+   </zone>
+   <zone type="4" level="1">
+      <polygon>
+         <point x="-682" y="-112"/>
+         <point x="-960" y="-335"/>
+         <point x="-531" y="-755"/>
+         <point x="-272" y="-490"/>
+      </polygon>
+   </zone>
+   <zone type="5" level="1">
+      <polygon>
+         <point x="802" y="-11"/>
+         <point x="640" y="-179"/>
+         <point x="771" y="-300"/>
+         <point x="924" y="-116"/>
       </polygon>
    </zone>
 </zoning>

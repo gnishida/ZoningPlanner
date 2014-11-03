@@ -46,8 +46,8 @@ public:
 	//virtual void setLookAt(float x, float y, float z) = 0;
 	virtual void resetCamera() = 0;
 
-	//virtual void saveCameraPose(const QString &filepath) = 0;
+	virtual void saveCameraPose(const QString &filepath) = 0;
 
-	//virtual void loadCameraPose(const QString &filepath) = 0;
+	virtual void loadCameraPose(const QString &filepath) = 0;
 };
 

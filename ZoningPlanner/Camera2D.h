@@ -32,6 +32,8 @@ public:
 		lookAtY = 0.0f;
 		lookAtZ = 0.0f;
 		fovy = 60.0f;
+
+		type = TYPE_2D;
 	}
 
 	QVector4D getCamPos() {
