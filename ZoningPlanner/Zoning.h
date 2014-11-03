@@ -16,7 +16,7 @@ public:
 
 public:
 	int type;
-	int level;
+	int level;	// 1/2/3
 
 	float park_percentage;
 	float parcel_area_mean;
@@ -42,6 +42,7 @@ public:
 public:
 	Zoning();
 	size_t size() { return zones.size(); }
-	int getZone(const QVector2D& pt);
+	int getZone(const QVector2D& pt) const;
 	void load(const QString& filename);
+	void generate(const QVector2D& size);
 };

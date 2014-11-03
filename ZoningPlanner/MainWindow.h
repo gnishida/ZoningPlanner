@@ -39,6 +39,7 @@ public slots:
 	void onGenerateAll();
 	void onViewZoning();
 	void onChangePropose();
+	void onFindBest();
 	void onCameraCar();
 };
 

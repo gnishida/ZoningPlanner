@@ -373,7 +373,7 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 			int zoneId = zoning.getZone(QVector2D(blocks[i].bbox.midPt()));
 			if (zoneId >= 0) {
 				blocks[i].zone = zoning.zones[zoneId].second;
-				VBOPmParcels::assignZoneType(blocks[i]);
+				VBOPmParcels::assignZoneType(blocks[i], zoning);
 			} else {
 				printf("ERROR: no zone is assigned to this block.\n");
 			}

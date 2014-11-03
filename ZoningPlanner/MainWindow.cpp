@@ -147,7 +147,6 @@ void MainWindow::onViewZoning() {
 }
 
 void MainWindow::onChangePropose() {
-	// randomly swap the zone types
 	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
 		int r = Util::genRand(0, urbanGeometry->blocks.size());
 		ZoneType zone = urbanGeometry->blocks[i].zone;
@@ -160,13 +159,52 @@ void MainWindow::onChangePropose() {
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
-		VBOPmParcels::assignZoneType(urbanGeometry->blocks[i]);
+		VBOPmParcels::assignZoneType(urbanGeometry->blocks[i], urbanGeometry->zones);
 	}
 
 	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	glWidget->updateGL();
+}
+
+void MainWindow::onFindBest() {
+	float best1 = 0.0f;
+	float best2 = 0.0f;
+	float best3 = 0.0f;
+	Zoning zoning1;
+	Zoning zoning2;
+	Zoning zoning3;
+
+	for (int loop = 0; loop < 10; ++loop) {
+		// randomly swap the zone types
+		urbanGeometry->zones.generate(QVector2D(4000, 4000));
+
+		// re-generate parcels
+		VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+		for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
+			VBOPmParcels::assignZoneType(urbanGeometry->blocks[i], urbanGeometry->zones);
+		}
+
+		urbanGeometry->allocateAll();
+		float score = urbanGeometry->computeScore();
+
+		if (score > best3) {
+			best3 = score;
+			zoning3 = urbanGeometry->zones;
+
+			if (best3 > best2) {
+				std::swap(best2, best3);
+				std::swap(zoning2, zoning3);
+
+				if (best2 > best1) {
+					std::swap(best1, best2);
+					std::swap(zoning1, zoning2);
+				}
+			}
+		}
+	}
 }
 
 void MainWindow::onCameraCar() {

@@ -11,5 +11,5 @@ class VBOPmParcels{
 public:
 
 	static bool generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks);
-	static void assignZoneType(Block& block);
+	static void assignZoneType(Block& block, const Zoning& zoning);
 };

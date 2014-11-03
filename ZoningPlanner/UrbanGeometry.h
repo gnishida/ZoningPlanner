@@ -25,8 +25,9 @@ public:
 	std::vector<Office> schools;
 	std::vector<Office> stores;
 	std::vector<Office> restaurants;
-	std::vector<Office> amusements;
 	std::vector<Office> parks;
+	std::vector<Office> amusements;
+	std::vector<Office> libraries;
 
 public:
 	UrbanGeometry(MainWindow* mainWin);
@@ -56,4 +57,14 @@ public:
 	void saveBlocks(const QString& filename);
 
 	void allocateAll();
+	void allocateCommputingPlace();
+	float computeScore();
+	std::pair<int, float> nearestSchool(const Person& person);
+	std::pair<int, float> nearestStore(const Person& person);
+	std::pair<int, float> nearestRestaurant(const Person& person);
+	std::pair<int, float> nearestPark(const Person& person);
+	std::pair<int, float> nearestAmusement(const Person& person);
+	std::pair<int, float> nearestLibrary(const Person& person);
+	float noise(const QVector2D& pt);
+	float airpollution(const QVector2D& pt);
 };

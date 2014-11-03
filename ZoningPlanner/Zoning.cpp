@@ -1,6 +1,7 @@
 #include "Zoning.h"
 #include <QFile>
 #include <QDomDocument>
+#include "Util.h"
 
 void ZoneType::init() {
 	if (type == TYPE_RESIDENTIAL) {
@@ -189,26 +190,11 @@ void ZoneType::init() {
 }
 
 Zoning::Zoning() {
-/*	Polygon2D polygon;
-	polygon.push_back(QVector2D(-5000, -5000));
-	polygon.push_back(QVector2D(5000, -5000));
-	polygon.push_back(QVector2D(5000, 5000));
-	polygon.push_back(QVector2D(-5000, 5000));
-	zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
-
-	polygon.clear();
-	polygon.push_back(QVector2D(-200, -200));
-	polygon.push_back(QVector2D(200, -200));
-	polygon.push_back(QVector2D(200, 200));
-	polygon.push_back(QVector2D(-200, 200));
-	zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 1)));
-	*/
 }
 
-int Zoning::getZone(const QVector2D& pt) {
+int Zoning::getZone(const QVector2D& pt) const {
 	int zoneId = -1;
 
-	int validClosestPlaceTypeIdx = -1;
 	for (int i = 0; i < zones.size(); ++i) {
 		if (zones[i].first.contains(QVector2D(pt))) {
 			zoneId = i;
@@ -247,5 +233,45 @@ void Zoning::load(const QString& filename) {
 		}
 
 		node = node.nextSibling();
+	}
+}
+
+/**
+ * Randomly generate zoning plan.
+ */
+void Zoning::generate(const QVector2D& size) {
+	float step = 100.0f;
+	for (int u = 0; u < size.x() / step; ++u) {
+		float x = (float)u * step;
+		for (int v = 0; v < size.y() / step; ++v) {
+			float y = (float)v * step;
+
+			Polygon2D polygon;
+			polygon.push_back(QVector2D(x, y));
+			polygon.push_back(QVector2D(x + step, y));
+			polygon.push_back(QVector2D(x + step, y + step));
+			polygon.push_back(QVector2D(x, y + step));
+
+			ZoneType zone;
+			int r = Util::genRand(0, 11);
+			if (r <= 2) {
+				zone.type = ZoneType::TYPE_RESIDENTIAL;
+				zone.level = r + 1;
+			} else if (r <= 5) {
+				zone.type = ZoneType::TYPE_COMMERCIAL;
+				zone.level = r - 2;
+			} else if (r <= 8) {
+				zone.type = ZoneType::TYPE_MANUFACTURING;
+				zone.level = r - 5;
+			} else if (r == 9) {
+				zone.type = ZoneType::TYPE_PARK;
+				zone.level = 1;
+			} else if (r == 10) {
+				zone.type = ZoneType::TYPE_AMUSEMENT;
+				zone.level = 1;
+			}
+
+			zones.push_back(std::make_pair(polygon, zone));
+		}
 	}
 }

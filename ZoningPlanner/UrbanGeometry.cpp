@@ -183,74 +183,19 @@ void UrbanGeometry::allocateAll() {
 	if (schools.size() == 0) {
 		schools.push_back(Office(QVector2D(0, 0)));
 	}
-
-	// allocate commuting office
-	for (int i = 0; i < people.size(); ++i) {
-		if (people[i].type == Person::TYPE_STUDENT) {
-			people[i].commuteTo = Util::genRand(0, schools.size());
-		} else if (people[i].type == Person::TYPE_OFFICEWORKER) {
-			people[i].commuteTo = Util::genRand(0, offices.size());
-		}
+	if (offices.size() == 0) {
+		offices.push_back(Office(QVector2D(0, 0)));
 	}
 
-	// find the nearest park
+	allocateCommputingPlace();
+
+	/*
+	// find the nearest store, restaurant, park, amusement
 	for (int i = 0; i < people.size(); ++i) {
-		float min_dist2 = std::numeric_limits<float>::max();
-		int nearestPark = -1;
-		for (int j = 0; j < parks.size(); ++j) {
-			float dist2 = (parks[j].location - people[i].homeLocation).lengthSquared();
-			if (dist2 < min_dist2) {
-				min_dist2 = dist2;
-				nearestPark = j;
-			}
-		}
-
-		people[i].nearestPark = nearestPark;
-	}
-
-	// find the nearest store
-	for (int i = 0; i < people.size(); ++i) {
-		float min_dist2 = std::numeric_limits<float>::max();
-		int nearestStore = -1;
-		for (int j = 0; j < stores.size(); ++j) {
-			float dist2 = (stores[j].location - people[i].homeLocation).lengthSquared();
-			if (dist2 < min_dist2) {
-				min_dist2 = dist2;
-				nearestStore = j;
-			}
-		}
-
-		people[i].nearestStore = nearestStore;
-	}
-
-	// find the nearest restaurant
-	for (int i = 0; i < people.size(); ++i) {
-		float min_dist2 = std::numeric_limits<float>::max();
-		int nearestRestaurant = -1;
-		for (int j = 0; j < restaurants.size(); ++j) {
-			float dist2 = (restaurants[j].location - people[i].homeLocation).lengthSquared();
-			if (dist2 < min_dist2) {
-				min_dist2 = dist2;
-				nearestRestaurant = j;
-			}
-		}
-
-		people[i].nearestRestaurant = nearestRestaurant;
-	}
-
-	// find the nearest amusement
-	for (int i = 0; i < people.size(); ++i) {
-		float min_dist2 = std::numeric_limits<float>::max();
-		int nearestAmusement = -1;
-		for (int j = 0; j < amusements.size(); ++j) {
-			float dist2 = (amusements[j].location - people[i].homeLocation).lengthSquared();
-			if (dist2 < min_dist2) {
-				min_dist2 = dist2;
-				nearestAmusement = j;
-			}
-		}
-
-		people[i].nearestAmusement = nearestAmusement;
+		people[i].nearestStore = nearestStore(people[i]).first;;
+		people[i].nearestRestaurant = nearestRestaurant(people[i]).first;;
+		people[i].nearestPark = nearestPark(people[i]).first;
+		people[i].nearestAmusement = nearestAmusement(people[i]).first;;
 	}
 
 	// compute the avg commuting distance
@@ -311,4 +256,134 @@ void UrbanGeometry::allocateAll() {
 
 		printf("avg distance to the nearest restaurant: %lf\n", dist_total / (float)count);
 	}
+	*/
+}
+
+/**
+ * Allocate a commuting place to each person.
+ */
+void UrbanGeometry::allocateCommputingPlace() {
+	for (int i = 0; i < people.size(); ++i) {
+		if (people[i].type() == Person::TYPE_STUDENT) {
+			people[i].commuteTo = Util::genRand(0, schools.size());
+		} else if (people[i].type() == Person::TYPE_OFFICEWORKER) {
+			people[i].commuteTo = Util::genRand(0, offices.size());
+		}
+	}
+}
+
+float UrbanGeometry::computeScore() {
+	float score_total = 0.0f;
+	for (int i = 0; i < people.size(); ++i) {
+		float feature[8];
+		feature[0] = nearestStore(people[i]).second;
+		feature[1] = nearestSchool(people[i]).second;
+		feature[2] = nearestRestaurant(people[i]).second;
+		feature[3] = nearestPark(people[i]).second;
+		if (people[i].type() == Person::TYPE_STUDENT) {
+			feature[4] = (schools[people[i].commuteTo].location - people[i].homeLocation).length();
+		} else if (people[i].type() == Person::TYPE_OFFICEWORKER) {
+			feature[4] = (offices[people[i].commuteTo].location - people[i].homeLocation).length();
+		}
+		feature[5] = nearestLibrary(people[i]).second;
+		feature[6] = noise(people[i].homeLocation);
+		feature[7] = airpollution(people[i].homeLocation);
+
+		float score = std::inner_product(std::begin(feature), std::end(feature), std::begin(people[i].preference), 0.0);
+		score_total += score;
+	}
+
+	return score_total / (float)people.size();
+}
+
+std::pair<int, float> UrbanGeometry::nearestSchool(const Person& person) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestSchool = -1;
+	for (int i = 0; i < schools.size(); ++i) {
+		float dist2 = (schools[i].location - person.homeLocation).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestSchool = i;
+		}
+	}
+
+	return std::make_pair(nearestSchool, sqrtf(min_dist2));
+}
+
+std::pair<int, float> UrbanGeometry::nearestStore(const Person& person) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestStore = -1;
+	for (int i = 0; i < stores.size(); ++i) {
+		float dist2 = (stores[i].location - person.homeLocation).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestStore = i;
+		}
+	}
+
+	return std::make_pair(nearestStore, sqrtf(min_dist2));
+}
+
+std::pair<int, float> UrbanGeometry::nearestRestaurant(const Person& person) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestRestaurant = -1;
+	for (int i = 0; i < restaurants.size(); ++i) {
+		float dist2 = (restaurants[i].location - person.homeLocation).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestRestaurant = i;
+		}
+	}
+
+	return std::make_pair(nearestRestaurant, sqrtf(min_dist2));
+}
+
+std::pair<int, float> UrbanGeometry::nearestPark(const Person& person) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestPark = -1;
+	for (int i = 0; i < parks.size(); ++i) {
+		float dist2 = (parks[i].location - person.homeLocation).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestPark = i;
+		}
+	}
+
+	return std::make_pair(nearestPark, sqrtf(min_dist2));
+}
+
+std::pair<int, float> UrbanGeometry::nearestAmusement(const Person& person) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestPark = -1;
+	for (int i = 0; i < amusements.size(); ++i) {
+		float dist2 = (amusements[i].location - person.homeLocation).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestPark = i;
+		}
+	}
+
+	return std::make_pair(nearestPark, sqrtf(min_dist2));
+}
+
+std::pair<int, float> UrbanGeometry::nearestLibrary(const Person& person) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestLibrary = -1;
+	for (int i = 0; i < libraries.size(); ++i) {
+		float dist2 = (libraries[i].location - person.homeLocation).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestLibrary = i;
+		}
+	}
+
+	return std::make_pair(nearestLibrary, sqrtf(min_dist2));
+}
+
+float UrbanGeometry::noise(const QVector2D& pt) {
+	return 0;
+}
+
+float UrbanGeometry::airpollution(const QVector2D& pt) {
+	return 0;
 }
