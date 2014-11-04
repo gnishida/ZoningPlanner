@@ -204,7 +204,7 @@ void MainWindow::onFindBest() {
 
 		urbanGeometry->allocateAll();
 		float score = urbanGeometry->computeScore();
-		printf("score: %lf\n", score);
+		printf("%d: score=%lf\n", loop, score);
 
 		if (score > best3) {
 			best3 = score;

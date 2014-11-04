@@ -119,13 +119,8 @@ bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parc
 	float probEmptyParcel = 0.0f;
 	Loop3D pContourCpy;
 
-	/*if(inParcel.getMyPlaceTypeIdx() == -1){
-		return false;
-	}*/
-
 	//if parcel is park, process
 	if(inParcel.zone.type() == ZoneType::TYPE_PARK) { //park
-		//printf("PARK\n");
 		return false;
 	}
 
@@ -150,7 +145,6 @@ bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parc
 		inParcel.zone.parcel_setback_sides,
 		frontEdges, rearEdges, sideEdges,
 		inParcel.parcelBuildableAreaContour.contour);
-	//printf("parcelBuilsable %d\n",inParcel.parcelBuildableAreaContour.contour.size());
 	if(inParcel.parcelBuildableAreaContour.isSelfIntersecting()){
 		inParcel.parcelBuildableAreaContour.contour.clear();
 		return false;

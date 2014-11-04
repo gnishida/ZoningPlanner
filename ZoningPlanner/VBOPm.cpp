@@ -150,7 +150,6 @@ bool VBOPm::generateParcels(VBORenderManager& rendManager, BlockSet& blocks) {
 		printf("ERROR: generateParcels\n");
 		return false;
 	}
-	printf(">>Parcels were generated.\n");
 
 	generateParcelModels(rendManager, blocks);
 
@@ -159,7 +158,6 @@ bool VBOPm::generateParcels(VBORenderManager& rendManager, BlockSet& blocks) {
 		printf("ERROR: generateBuildings\n");
 		return false;
 	}
-	printf(">>Buildings contours were generated.\n");
 		
 	return true;
 }

@@ -11,13 +11,11 @@ void subdivideBlockIntoParcels(Block &block);
 bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin, float areaVar, float splitIrregularity, std::vector<Parcel> &outParcels); 
 
 bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks) {
-	std::cout << "start #"<<blocks.size()<<"...";
 	for (int i = 0; i < blocks.size(); ++i) {
 		subdivideBlockIntoParcels(blocks[i]);
 
 		blocks[i].adaptToTerrain(&rendManager);
 	}
-	std::cout << "end...";
 
 	return true;
 }
