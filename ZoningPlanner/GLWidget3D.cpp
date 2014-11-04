@@ -146,7 +146,7 @@ void GLWidget3D::paintGL() {
 void GLWidget3D::drawScene(int drawMode) {
 	glLineWidth(10);
 	
-	if(drawMode==0){
+	if (drawMode == 0) {
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
 		vboRenderManager.renderStaticGeometry(QString("sky"));
@@ -167,8 +167,10 @@ void GLWidget3D::drawScene(int drawMode) {
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));
 
 	if (mainWin->ui.actionViewZoning->isChecked()) {
-		vboRenderManager.renderStaticGeometry("people");
-		vboRenderManager.renderStaticGeometry("zoning");
+		//vboRenderManager.renderStaticGeometry("people");
+		if (drawMode == 0) {
+			vboRenderManager.renderStaticGeometry("zoning");
+		}
 	} else {
 		vboRenderManager.renderStaticGeometry(QString("3d_building"));
 		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));

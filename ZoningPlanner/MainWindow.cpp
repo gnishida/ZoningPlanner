@@ -159,6 +159,10 @@ void MainWindow::onViewZoning() {
 void MainWindow::onPropose() {
 	// randomly generate the zoning
 	urbanGeometry->zones.generate(QVector2D(4000, 4000));
+
+	// assign zone type to blocks
+	VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
+
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	// re-generate parcels

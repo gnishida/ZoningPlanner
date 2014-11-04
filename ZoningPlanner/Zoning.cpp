@@ -57,8 +57,8 @@ void ZoneType::init() {
 	} else if (_type == TYPE_COMMERCIAL) {
 		if (_level == 1) {
 			park_percentage = 0.0f;
-			parcel_area_mean = 200;
-			parcel_area_min = 100;
+			parcel_area_mean = 500;
+			parcel_area_min = 250;
 			parcel_area_deviation = 1;
 			parcel_split_deviation = 0.2;
 			parcel_setback_front = 2;
@@ -73,8 +73,8 @@ void ZoneType::init() {
 			building_type = 0;
 		} else if (_level == 2) {
 			park_percentage = 0.0f;
-			parcel_area_mean = 2000;
-			parcel_area_min = 1000;
+			parcel_area_mean = 2500;
+			parcel_area_min = 1250;
 			parcel_area_deviation = 1;
 			parcel_split_deviation = 0.2;
 			parcel_setback_front = 8;
@@ -107,8 +107,8 @@ void ZoneType::init() {
 	} else if (_type == TYPE_MANUFACTURING) {
 		if (_level == 1) {
 			park_percentage = 0.05;
-			parcel_area_mean = 200;
-			parcel_area_min = 100;
+			parcel_area_mean = 500;
+			parcel_area_min = 250;
 			parcel_area_deviation = 1;
 			parcel_split_deviation = 0.2;
 			parcel_setback_front = 2;
@@ -123,8 +123,8 @@ void ZoneType::init() {
 			building_type = 0;
 		} else if (_level == 2) {
 			park_percentage = 0.0f;
-			parcel_area_mean = 2000;
-			parcel_area_min = 1000;
+			parcel_area_mean = 2500;
+			parcel_area_min = 1250;
 			parcel_area_deviation = 1;
 			parcel_split_deviation = 0.2;
 			parcel_setback_front = 5;
@@ -313,9 +313,9 @@ void Zoning::generate(const QVector2D& size) {
 
 	float step = 200.0f;
 	for (int u = 0; u < size.x() / step; ++u) {
-		float x = (float)u * step;
+		float x = (float)u * step - size.x() * 0.5f;
 		for (int v = 0; v < size.y() / step; ++v) {
-			float y = (float)v * step;
+			float y = (float)v * step - size.x() * 0.5f;
 
 			Polygon2D polygon;
 			polygon.push_back(QVector2D(x, y));
@@ -324,18 +324,30 @@ void Zoning::generate(const QVector2D& size) {
 			polygon.push_back(QVector2D(x, y + step));
 
 			ZoneType zone;
-			int r = Util::genRand(0, 12);
-			if (r <= 2) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, r+1)));
-			} else if (r <= 5) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, r-2)));
-			} else if (r <= 8) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, r-5)));
-			} else if (r == 9) {
+			int r = Util::genRand(0, 100);
+			if (r <= 20) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
+			} else if (r <= 50) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 2)));
+			} else if (r <= 65) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 3)));
+			} else if (r <= 71) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 1)));
+			} else if (r <= 77) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 2)));
+			} else if (r <= 80) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 3)));
+			} else if (r <= 82) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 1)));
+			} else if (r <= 84) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 2)));
+			} else if (r <= 85) {
+				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 3)));
+			} else if (r <= 90) {
 				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PARK, 1)));
-			} else if (r == 10) {
+			} else if (r <= 95) {
 				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_AMUSEMENT, 1)));
-			} else if (r == 11) {
+			} else {
 				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PUBLIC, 1)));
 			}			
 		}
