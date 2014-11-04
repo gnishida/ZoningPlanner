@@ -10,6 +10,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 {
 	ui.setupUi(this);
 
+	// setup the docking widgets
+	controlWidget = new ControlWidget(this);
+
 	// setup the toolbar
 	ui.fileToolBar->addAction(ui.actionLoadRoads);
 	ui.fileToolBar->addAction(ui.actionSaveRoads);
@@ -38,7 +41,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 
 	urbanGeometry = new UrbanGeometry(this);
 
-	//mode = MODE_DEFAULT;
+	controlWidget->show();
+	addDockWidget(Qt::LeftDockWidgetArea, controlWidget);
 }
 
 MainWindow::~MainWindow()
@@ -70,6 +74,9 @@ void MainWindow::onLoadZoning() {
 
 	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+
+	// compute the feature vectors
+	urbanGeometry->computeScore();
 
 	glWidget->shadow.makeShadowMap(glWidget);
 
@@ -192,7 +199,7 @@ void MainWindow::onFindBest() {
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
-	for (int loop = 0; loop < 1000; ++loop) {
+	for (int loop = 0; loop < 250; ++loop) {
 		// randomly generate the zoning
 		urbanGeometry->zones.generate(QVector2D(4000, 4000));
 

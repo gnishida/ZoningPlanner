@@ -187,6 +187,15 @@
     <ClCompile Include="CarCamera.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="ControlWidget.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ControlWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ControlWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -196,6 +205,12 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="MainWindow.h">
+      <Filter>Main Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ControlWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ControlWidget.h">
       <Filter>Main Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -349,6 +364,9 @@
     </ClInclude>
     <ClInclude Include="CarCamera.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ControlWidget.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

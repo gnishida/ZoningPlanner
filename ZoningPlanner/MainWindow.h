@@ -5,6 +5,7 @@
 #include "ui_MainWindow.h"
 #include "GLWidget3D.h"
 #include "UrbanGeometry.h"
+#include "ControlWidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -16,7 +17,7 @@ public:
 
 public:
 	Ui::MainWindow ui;
-	//ControlWidget* controlWidget;
+	ControlWidget* controlWidget;
 	//PropertyWidget* propertyWidget;
 	GLWidget3D* glWidget;
 	UrbanGeometry* urbanGeometry;

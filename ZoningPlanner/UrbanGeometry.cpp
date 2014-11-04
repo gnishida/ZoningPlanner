@@ -243,28 +243,46 @@ void UrbanGeometry::allocateCommputingPlace() {
 	}
 }
 
+/**
+ * 各住人にとっての、都市のfeatureベクトルを計算する。結果は、各personのfeatureに格納される。
+ * また、それに対する評価結果を、各personのscoreに格納する。
+ * さらに、全住人によるscoreの平均を返却する。
+ */
 float UrbanGeometry::computeScore() {
 	float score_total = 0.0f;
 	for (int i = 0; i < people.size(); ++i) {
-		float feature[8];
-		feature[0] = exp(-nearestStore(people[i]).second * 0.001);
-		feature[1] = exp(-nearestSchool(people[i]).second * 0.001);
-		feature[2] = exp(-nearestRestaurant(people[i]).second * 0.001);
-		feature[3] = exp(-nearestPark(people[i]).second * 0.001);
-		if (people[i].type() == Person::TYPE_STUDENT) {
-			feature[4] = exp(-(schools[people[i].commuteTo].location - people[i].homeLocation).length() * 0.001);
-		} else if (people[i].type() == Person::TYPE_OFFICEWORKER) {
-			feature[4] = exp(-(offices[people[i].commuteTo].location - people[i].homeLocation).length() * 0.001);
-		}
-		feature[5] = exp(-nearestLibrary(people[i]).second * 0.001);
-		feature[6] = exp(-noise(people[i].homeLocation) * 0.02);
-		feature[7] = exp(-airpollution(people[i].homeLocation) * 0.02);
+		setFeatureForPerson(people[i]);
+		std::vector<float> f = people[i].feature;
 
-		float score = std::inner_product(std::begin(feature), std::end(feature), std::begin(people[i].preference), 0.0);
-		score_total += score;
+		for (int j = 0; j < f.size(); ++j) {
+			f[j] = exp(-f[j] * 0.001);
+		}
+
+		people[i].score = std::inner_product(std::begin(f), std::end(f), std::begin(people[i].preference), 0.0);
+		score_total += people[i].score;
 	}
 
 	return score_total / (float)people.size();
+}
+
+void UrbanGeometry::setFeatureForPerson(Person& person) {
+	person.feature.clear();
+	person.feature.resize(8);
+
+	person.feature[0] = nearestStore(person).second;
+	person.feature[1] = nearestSchool(person).second;
+	person.feature[2] = nearestRestaurant(person).second;
+	person.feature[3] = nearestPark(person).second;
+	if (person.type() == Person::TYPE_STUDENT) {
+		person.feature[4] = (schools[person.commuteTo].location - person.homeLocation).length();
+	} else if (person.type() == Person::TYPE_OFFICEWORKER) {
+		person.feature[4] = (offices[person.commuteTo].location - person.homeLocation).length();
+	}
+	person.feature[5] = nearestLibrary(person).second;
+	person.feature[6] = noise(person.homeLocation);
+	person.feature[7] = airpollution(person.homeLocation);
+
+	person.nearestLibrary = nearestLibrary(person).first;
 }
 
 std::pair<int, float> UrbanGeometry::nearestSchool(const Person& person) {
@@ -417,4 +435,19 @@ float UrbanGeometry::airpollution(const QVector2D& pt) {
 	}
 
 	return n;
+}
+
+Person UrbanGeometry::findNearestPerson(const QVector2D& pt) {
+	float min_dist = std::numeric_limits<float>::max();
+	int id = -1;
+
+	for (int i = 0; i < people.size(); ++i) {
+		float dist = (people[i].homeLocation - pt).lengthSquared();
+		if (dist < min_dist) {
+			min_dist = dist;
+			id = i;
+		}
+	}
+
+	return people[id];
 }

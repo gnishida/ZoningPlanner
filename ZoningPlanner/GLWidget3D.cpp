@@ -49,6 +49,19 @@ void GLWidget3D::mousePressEvent(QMouseEvent *event) {
 
 	lastPos = event->pos();
 	mouseTo2D(event->x(), event->y(), pos);
+
+	if (controlPressed) {
+		Person person = mainWin->urbanGeometry->findNearestPerson(pos);
+		mainWin->controlWidget->showPersonInfo(person);
+
+		if (person.commuteTo >= 0) {
+			if (person.type() == Person::TYPE_STUDENT) {
+				printf("school: (%lf, %lf)\n", mainWin->urbanGeometry->schools[person.commuteTo].location.x(), mainWin->urbanGeometry->schools[person.commuteTo].location.y());
+			} else if (person.type() == Person::TYPE_OFFICEWORKER) {
+				printf("office: (%lf, %lf)\n", mainWin->urbanGeometry->offices[person.commuteTo].location.x(), mainWin->urbanGeometry->offices[person.commuteTo].location.y());
+			}
+		}
+	}
 }
 
 void GLWidget3D::mouseReleaseEvent(QMouseEvent *event) {
@@ -167,7 +180,7 @@ void GLWidget3D::drawScene(int drawMode) {
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));
 
 	if (mainWin->ui.actionViewZoning->isChecked()) {
-		//vboRenderManager.renderStaticGeometry("people");
+		vboRenderManager.renderStaticGeometry("people");
 		if (drawMode == 0) {
 			vboRenderManager.renderStaticGeometry("zoning");
 		}

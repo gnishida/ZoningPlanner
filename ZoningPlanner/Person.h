@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QVector2D>
+#include <vector>
 
 class Person
 {
@@ -17,13 +18,16 @@ public:
 	int nearestRestaurant;
 	int nearestPark;
 	int nearestAmusement;
+	int nearestLibrary;
 	float preference[8];
+	std::vector<float> feature;
+	float score;
 
 public:
 	Person();
 	Person(int type, const QVector2D& homeLocation);
 
-	int type() { return _type; }
+	int type() const { return _type; }
 	void initPreference();
 };
 

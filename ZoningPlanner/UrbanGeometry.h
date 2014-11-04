@@ -60,6 +60,7 @@ public:
 	void allocateAll();
 	void allocateCommputingPlace();
 	float computeScore();
+	void setFeatureForPerson(Person& person);
 	std::pair<int, float> nearestSchool(const Person& person);
 	std::pair<int, float> nearestStore(const Person& person);
 	std::pair<int, float> nearestRestaurant(const Person& person);
@@ -68,4 +69,6 @@ public:
 	std::pair<int, float> nearestLibrary(const Person& person);
 	float noise(const QVector2D& pt);
 	float airpollution(const QVector2D& pt);
+
+	Person findNearestPerson(const QVector2D& pt);
 };
