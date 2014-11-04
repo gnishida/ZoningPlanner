@@ -300,26 +300,23 @@ void Zoning::save(const QString& filename) {
  * Randomly generate zoning plan.
  * Each type of zone is assigned to at least one block.
  */
-void Zoning::generate(const QVector2D& size) {
+void Zoning::generate(Polygon2D& targetArea) {
+	BBox bbox = targetArea.envelope();
+
 	while (true) {
 		zones.clear();
 
 		int histogram[7] = {};
 
-		{
-			Polygon2D polygon;
-			polygon.push_back(QVector2D(-100000, -100000));
-			polygon.push_back(QVector2D(100000, -100000));
-			polygon.push_back(QVector2D(100000, 100000));
-			polygon.push_back(QVector2D(-100000, 100000));
-			zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
-		}
+		zones.push_back(std::make_pair(targetArea, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
 
 		float step = 200.0f;
-		for (int u = 0; u < size.x() / step; ++u) {
-			float x = (float)u * step - size.x() * 0.5f;
-			for (int v = 0; v < size.y() / step; ++v) {
-				float y = (float)v * step - size.x() * 0.5f;
+		for (int u = 0; u < bbox.dx()  / step; ++u) {
+			float x = (float)u * step + bbox.minPt.x();
+			for (int v = 0; v < bbox.dy() / step; ++v) {
+				float y = (float)v * step + bbox.minPt.y();
+
+				if (!targetArea.contains(QVector2D(x, y))) continue;
 
 				Polygon2D polygon;
 				polygon.push_back(QVector2D(x, y));

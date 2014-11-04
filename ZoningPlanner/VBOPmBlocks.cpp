@@ -358,8 +358,6 @@ void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadE
 }
 
 void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
-	bool useSamePlaceTypeForEntireBlock = false;
-
 	for (int i = 0; i < blocks.size(); ++i) {
 		// assign a zone type to the block
 		{

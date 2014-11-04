@@ -4,6 +4,7 @@
 #include "Util.h"
 #include "VBOPmBlocks.h"
 #include "VBOPmParcels.h"
+#include "ConvexHull.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -168,18 +169,29 @@ void MainWindow::onViewZoning() {
 }
 
 void MainWindow::onPropose() {
-	// randomly generate the zoning
-	urbanGeometry->zones.generate(QVector2D(4000, 4000));
+	ConvexHull ch;
+	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
+		for (int j = 0; j < urbanGeometry->blocks[i].sidewalkContour.contour.size(); ++j) {
+			ch.addPoint(QVector2D(urbanGeometry->blocks[i].sidewalkContour.contour[j]));
+		}
+	}
+	Polygon2D taretArea = ch.convexHull();
 
-	// assign zone type to blocks
-	VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
+	while (true) {
+		// randomly generate the zoning
+		urbanGeometry->zones.generate(taretArea);
 
+		// assign zone type to blocks
+		VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
+
+		// re-generate parcels
+		VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+		if (urbanGeometry->allocateAll()) break;
+	}
+
+	// generate 3D mesh
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	// re-generate parcels
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	float score = urbanGeometry->computeScore();
@@ -199,17 +211,28 @@ void MainWindow::onFindBest() {
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
-	for (int loop = 0; loop < 250; ++loop) {
-		// randomly generate the zoning
-		urbanGeometry->zones.generate(QVector2D(4000, 4000));
+	ConvexHull ch;
+	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
+		for (int j = 0; j < urbanGeometry->blocks[i].sidewalkContour.contour.size(); ++j) {
+			ch.addPoint(QVector2D(urbanGeometry->blocks[i].sidewalkContour.contour[j]));
+		}
+	}
+	Polygon2D taretArea = ch.convexHull();
 
-		// re-assign zone type to blocks
-		VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
+	for (int loop = 0; loop < 25; ++loop) {
+		while (true) {
+			// randomly generate the zoning
+			urbanGeometry->zones.generate(taretArea);
 
-		// re-generate parcels
-		VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+			// assign zone type to blocks
+			VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
 
-		urbanGeometry->allocateAll();
+			// re-generate parcels
+			VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+			if (urbanGeometry->allocateAll()) break;
+		}
+
 		float score = urbanGeometry->computeScore();
 		printf("%d: score=%lf\n", loop, score);
 

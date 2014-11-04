@@ -57,7 +57,7 @@ public:
 	void loadBlocks(const QString& filename);
 	void saveBlocks(const QString& filename);
 
-	void allocateAll();
+	bool allocateAll();
 	void allocateCommputingPlace();
 	float computeScore();
 	void setFeatureForPerson(Person& person);

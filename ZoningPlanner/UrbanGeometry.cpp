@@ -99,9 +99,10 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 }
 
 /**
- * 住民を配備する
+ * 住民、オフィス、レストラン、図書館、公園、工場、などなどを配備する
+ * １つも配備されない施設があった場合は、falseを返却する。
  */
-void UrbanGeometry::allocateAll() {
+bool UrbanGeometry::allocateAll() {
 	people.clear();
 	offices.clear();
 	schools.clear();
@@ -227,7 +228,13 @@ void UrbanGeometry::allocateAll() {
 
 	allocateCommputingPlace();
 
-	//printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
+	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
+
+	if (schools.size() == 0 || restaurants.size() == 0 || amusements.size() == 0 || parks.size() == 0 || libraries.size() == 0 || factories.size() == 0) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 /**

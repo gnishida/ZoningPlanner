@@ -49,5 +49,5 @@ public:
 	int getZone(const QVector2D& pt) const;
 	void load(const QString& filename);
 	void save(const QString& filename);
-	void generate(const QVector2D& size);
+	void generate(Polygon2D& targetArea);
 };
