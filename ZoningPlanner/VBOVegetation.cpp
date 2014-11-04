@@ -78,7 +78,7 @@ bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, Zoning& zo
 
 	//generate trees in blocks (park)
 	for (int bN = 0; bN < blocks.size(); bN++) {
-		if (blocks[bN].zone.type == ZoneType::TYPE_PARK) {
+		if (blocks[bN].zone.type() == ZoneType::TYPE_PARK) {
 
 			BBox parcelBBox = blocks[bN].blockContour.envelope();
 
@@ -104,7 +104,7 @@ bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, Zoning& zo
 			Block::parcelGraphVertexIter vi, viEnd;
 			
 			for (boost::tie(vi, viEnd) = boost::vertices(blocks[bN].myParcels); vi != viEnd; ++vi) {
-				if (blocks[bN].myParcels[*vi].zone.type != ZoneType::TYPE_PARK) continue;
+				if (blocks[bN].myParcels[*vi].zone.type() != ZoneType::TYPE_PARK) continue;
 				
 				QVector3D minCorner, maxCorner;
 				Polygon3D::getLoopAABB(blocks[bN].myParcels[*vi].parcelContour.contour, minCorner, maxCorner);

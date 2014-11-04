@@ -117,7 +117,7 @@ void UrbanGeometry::allocateAll() {
 
 	Block::parcelGraphVertexIter vi, viEnd;
 	for (int i = 0; i < blocks.size(); ++i) {
-		if (blocks[i].zone.type == ZoneType::TYPE_PARK) {
+		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
 			QVector2D location = QVector2D(blocks[i].blockContour.getCentroid());
 			parks.push_back(Office(location));
 			continue;
@@ -126,11 +126,11 @@ void UrbanGeometry::allocateAll() {
 		for (boost::tie(vi, viEnd) = boost::vertices(blocks[i].myParcels); vi != viEnd; ++vi) {
 			QVector2D location = QVector2D(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.getCentroid());
 
-			if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_RESIDENTIAL) {
+			if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
 				int num = Util::genRand(1, 5);
-				if (blocks[i].myParcels[*vi].zone.level == 2) {
+				if (blocks[i].myParcels[*vi].zone.level() == 2) {
 					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.05f;
-				} else if (blocks[i].myParcels[*vi].zone.level == 3) {
+				} else if (blocks[i].myParcels[*vi].zone.level() == 3) {
 					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.20f;
 				}
 
@@ -154,7 +154,7 @@ void UrbanGeometry::allocateAll() {
 
 					people.push_back(Person(type, location + noise));
 				}
-			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_COMMERCIAL) {
+			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_COMMERCIAL) {
 				float r = Util::genRand(0, 1);
 				if (r < 0.6) {
 					offices.push_back(Office(location));
@@ -163,10 +163,10 @@ void UrbanGeometry::allocateAll() {
 				} else {
 					restaurants.push_back(Office(location));
 				}
-			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_MANUFACTURING) {
+			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_MANUFACTURING) {
 				factories.push_back(Office(location));
 				offices.push_back(Office(location));
-			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_AMUSEMENT) {
+			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_AMUSEMENT) {
 				float r = Util::genRand(0, 1);
 				if (r < 0.6) {
 					amusements.push_back(Office(location));
@@ -175,9 +175,9 @@ void UrbanGeometry::allocateAll() {
 				} else {
 					restaurants.push_back(Office(location));
 				}
-			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_PARK) {
+			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PARK) {
 				parks.push_back(Office(location));
-			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_PUBLIC) {
+			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PUBLIC) {
 				float r = Util::genRand(0, 1);
 				if (r < 0.3) {
 					libraries.push_back(Office(location));

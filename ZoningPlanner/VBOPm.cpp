@@ -113,7 +113,7 @@ void VBOPm::generateBlockModels(VBORenderManager& rendManager,RoadGraph &roadGra
 		}
 
 		// 公園の3Dモデルを生成
-		if (blocks[i].zone.type == ZoneType::TYPE_PARK) {
+		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
 			// PARK
 			int randPark=qrand()%grassFileNames.size();
 			rendManager.addStaticGeometry2("3d_sidewalk", blocks[i].blockContour.contour, 0.5f, false, grassFileNames[randPark], GL_QUADS, 2, QVector3D(0.05f,0.05f,0.05f), QColor());
@@ -181,7 +181,7 @@ void VBOPm::generateParcelModels(VBORenderManager& rendManager, BlockSet& blocks
 
 			if (i == blocks.selectedBlockIndex && cnt == blocks.selectedParcelIndex) {
 				color = QVector3D(1.0f, 1.0f, 1.0f);
-			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_PARK) {
+			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PARK) {
 				color = QVector3D(0.8f, 0.8f, 0.0f);
 			} else {
 				color = QVector3D(0.0f, 0.5f, 0.8f);
@@ -230,9 +230,9 @@ bool VBOPm::generateBuildings(VBORenderManager& rendManager, BlockSet& blocks, Z
 		
 	Block::parcelGraphVertexIter vi, viEnd;
 	for (int bN = 0; bN < blocks.size(); bN++) {
-		if (blocks[bN].zone.type == ZoneType::TYPE_PARK) continue;//skip those with parks
+		if (blocks[bN].zone.type() == ZoneType::TYPE_PARK) continue;//skip those with parks
 		for (boost::tie(vi, viEnd) = boost::vertices(blocks[bN].myParcels); vi != viEnd; ++vi) {
-			if (blocks[bN].myParcels[*vi].zone.type == ZoneType::TYPE_PARK) continue;
+			if (blocks[bN].myParcels[*vi].zone.type() == ZoneType::TYPE_PARK) continue;
 			if (blocks[bN].myParcels[*vi].myBuilding.buildingFootprint.contour.size() < 3) continue;
 
 			int building_type = 1;//placeTypes.myPlaceTypes[blocks[bN].getMyPlaceTypeIdx()].getInt("building_type");
@@ -263,17 +263,17 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 			QColor color;
 			if (i == blocks.selectedBlockIndex) {
 				color = QColor(255, 255, 255, 100);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_RESIDENTIAL) {
-				color = QColor(255 - (blocks[i].zone.level - 1) * 70, 0, 0, 100);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_COMMERCIAL) {
-				color = QColor(0, 0, 255 - (blocks[i].zone.level - 1) * 70, 100);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_MANUFACTURING) {
-				color = QColor(200 - (blocks[i].zone.level - 1) * 60, 200 - (blocks[i].zone.level - 1) * 60, 200 - (blocks[i].zone.level - 1) * 60, 100);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_PARK) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+				color = QColor(255 - (blocks[i].zone.level() - 1) * 70, 0, 0, 100);
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
+				color = QColor(0, 0, 255 - (blocks[i].zone.level() - 1) * 70, 100);
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {
+				color = QColor(200 - (blocks[i].zone.level() - 1) * 60, 200 - (blocks[i].zone.level() - 1) * 60, 200 - (blocks[i].zone.level() - 1) * 60, 100);
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
 				color = QColor(0, 255, 0, 100);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_AMUSEMENT) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {
 				color = QColor(255, 255, 0, 100);
-			} else if (blocks[i].zone.type == ZoneType::TYPE_PUBLIC) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {
 				color = QColor(0, 255, 255, 100);
 			} else {
 				color = QColor(128, 128, 128, 100);

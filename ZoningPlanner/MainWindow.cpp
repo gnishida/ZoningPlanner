@@ -2,6 +2,7 @@
 #include <QFileDialog>
 #include "VBOPm.h"
 #include "Util.h"
+#include "VBOPmBlocks.h"
 #include "VBOPmParcels.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
@@ -16,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	ui.actionModeDefault->setChecked(true);
 
 	// register the menu's action handlers
-	connect(ui.actionLoadPlaceTypes, SIGNAL(triggered()), this, SLOT(onLoadZoning()));
+	connect(ui.actionLoadZoning, SIGNAL(triggered()), this, SLOT(onLoadZoning()));
 	connect(ui.actionLoadRoads, SIGNAL(triggered()), this, SLOT(onLoadRoads()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -27,7 +28,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionGenerateAll, SIGNAL(triggered()), this, SLOT(onGenerateAll()));
 
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
-	connect(ui.actionChangePropose, SIGNAL(triggered()), this, SLOT(onChangePropose()));
+	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
+	connect(ui.actionFindBest, SIGNAL(triggered()), this, SLOT(onFindBest()));
 	connect(ui.actionCameraCar, SIGNAL(triggered()), this, SLOT(onCameraCar()));
 
 	// setup the GL widget
@@ -53,10 +55,18 @@ void MainWindow::keyReleaseEvent(QKeyEvent* e) {
 }
 
 void MainWindow::onLoadZoning() {
-	QString filename = QFileDialog::getOpenFileName(this, tr("Open zone file..."), "", tr("Zone Files (*.xml)"));
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open zoning file..."), "", tr("Zoning Files (*.xml)"));
 	if (filename.isEmpty()) return;
 
-	urbanGeometry->loadRoads(filename);
+	urbanGeometry->zones.load(filename);
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+	// re-generate parcels
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+	urbanGeometry->allocateAll();
+	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+
 	glWidget->shadow.makeShadowMap(glWidget);
 
 	glWidget->updateGL();
@@ -146,7 +156,7 @@ void MainWindow::onViewZoning() {
 	glWidget->updateGL();
 }
 
-void MainWindow::onChangePropose() {
+void MainWindow::onPropose() {
 	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
 		int r = Util::genRand(0, urbanGeometry->blocks.size());
 		ZoneType zone = urbanGeometry->blocks[i].zone;
@@ -157,10 +167,6 @@ void MainWindow::onChangePropose() {
 
 	// re-generate parcels
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
-		VBOPmParcels::assignZoneType(urbanGeometry->blocks[i], urbanGeometry->zones);
-	}
 
 	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
@@ -177,18 +183,18 @@ void MainWindow::onFindBest() {
 	Zoning zoning3;
 
 	for (int loop = 0; loop < 10; ++loop) {
-		// randomly swap the zone types
+		// randomly generate the zoning
 		urbanGeometry->zones.generate(QVector2D(4000, 4000));
+
+		// assign zone type to blocks
+		VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
 
 		// re-generate parcels
 		VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-		for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
-			VBOPmParcels::assignZoneType(urbanGeometry->blocks[i], urbanGeometry->zones);
-		}
-
 		urbanGeometry->allocateAll();
 		float score = urbanGeometry->computeScore();
+		printf("score: %lf\n", score);
 
 		if (score > best3) {
 			best3 = score;
@@ -205,6 +211,10 @@ void MainWindow::onFindBest() {
 			}
 		}
 	}
+
+	zoning1.save("zoning1.xml");
+	zoning2.save("zoning2.xml");
+	zoning3.save("zoning3.xml");
 }
 
 void MainWindow::onCameraCar() {

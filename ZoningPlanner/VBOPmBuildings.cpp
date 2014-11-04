@@ -124,7 +124,7 @@ bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parc
 	}*/
 
 	//if parcel is park, process
-	if(inParcel.zone.type == ZoneType::TYPE_PARK) { //park
+	if(inParcel.zone.type() == ZoneType::TYPE_PARK) { //park
 		//printf("PARK\n");
 		return false;
 	}
@@ -215,7 +215,7 @@ bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock)
 	//For each parcel
 	for(boost::tie(vi, viEnd) = boost::vertices(inBlock.myParcels); vi != viEnd; ++vi){
 		if (!generateParcelBuildings(rendManager, inBlock, inBlock.myParcels[*vi])) {
-			inBlock.myParcels[*vi].zone.type = ZoneType::TYPE_PARK;
+			inBlock.myParcels[*vi].zone.setType(ZoneType::TYPE_PARK);
 		}
 	}
 	return true;

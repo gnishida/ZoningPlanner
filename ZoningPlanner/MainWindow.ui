@@ -37,14 +37,11 @@
     <addaction name="actionOpenTerrain"/>
     <addaction name="actionSaveTerrain"/>
     <addaction name="separator"/>
-    <addaction name="actionLoadPlaceTypes"/>
+    <addaction name="actionLoadZoning"/>
     <addaction name="separator"/>
     <addaction name="actionLoadRoads"/>
     <addaction name="actionSaveRoads"/>
     <addaction name="actionClearRoads"/>
-    <addaction name="separator"/>
-    <addaction name="actionLoadBlocks"/>
-    <addaction name="actionSaveBlocks"/>
     <addaction name="separator"/>
     <addaction name="actionSaveImage"/>
     <addaction name="actionSaveImageHD"/>
@@ -85,16 +82,17 @@
     </property>
     <addaction name="actionViewZoning"/>
    </widget>
-   <widget class="QMenu" name="menuChange">
+   <widget class="QMenu" name="menuTool">
     <property name="title">
-     <string>Change</string>
+     <string>Tool</string>
     </property>
-    <addaction name="actionChangePropose"/>
+    <addaction name="actionPropose"/>
+    <addaction name="actionFindBest"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
    <addaction name="menuView"/>
-   <addaction name="menuChange"/>
+   <addaction name="menuTool"/>
    <addaction name="menuCamera"/>
    <addaction name="menuWindow"/>
   </widget>
@@ -289,9 +287,9 @@
     <string>Place Type</string>
    </property>
   </action>
-  <action name="actionLoadPlaceTypes">
+  <action name="actionLoadZoning">
    <property name="text">
-    <string>Load Place Types</string>
+    <string>Load Zoning</string>
    </property>
   </action>
   <action name="actionCameraDefault">
@@ -315,6 +313,16 @@
   <action name="actionChangePropose">
    <property name="text">
     <string>Propose</string>
+   </property>
+  </action>
+  <action name="actionPropose">
+   <property name="text">
+    <string>Propose</string>
+   </property>
+  </action>
+  <action name="actionFindBest">
+   <property name="text">
+    <string>Find Best</string>
    </property>
   </action>
  </widget>

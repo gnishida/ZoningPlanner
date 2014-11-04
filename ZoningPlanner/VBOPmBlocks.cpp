@@ -317,16 +317,6 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		blockAreas.erase(blockAreas.begin()+maxAreaIdx);
 	}
 
-	// assign a zone to each block
-	assignZonesToBlocks(zoning, blocks);
-
-	// block park
-	for (int i = 0; i < blocks.size(); ++i) {
-		/*if (Util::genRand() < blocks[i].zone.park_percentage) {
-			blocks[i].isPark = true;
-		}*/
-	}
-
 	// 歩道の分を確保するため、ブロックを縮小する。
 	for (int i = 0; i < blocks.size(); ++i) {
 		Loop3D blockContourInset;
@@ -335,6 +325,9 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		blocks[i].blockContour.contour = blockContourInset;
 		blocks[i].blockContour.getBBox3D(blocks[i].bbox.minPt, blocks[i].bbox.maxPt);
 	}
+
+	// assign a zone to each block
+	assignZonesToBlocks(zoning, blocks);
 
 	return true;
 }
