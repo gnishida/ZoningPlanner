@@ -81,6 +81,7 @@
      <string>View</string>
     </property>
     <addaction name="actionViewZoning"/>
+    <addaction name="actionViewPeople"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
@@ -323,6 +324,11 @@
   <action name="actionFindBest">
    <property name="text">
     <string>Find Best</string>
+   </property>
+  </action>
+  <action name="actionViewPeople">
+   <property name="text">
+    <string>People</string>
    </property>
   </action>
  </widget>

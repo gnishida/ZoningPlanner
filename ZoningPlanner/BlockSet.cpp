@@ -40,8 +40,8 @@ void BlockSet::save(const QString& filename) {
 	for (int i = 0; i < blocks.size(); ++i) {
 		QDomElement node = doc.createElement("block");
 		node.setAttribute("id", i);
-		node.setAttribute("zoneType", blocks[i].zone.type);
-		node.setAttribute("zoneLevel", blocks[i].zone.level);
+		node.setAttribute("zoneType", blocks[i].zone.type());
+		node.setAttribute("zoneLevel", blocks[i].zone.level());
 
 		saveBlock(doc, node, blocks[i]);
 
@@ -92,8 +92,8 @@ void BlockSet::saveBlock(QDomDocument& doc, QDomNode& node, Block& block) {
 	for (boost::tie(vi, viEnd) = boost::vertices(block.myParcels); vi != viEnd; ++vi) {
 		QDomElement child = doc.createElement("parcel");
 		child.setAttribute("id", id++);
-		child.setAttribute("zoneType", block.myParcels[*vi].zone.type);
-		child.setAttribute("zoneLevel", block.myParcels[*vi].zone.level);
+		child.setAttribute("zoneType", block.myParcels[*vi].zone.type());
+		child.setAttribute("zoneLevel", block.myParcels[*vi].zone.level());
 
 		saveParcel(doc, child, block.myParcels[*vi]);
 

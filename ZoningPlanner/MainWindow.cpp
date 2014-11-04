@@ -157,12 +157,8 @@ void MainWindow::onViewZoning() {
 }
 
 void MainWindow::onPropose() {
-	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
-		int r = Util::genRand(0, urbanGeometry->blocks.size());
-		ZoneType zone = urbanGeometry->blocks[i].zone;
-		urbanGeometry->blocks[i].zone = urbanGeometry->blocks[r].zone;
-		urbanGeometry->blocks[r].zone = zone;
-	}
+	// randomly generate the zoning
+	urbanGeometry->zones.generate(QVector2D(4000, 4000));
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	// re-generate parcels
