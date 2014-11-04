@@ -189,11 +189,14 @@ void MainWindow::onFindBest() {
 	Zoning zoning2;
 	Zoning zoning3;
 
-	for (int loop = 0; loop < 10; ++loop) {
+	// generate blocks
+	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+
+	for (int loop = 0; loop < 1000; ++loop) {
 		// randomly generate the zoning
 		urbanGeometry->zones.generate(QVector2D(4000, 4000));
 
-		// assign zone type to blocks
+		// re-assign zone type to blocks
 		VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
 
 		// re-generate parcels
