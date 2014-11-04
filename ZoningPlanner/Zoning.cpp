@@ -298,58 +298,82 @@ void Zoning::save(const QString& filename) {
 
 /**
  * Randomly generate zoning plan.
+ * Each type of zone is assigned to at least one block.
  */
 void Zoning::generate(const QVector2D& size) {
-	zones.clear();
+	while (true) {
+		zones.clear();
 
-	{
-		Polygon2D polygon;
-		polygon.push_back(QVector2D(-100000, -100000));
-		polygon.push_back(QVector2D(100000, -100000));
-		polygon.push_back(QVector2D(100000, 100000));
-		polygon.push_back(QVector2D(-100000, 100000));
-		zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
-	}
+		int histogram[7] = {};
 
-	float step = 200.0f;
-	for (int u = 0; u < size.x() / step; ++u) {
-		float x = (float)u * step - size.x() * 0.5f;
-		for (int v = 0; v < size.y() / step; ++v) {
-			float y = (float)v * step - size.x() * 0.5f;
-
+		{
 			Polygon2D polygon;
-			polygon.push_back(QVector2D(x, y));
-			polygon.push_back(QVector2D(x + step, y));
-			polygon.push_back(QVector2D(x + step, y + step));
-			polygon.push_back(QVector2D(x, y + step));
-
-			ZoneType zone;
-			int r = Util::genRand(0, 100);
-			if (r <= 20) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
-			} else if (r <= 50) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 2)));
-			} else if (r <= 65) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 3)));
-			} else if (r <= 71) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 1)));
-			} else if (r <= 77) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 2)));
-			} else if (r <= 80) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 3)));
-			} else if (r <= 82) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 1)));
-			} else if (r <= 84) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 2)));
-			} else if (r <= 85) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 3)));
-			} else if (r <= 90) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PARK, 1)));
-			} else if (r <= 95) {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_AMUSEMENT, 1)));
-			} else {
-				zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PUBLIC, 1)));
-			}			
+			polygon.push_back(QVector2D(-100000, -100000));
+			polygon.push_back(QVector2D(100000, -100000));
+			polygon.push_back(QVector2D(100000, 100000));
+			polygon.push_back(QVector2D(-100000, 100000));
+			zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
 		}
+
+		float step = 200.0f;
+		for (int u = 0; u < size.x() / step; ++u) {
+			float x = (float)u * step - size.x() * 0.5f;
+			for (int v = 0; v < size.y() / step; ++v) {
+				float y = (float)v * step - size.x() * 0.5f;
+
+				Polygon2D polygon;
+				polygon.push_back(QVector2D(x, y));
+				polygon.push_back(QVector2D(x + step, y));
+				polygon.push_back(QVector2D(x + step, y + step));
+				polygon.push_back(QVector2D(x, y + step));
+
+				ZoneType zone;
+				float r = Util::genRand(0, 100);
+				if (r <= 20) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
+					histogram[ZoneType::TYPE_RESIDENTIAL]++;
+				} else if (r <= 58) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 2)));
+					histogram[ZoneType::TYPE_RESIDENTIAL]++;
+				} else if (r <= 78) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 3)));
+					histogram[ZoneType::TYPE_RESIDENTIAL]++;
+				} else if (r <= 84) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 1)));
+					histogram[ZoneType::TYPE_COMMERCIAL]++;
+				} else if (r <= 89) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 2)));
+					histogram[ZoneType::TYPE_COMMERCIAL]++;
+				} else if (r <= 92) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 3)));
+					histogram[ZoneType::TYPE_COMMERCIAL]++;
+				} else if (r <= 94) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 1)));
+					histogram[ZoneType::TYPE_MANUFACTURING]++;
+				} else if (r <= 95) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 2)));
+					histogram[ZoneType::TYPE_MANUFACTURING]++;
+				} else if (r <= 96) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 3)));
+					histogram[ZoneType::TYPE_MANUFACTURING]++;
+				} else if (r <= 98) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PARK, 1)));
+					histogram[ZoneType::TYPE_PARK]++;
+				} else if (r <= 99) {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_AMUSEMENT, 1)));
+					histogram[ZoneType::TYPE_AMUSEMENT]++;
+				} else {
+					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PUBLIC, 1)));
+					histogram[ZoneType::TYPE_PUBLIC]++;
+				}			
+			}
+		}
+
+		// check if there is at least one block for each zone type
+		bool valid = true;
+		for (int i = 1; i < 7; ++i) {
+			if (histogram[i] == 0) valid = false;
+		}
+		if (valid) break;
 	}
 }

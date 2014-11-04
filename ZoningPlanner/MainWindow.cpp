@@ -59,6 +59,10 @@ void MainWindow::onLoadZoning() {
 	if (filename.isEmpty()) return;
 
 	urbanGeometry->zones.load(filename);
+
+	// re-generate blocks
+	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	// re-generate parcels
@@ -170,6 +174,9 @@ void MainWindow::onPropose() {
 
 	urbanGeometry->allocateAll();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+
+	float score = urbanGeometry->computeScore();
+	printf("score: %lf\n", score);
 
 	glWidget->updateGL();
 }

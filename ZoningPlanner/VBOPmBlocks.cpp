@@ -360,25 +360,16 @@ void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadE
 void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 	bool useSamePlaceTypeForEntireBlock = false;
 
-	int hist[7] = {};
-
 	for (int i = 0; i < blocks.size(); ++i) {
 		// assign a zone type to the block
 		{
 			int zoneId = zoning.getZone(QVector2D(blocks[i].bbox.midPt()));
 			if (zoneId >= 0) {
 				blocks[i].zone = zoning.zones[zoneId].second;
-				VBOPmParcels::assignZoneType(blocks[i], zoning);
-				hist[blocks[i].zone.type()]++;
+				VBOPmParcels::assignZoneType(blocks[i]);
 			} else {
 				printf("ERROR: no zone is assigned to this block.\n");
 			}
 		}
 	}
-
-	printf("ZoneType histogram: ");
-	for (int i = 0; i < 7; ++i) {
-		printf("%d, ", hist[i]);
-	}
-	printf("\n");
 }

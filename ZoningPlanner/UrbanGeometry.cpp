@@ -188,17 +188,49 @@ void UrbanGeometry::allocateAll() {
 		}
 	}
 
-	// if no school, put a school
-	if (schools.size() == 0) {
-		schools.push_back(Office(QVector2D(0, 0)));
+	// put schools outside this region
+	{
+		schools.push_back(Office(QVector2D(-10000, -10000)));
+		schools.push_back(Office(QVector2D(10000, -10000)));
+		schools.push_back(Office(QVector2D(10000, 10000)));
+		schools.push_back(Office(QVector2D(-10000, 10000)));
 	}
-	if (offices.size() == 0) {
-		offices.push_back(Office(QVector2D(0, 0)));
+
+	// put libraries outside this region
+	{
+		libraries.push_back(Office(QVector2D(-10000, -10000)));
+		libraries.push_back(Office(QVector2D(10000, -10000)));
+		libraries.push_back(Office(QVector2D(10000, 10000)));
+		libraries.push_back(Office(QVector2D(-10000, 10000)));
+	}
+
+	// put amusements outside this region
+	{
+		amusements.push_back(Office(QVector2D(-10000, -10000)));
+		amusements.push_back(Office(QVector2D(10000, -10000)));
+		amusements.push_back(Office(QVector2D(10000, 10000)));
+		amusements.push_back(Office(QVector2D(-10000, 10000)));
+	}
+
+	// put parks outside this region
+	{
+		parks.push_back(Office(QVector2D(-10000, -10000)));
+		parks.push_back(Office(QVector2D(10000, -10000)));
+		parks.push_back(Office(QVector2D(10000, 10000)));
+		parks.push_back(Office(QVector2D(-10000, 10000)));
+	}
+
+	// put offices outside this region
+	{
+		offices.push_back(Office(QVector2D(-10000, -10000)));
+		offices.push_back(Office(QVector2D(10000, -10000)));
+		offices.push_back(Office(QVector2D(10000, 10000)));
+		offices.push_back(Office(QVector2D(-10000, 10000)));
 	}
 
 	allocateCommputingPlace();
 
-	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
+	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 }
 
 /**

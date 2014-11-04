@@ -130,10 +130,10 @@ bool compareFirstPartTuple (const std::pair<float,Parcel*> &i, const std::pair<f
 	return (i.first<j.first);
 }
 
-void VBOPmParcels::assignZoneType(Block& block, const Zoning& zoning) {
+void VBOPmParcels::assignZoneType(Block& block) {
 	Block::parcelGraphVertexIter vi, viEnd;
 	for (boost::tie(vi, viEnd) = boost::vertices(block.myParcels); vi != viEnd; ++vi) {
-		block.myParcels[*vi].zone = zoning.zones[zoning.getZone(QVector2D(block.myParcels[*vi].myBuilding.buildingFootprint.getCentroid()))].second;
+		block.myParcels[*vi].zone = block.zone;
 	}
 }
 
