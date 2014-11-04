@@ -11,6 +11,7 @@
 #include "VBOPmBlocks.h"
 #include "VBOPmParcels.h"
 #include "Util.h"
+#include <numeric>
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -108,7 +109,12 @@ void UrbanGeometry::allocateAll() {
 	restaurants.clear();
 	amusements.clear();
 	parks.clear();
+	libraries.clear();
+	factories.clear();
 	
+	printf("allocateAll()...\n");
+	printf("#blocks: %d\n", blocks.size());
+
 	Block::parcelGraphVertexIter vi, viEnd;
 	for (int i = 0; i < blocks.size(); ++i) {
 		if (blocks[i].zone.type == ZoneType::TYPE_PARK) {
@@ -122,7 +128,6 @@ void UrbanGeometry::allocateAll() {
 
 			if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_RESIDENTIAL) {
 				int num = Util::genRand(1, 5);
-				//num = 1;
 				if (blocks[i].myParcels[*vi].zone.level == 2) {
 					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.05f;
 				} else if (blocks[i].myParcels[*vi].zone.level == 3) {
@@ -133,25 +138,21 @@ void UrbanGeometry::allocateAll() {
 				QMatrix4x4 xformMat;
 				Polygon3D::getLoopOBB(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.contour, size, xformMat);
 
-				if (Util::genRand(0, 1) < 0.01) {
-					schools.push_back(Office(location));
-				} else {					
-					for (int n = 0; n < num; ++n) {
-						QVector2D noise(Util::genRand(-size.x() * 0.5, size.x() * 0.5), Util::genRand(-size.y() * 0.5, size.y() * 0.5));
-						float r = Util::genRand(0, 1);
-						int type = Person::TYPE_UNKNOWN;
-						if (r < 0.2) {
-							type = Person::TYPE_STUDENT;
-						} else if (r < 0.5) {
-							type = Person::TYPE_HOUSEWIFE;
-						} else if (r < 0.8) {
-							type = Person::TYPE_OFFICEWORKER;
-						} else {
-							type = Person::TYPE_ELDERLY;
-						}
-
-						people.push_back(Person(type, location + noise));
+				for (int n = 0; n < num; ++n) {
+					QVector2D noise(Util::genRand(-size.x() * 0.5, size.x() * 0.5), Util::genRand(-size.y() * 0.5, size.y() * 0.5));
+					float r = Util::genRand(0, 1);
+					int type = Person::TYPE_UNKNOWN;
+					if (r < 0.2) {
+						type = Person::TYPE_STUDENT;
+					} else if (r < 0.5) {
+						type = Person::TYPE_HOUSEWIFE;
+					} else if (r < 0.8) {
+						type = Person::TYPE_OFFICEWORKER;
+					} else {
+						type = Person::TYPE_ELDERLY;
 					}
+
+					people.push_back(Person(type, location + noise));
 				}
 			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_COMMERCIAL) {
 				float r = Util::genRand(0, 1);
@@ -163,6 +164,7 @@ void UrbanGeometry::allocateAll() {
 					restaurants.push_back(Office(location));
 				}
 			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_MANUFACTURING) {
+				factories.push_back(Office(location));
 				offices.push_back(Office(location));
 			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_AMUSEMENT) {
 				float r = Util::genRand(0, 1);
@@ -175,6 +177,13 @@ void UrbanGeometry::allocateAll() {
 				}
 			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_PARK) {
 				parks.push_back(Office(location));
+			} else if (blocks[i].myParcels[*vi].zone.type == ZoneType::TYPE_PUBLIC) {
+				float r = Util::genRand(0, 1);
+				if (r < 0.3) {
+					libraries.push_back(Office(location));
+				} else {
+					schools.push_back(Office(location));
+				}
 			}
 		}
 	}
@@ -189,74 +198,7 @@ void UrbanGeometry::allocateAll() {
 
 	allocateCommputingPlace();
 
-	/*
-	// find the nearest store, restaurant, park, amusement
-	for (int i = 0; i < people.size(); ++i) {
-		people[i].nearestStore = nearestStore(people[i]).first;;
-		people[i].nearestRestaurant = nearestRestaurant(people[i]).first;;
-		people[i].nearestPark = nearestPark(people[i]).first;
-		people[i].nearestAmusement = nearestAmusement(people[i]).first;;
-	}
-
-	// compute the avg commuting distance
-	{
-		float dist_total = 0.0f;
-		int count = 0;
-		for (int i = 0; i < people.size(); ++i) {
-			if (people[i].type == Person::TYPE_STUDENT && people[i].commuteTo >= 0) {
-				dist_total += (people[i].homeLocation - schools[people[i].commuteTo].location).length();
-				count++;
-			} else if (people[i].type == Person::TYPE_OFFICEWORKER && people[i].commuteTo >= 0) {
-				dist_total += (people[i].homeLocation - offices[people[i].commuteTo].location).length();
-				count++;
-			}
-		}
-
-		printf("avg commuting distance: %lf\n", dist_total / (float)count);
-	}
-
-	// compute the avg distance to the nearest park
-	{
-		float dist_total = 0.0f;
-		int count = 0;
-		for (int i = 0; i < people.size(); ++i) {
-			if (people[i].nearestPark >= 0) {
-				dist_total += (people[i].homeLocation - parks[people[i].nearestPark].location).length();
-				count++;
-			}
-		}
-
-		printf("avg distance to the nearest park: %lf\n", dist_total / (float)count);
-	}
-
-	// compute the avg distance to the nearest store
-	{
-		float dist_total = 0.0f;
-		int count = 0;
-		for (int i = 0; i < people.size(); ++i) {
-			if (people[i].nearestStore >= 0) {
-				dist_total += (people[i].homeLocation - stores[people[i].nearestStore].location).length();
-				count++;
-			}
-		}
-
-		printf("avg distance to the nearest store: %lf\n", dist_total / (float)count);
-	}
-
-	// compute the avg distance to the nearest restaurant
-	{
-		float dist_total = 0.0f;
-		int count = 0;
-		for (int i = 0; i < people.size(); ++i) {
-			if (people[i].nearestRestaurant >= 0) {
-				dist_total += (people[i].homeLocation - restaurants[people[i].nearestRestaurant].location).length();
-				count++;
-			}
-		}
-
-		printf("avg distance to the nearest restaurant: %lf\n", dist_total / (float)count);
-	}
-	*/
+	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 }
 
 /**
@@ -276,18 +218,18 @@ float UrbanGeometry::computeScore() {
 	float score_total = 0.0f;
 	for (int i = 0; i < people.size(); ++i) {
 		float feature[8];
-		feature[0] = nearestStore(people[i]).second;
-		feature[1] = nearestSchool(people[i]).second;
-		feature[2] = nearestRestaurant(people[i]).second;
-		feature[3] = nearestPark(people[i]).second;
+		feature[0] = exp(-nearestStore(people[i]).second * 0.001);
+		feature[1] = exp(-nearestSchool(people[i]).second * 0.001);
+		feature[2] = exp(-nearestRestaurant(people[i]).second * 0.001);
+		feature[3] = exp(-nearestPark(people[i]).second * 0.001);
 		if (people[i].type() == Person::TYPE_STUDENT) {
-			feature[4] = (schools[people[i].commuteTo].location - people[i].homeLocation).length();
+			feature[4] = exp(-(schools[people[i].commuteTo].location - people[i].homeLocation).length() * 0.001);
 		} else if (people[i].type() == Person::TYPE_OFFICEWORKER) {
-			feature[4] = (offices[people[i].commuteTo].location - people[i].homeLocation).length();
+			feature[4] = exp(-(offices[people[i].commuteTo].location - people[i].homeLocation).length() * 0.001);
 		}
-		feature[5] = nearestLibrary(people[i]).second;
-		feature[6] = noise(people[i].homeLocation);
-		feature[7] = airpollution(people[i].homeLocation);
+		feature[5] = exp(-nearestLibrary(people[i]).second * 0.001);
+		feature[6] = exp(-noise(people[i].homeLocation) * 0.02);
+		feature[7] = exp(-airpollution(people[i].homeLocation) * 0.02);
 
 		float score = std::inner_product(std::begin(feature), std::end(feature), std::begin(people[i].preference), 0.0);
 		score_total += score;
@@ -381,9 +323,69 @@ std::pair<int, float> UrbanGeometry::nearestLibrary(const Person& person) {
 }
 
 float UrbanGeometry::noise(const QVector2D& pt) {
-	return 0;
+	float n = 0.0f;
+	float Km = 120.0f;
+	float Ka = 70.0f;
+	float Kc = 70.0f;
+
+	// noise by the manufactoring
+	for (int i = 0; i < factories.size(); ++i) {
+		float len = (factories[i].location - pt).length();
+		if (len > 1.0f) {
+			float attenuation = 20 * logf(len);
+			if (Km > attenuation) {
+				n += Km - attenuation;
+			}
+		} else {
+			n += Km;
+		}
+	}
+
+	// noise by the amusement facilities
+	for (int i = 0; i < amusements.size(); ++i) {
+		float len = (amusements[i].location - pt).length();
+		if (len > 1.0f) {
+			float attenuation = 20 * logf(len);
+			if (Ka > attenuation) {
+				n += Ka - attenuation;
+			}
+		} else {
+			n += Ka;
+		}
+	}
+
+	// noise by the commercial stores
+	for (int i = 0; i < stores.size(); ++i) {
+		float len = (stores[i].location - pt).length();
+		if (len > 1.0f) {
+			float attenuation = 20 * logf(len);
+			if (Kc > attenuation) {
+				n += Ka - attenuation;
+			}
+		} else {
+			n += Kc;
+		}
+	}
+
+	return n;
 }
 
 float UrbanGeometry::airpollution(const QVector2D& pt) {
-	return 0;
+	float n = 0.0f;
+	float Km = 120.0f;
+
+	// pollution by the manufactoring
+	for (int i = 0; i < factories.size(); ++i) {
+		float len = (factories[i].location - pt).length();
+		if (len > 1.0f) {
+			float attenuation = 20 * logf(len);
+			if (Km > attenuation) {
+				n += Km - attenuation;
+			}
+		} else {
+			n += Km;
+		}
+	}
+
+	return n;
 }

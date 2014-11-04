@@ -28,6 +28,7 @@ public:
 	std::vector<Office> parks;
 	std::vector<Office> amusements;
 	std::vector<Office> libraries;
+	std::vector<Office> factories;
 
 public:
 	UrbanGeometry(MainWindow* mainWin);
