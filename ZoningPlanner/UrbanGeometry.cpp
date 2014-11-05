@@ -379,8 +379,8 @@ std::pair<int, float> UrbanGeometry::nearestLibrary(const Person& person) {
 float UrbanGeometry::noise(const QVector2D& pt) {
 	float n = 0.0f;
 	float Km = 120.0f;
-	float Ka = 70.0f;
-	float Kc = 70.0f;
+	float Ka = 100.0f;
+	float Kc = 100.0f;
 
 	// noise by the manufactoring
 	for (int i = 0; i < factories.size(); ++i) {
@@ -414,7 +414,7 @@ float UrbanGeometry::noise(const QVector2D& pt) {
 		if (len > 1.0f) {
 			float attenuation = 20 * logf(len);
 			if (Kc > attenuation) {
-				n += Ka - attenuation;
+				n += Kc - attenuation;
 			}
 		} else {
 			n += Kc;

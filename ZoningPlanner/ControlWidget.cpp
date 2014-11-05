@@ -50,4 +50,6 @@ void ControlWidget::showPersonInfo(const Person& person) {
 	ui.lineEditFeature5->setText(QString::number(person.feature[5]));
 	ui.lineEditFeature6->setText(QString::number(person.feature[6]));
 	ui.lineEditFeature7->setText(QString::number(person.feature[7]));
+
+	ui.lineEditScore->setText(QString::number(person.score));
 }

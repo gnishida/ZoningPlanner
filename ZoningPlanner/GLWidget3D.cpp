@@ -180,7 +180,9 @@ void GLWidget3D::drawScene(int drawMode) {
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));
 
 	if (mainWin->ui.actionViewZoning->isChecked()) {
-		vboRenderManager.renderStaticGeometry("people");
+		if (mainWin->ui.actionViewPeople->isChecked()) {
+			vboRenderManager.renderStaticGeometry("people");
+		}
 		if (drawMode == 0) {
 			vboRenderManager.renderStaticGeometry("zoning");
 		}

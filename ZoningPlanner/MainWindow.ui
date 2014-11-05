@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>FBC Designer</string>
+   <string>Zoning Planner</string>
   </property>
   <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
@@ -44,7 +44,6 @@
     <addaction name="actionClearRoads"/>
     <addaction name="separator"/>
     <addaction name="actionSaveImage"/>
-    <addaction name="actionSaveImageHD"/>
     <addaction name="separator"/>
     <addaction name="actionLoadCamera"/>
     <addaction name="actionSaveCamera"/>

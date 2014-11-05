@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	// register the menu's action handlers
 	connect(ui.actionLoadZoning, SIGNAL(triggered()), this, SLOT(onLoadZoning()));
 	connect(ui.actionLoadRoads, SIGNAL(triggered()), this, SLOT(onLoadRoads()));
+	connect(ui.actionSaveImage, SIGNAL(triggered()), this, SLOT(onSaveImage()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
 	connect(ui.actionGenerateBlocks, SIGNAL(triggered()), this, SLOT(onGenerateBlocks()));
@@ -201,13 +202,6 @@ void MainWindow::onPropose() {
 }
 
 void MainWindow::onFindBest() {
-	float best1 = 0.0f;
-	float best2 = 0.0f;
-	float best3 = 0.0f;
-	Zoning zoning1;
-	Zoning zoning2;
-	Zoning zoning3;
-
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
@@ -219,7 +213,9 @@ void MainWindow::onFindBest() {
 	}
 	Polygon2D taretArea = ch.convexHull();
 
-	for (int loop = 0; loop < 25; ++loop) {
+	srand(time(NULL));
+
+	for (int loop = 0; loop < 20; ++loop) {
 		while (true) {
 			// randomly generate the zoning
 			urbanGeometry->zones.generate(taretArea);
@@ -236,25 +232,9 @@ void MainWindow::onFindBest() {
 		float score = urbanGeometry->computeScore();
 		printf("%d: score=%lf\n", loop, score);
 
-		if (score > best3) {
-			best3 = score;
-			zoning3 = urbanGeometry->zones;
-
-			if (best3 > best2) {
-				std::swap(best2, best3);
-				std::swap(zoning2, zoning3);
-
-				if (best2 > best1) {
-					std::swap(best1, best2);
-					std::swap(zoning1, zoning2);
-				}
-			}
-		}
+		QString filename = QString("zoning/score_%1.xml").arg(score, 4, 'f', 6);
+		urbanGeometry->zones.save(filename);
 	}
-
-	zoning1.save("zoning1.xml");
-	zoning2.save("zoning2.xml");
-	zoning3.save("zoning3.xml");
 }
 
 void MainWindow::onCameraCar() {

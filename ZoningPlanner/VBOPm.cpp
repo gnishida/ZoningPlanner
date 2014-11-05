@@ -262,17 +262,17 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 			int opacity = 255;
 			if (i == blocks.selectedBlockIndex) {
 				color = QColor(255, 255, 255, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {	// 住宅街は赤色ベース
 				color = QColor(255 - (blocks[i].zone.level() - 1) * 70, 0, 0, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {	// 商業地は青色ベース
 				color = QColor(0, 0, 255 - (blocks[i].zone.level() - 1) * 70, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {
-				color = QColor(200 - (blocks[i].zone.level() - 1) * 60, 200 - (blocks[i].zone.level() - 1) * 60, 200 - (blocks[i].zone.level() - 1) * 60, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {	// 工場街は灰色ベース
+				color = QColor(200 - (blocks[i].zone.level() - 1) * 60, 150 - (blocks[i].zone.level() - 1) * 40, 200 - (blocks[i].zone.level() - 1) * 60, opacity);
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {			// 公園は緑色
 				color = QColor(0, 255, 0, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {		// 繁華街は黄色
 				color = QColor(255, 255, 0, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {
+			} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {		// 公共施設は水色ベース
 				color = QColor(0, 255, 255, opacity);
 			} else {
 				color = QColor(128, 128, 128, opacity);
