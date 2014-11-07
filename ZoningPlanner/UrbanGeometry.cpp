@@ -228,6 +228,8 @@ bool UrbanGeometry::allocateAll() {
 
 	allocateCommputingPlace();
 
+	generateNoiseMap(QVector2D(10000, 10000));
+
 	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 
 	if (schools.size() == 0 || restaurants.size() == 0 || amusements.size() == 0 || parks.size() == 0 || libraries.size() == 0 || factories.size() == 0) {
@@ -457,4 +459,26 @@ Person UrbanGeometry::findNearestPerson(const QVector2D& pt) {
 	}
 
 	return people[id];
+}
+
+void UrbanGeometry::generateNoiseMap(const QVector2D& size) {
+	noiseMap.init(QVector3D(-size.x() * 0.5, -size.y() * 0.5, 0), QVector3D(size.x() * 0.5, size.y() * 0.5, 0), 100, 100, 0, 100, 100);
+	for (int r = 0; r < noiseMap.layerData.rows; ++r) {
+		float y = -size.y() * 0.5 + size.y() / noiseMap.layerData.rows * r;
+		for (int c = 0; c < noiseMap.layerData.cols; ++c) {
+			float x = -size.x() * 0.5 + size.x() / noiseMap.layerData.cols * c;
+
+			int n = noise(QVector2D(x, y)) * 0.25f;
+			if (n > 255) n = 255;
+
+			noiseMap.layerData.at<uchar>(r, c) = n;
+		}
+	}
+
+	Polygon3D quad;
+	quad.push_back(QVector3D(-size.x() * 0.5f, -size.y() * 0.5, 0));
+	quad.push_back(QVector3D(size.x() * 0.5f, -size.y() * 0.5, 0));
+	quad.push_back(QVector3D(size.x() * 0.5f, size.y() * 0.5, 0));
+	quad.push_back(QVector3D(-size.x() * 0.5f, size.y() * 0.5, 0));
+	rendManager.addStaticGeometry2("noise", quad, 0.5f, false, grassFileNames[randPark], GL_QUADS, 2, QVector3D(0.05f,0.05f,0.05f), QColor());
 }

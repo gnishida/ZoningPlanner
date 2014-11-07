@@ -185,6 +185,7 @@
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="VBOBlock.cpp" />
     <ClCompile Include="VBOGeoBuilding.cpp" />
+    <ClCompile Include="VBOLayer.cpp" />
     <ClCompile Include="VBOModel.cpp" />
     <ClCompile Include="VBOModel_StreetElements.cpp" />
     <ClCompile Include="VBOParcel.cpp" />
@@ -297,6 +298,7 @@
     <ClInclude Include="VBOBlock.h" />
     <ClInclude Include="VBOBuilding.h" />
     <ClInclude Include="VBOGeoBuilding.h" />
+    <ClInclude Include="VBOLayer.h" />
     <ClInclude Include="VBOModel.h" />
     <ClInclude Include="VBOModel_StreetElements.h" />
     <ClInclude Include="VBOParcel.h" />

@@ -29,6 +29,7 @@ public:
 	std::vector<Office> amusements;
 	std::vector<Office> libraries;
 	std::vector<Office> factories;
+	Layer noiseMap;
 
 public:
 	UrbanGeometry(MainWindow* mainWin);
@@ -71,4 +72,6 @@ public:
 	float airpollution(const QVector2D& pt);
 
 	Person findNearestPerson(const QVector2D& pt);
+
+	void generateNoiseMap(const QVector2D& size);
 };

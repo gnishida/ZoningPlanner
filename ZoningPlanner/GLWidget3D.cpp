@@ -186,6 +186,10 @@ void GLWidget3D::drawScene(int drawMode) {
 		if (drawMode == 0) {
 			vboRenderManager.renderStaticGeometry("zoning");
 		}
+	} else if (mainWin->ui.actionViewNoise->isChecked()) {
+		if (drawMode == 0) {
+			vboRenderManager.renderStaticGeometry("noise");
+		}
 	} else {
 		vboRenderManager.renderStaticGeometry(QString("3d_building"));
 		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
