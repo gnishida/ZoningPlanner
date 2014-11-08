@@ -5,7 +5,7 @@
 
 VBORenderManager::VBORenderManager(){
 	editionMode=false;
-	side=10000.0f;//5000.0f;
+	side=5000.0f;//10000.0f;
 	minPos=QVector3D (-side/2.0f,-side/2.0f,0);
 	maxPos=QVector3D (side/2.0f,side/2.0f,0);
 	//initializedStreetElements=false;
@@ -22,6 +22,8 @@ void VBORenderManager::init(){
 
 	vboTerrain.init(*this);
 	vboSkyBox.init(*this);
+	vboStoreLayer.init(*this);
+	vboNoiseLayer.init(*this);
 
 	nameToTexId[""]=0;
 

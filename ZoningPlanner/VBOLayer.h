@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "LC_Layer.h"
+#include "FLayer.h"
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -20,21 +20,17 @@ public:
 	void init(VBORenderManager& rendManager);
 
 	void render(VBORenderManager& rendManager);
-	void updateTerrain(float coordX,float coordY,float change,float rad);
-	void updateTerrainNewValue(float coordX,float coordY,float newValue,float rad);
-	float getTerrainHeight(float xM,float yM);
-	void loadTerrain(QString& fileName);
-	void saveTerrain(QString& fileName);
 
 	// edit
-	Layer layer;
+	FLayer layer;
 	bool initialized;
 	int resolutionX;
 	int resolutionY;
+	QVector3D minPos;
+	QVector3D maxPos;
 
 private:
-	GLuint elementbuffer;
+	GLuint vao;
 	GLuint vbo;
-	GLuint indicesCount;
 	GLuint program;
 };

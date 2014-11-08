@@ -39,6 +39,8 @@ public slots:
 	void onGenerateVegetation();
 	void onGenerateAll();
 	void onViewZoning();
+	void onViewStore();
+	void onViewNoise();
 	void onPropose();
 	void onFindBest();
 	void onCameraCar();

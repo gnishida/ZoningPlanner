@@ -9,6 +9,7 @@
 #include "VBOSkyBox.h"
 #include "VBOTerrain.h"
 #include "VBOModel.h"
+#include "VBOLayer.h"
 
 #include "VBOModel_StreetElements.h"
 
@@ -22,9 +23,6 @@
 #include <boost/polygon/polygon.hpp>
 #endif
 
-//class VBOTerrain;
-//class vboWater;
-
 const int mode_AdaptTerrain=0x0100;
 const int mode_Lighting=0x0200;
 const int mode_TexArray=0x0400;
@@ -35,7 +33,6 @@ const int mode_Tex3D=0x0800;
 
 struct RenderSt{
 	uint texNum;//0 means use color
-	//int gridIndex;
 	GLuint vbo;
 	GLuint vao;
 	int numVertex;//defines if the vbo has been created
@@ -91,6 +88,10 @@ public:
 	QVector3D minPos;
 	QVector3D maxPos;
 	float side;
+
+	// layer
+	VBOLayer vboNoiseLayer;
+	VBOLayer vboStoreLayer;
 
 	// sky
 	VBOSkyBox vboSkyBox;

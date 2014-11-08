@@ -62,16 +62,18 @@ public:
 	void allocateCommputingPlace();
 	float computeScore();
 	void setFeatureForPerson(Person& person);
-	std::pair<int, float> nearestSchool(const Person& person);
-	std::pair<int, float> nearestStore(const Person& person);
-	std::pair<int, float> nearestRestaurant(const Person& person);
-	std::pair<int, float> nearestPark(const Person& person);
-	std::pair<int, float> nearestAmusement(const Person& person);
-	std::pair<int, float> nearestLibrary(const Person& person);
+	std::pair<int, float> nearestPerson(const QVector2D& pt);
+	std::pair<int, float> nearestSchool(const QVector2D& pt);
+	std::pair<int, float> nearestStore(const QVector2D& pt);
+	std::pair<int, float> nearestRestaurant(const QVector2D& pt);
+	std::pair<int, float> nearestPark(const QVector2D& pt);
+	std::pair<int, float> nearestAmusement(const QVector2D& pt);
+	std::pair<int, float> nearestLibrary(const QVector2D& pt);
 	float noise(const QVector2D& pt);
 	float airpollution(const QVector2D& pt);
 
 	Person findNearestPerson(const QVector2D& pt);
 
-	void generateNoiseMap(const QVector2D& size);
+	void updateStoreMap(VBOLayer& layer);
+	void updateNoiseMap(VBOLayer& layer);
 };

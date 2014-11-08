@@ -1,13 +1,8 @@
-#include "VBOLayer.h"
-#include <QFileInfo>
-#include "VBOUtil.h"
-#include "qimage.h"
+﻿#include "VBOLayer.h"
 #include <QGLWidget>
-
+#include "Util.h"
 #include "global.h"
-
 #include "VBORenderManager.h"
-
 
 VBOLayer::VBOLayer() {
 	initialized=false;
@@ -17,38 +12,23 @@ VBOLayer::VBOLayer() {
 	resolutionY=200;
 }
 
-
-
 void VBOLayer::init(VBORenderManager& rendManager){
-
-	QVector3D minPos=rendManager.minPos;
-	QVector3D maxPos=rendManager.maxPos;
+	minPos=rendManager.minPos;
+	maxPos=rendManager.maxPos;
 		
-
-	//////////////////
-	// TERRAIN LAYER
-	if(initialized==false){
-		//terrainLayer.init(minPos,maxPos,0,0,0,200,200);
-		terrainLayer.init(minPos, maxPos, resolutionX, resolutionY, 0, resolutionX, resolutionY);
-
-		glActiveTexture(GL_TEXTURE7);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glBindTexture(GL_TEXTURE_2D,terrainLayer.texData); 
-		glActiveTexture(GL_TEXTURE0);
-	}else{
+	if (!initialized) {
+		layer.init(minPos, maxPos, resolutionX, resolutionY);
+	} else {
 		layer.minPos=minPos;
 		layer.maxPos=maxPos;
 	}
 
 	//////////////////
 	// VERTICES
-	if(initialized==true){
+	/*if(initialized==true){
 		glDeleteBuffers(1, &vbo);
-		glDeleteBuffers(1, &elementbuffer);
-		vbo=0;elementbuffer=0;
-
-	}
+		vbo=0;
+	}*/
 
 	program=rendManager.program;
 
@@ -57,37 +37,34 @@ void VBOLayer::init(VBORenderManager& rendManager){
 	float sideY=abs(maxPos.y()-minPos.y())/resolutionY;
 		
 	// VERTEX
-	vert.push_back(Vertex(minPos, QVector3D(0, 0, 0)));
-	vert.push_back(Vertex(QVector3D(maxPos.x(), minPos.y(), minPos.z()), QVector3D(1, 0, 0)));
-	vert.push_back(Vertex(maxPos, QVector3D(1, 1, 0)));
-	vert.push_back(Vertex(QVector3D(minPos.x(), maxPos.y(), minPos.z()), QVector3D(1, 0, 0)));
+	float alpha = 0.3;
+	vert.push_back(Vertex(minPos.x(), minPos.y(), 80, 0, 0, 0, alpha, 0, 0, 1, 0, 0, 0));
+	vert.push_back(Vertex(maxPos.x(), minPos.y(), 80, 0, 0, 0, alpha, 0, 0, 1, 1, 0, 0));
+	vert.push_back(Vertex(maxPos.x(), maxPos.y(), 80, 0, 0, 0, alpha, 0, 0, 1, 1, 1, 0));
+	vert.push_back(Vertex(minPos.x(), maxPos.y(), 80, 0, 0, 0, alpha, 0, 0, 1, 0, 1, 0));
 
+	// デバッグ用　適当なテクスチャを生成
+	/*
+	for (int r = 0; r < layer.layerData.rows; ++r) {
+		for (int c = 0; c < layer.layerData.cols; ++c) {
+			if (c < layer.layerData.cols / 3) {
+				layer.layerData.at<float>(r, c) = Util::genRand(0, 1);
+			} else {
+				layer.layerData.at<float>(r, c) = 1.0f;
+			}
+		}
+	}
+	layer.updateTexFromData(0, 1);*/
+
+	glGenVertexArrays(1,&vao);
+	glBindVertexArray(vao);
+
+	// Crete VBO
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*vert.size(), vert.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	initialized=true;
-}//
-
-
-void VBOLayer::render(VBORenderManager& rendManager ){//bool editionMode,QVector3D mousePos
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	GLuint vao;
-	glGenVertexArrays(1,&vao); 
-	glBindVertexArray(vao); 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-		
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(
-
-	glUniform1i (glGetUniformLocation (program, "mode"), 2);//MODE: terrain
-
+	
+	// Configure the attributes in the VAO.
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),0);
 	glEnableVertexAttribArray(1);
@@ -97,62 +74,27 @@ void VBOLayer::render(VBORenderManager& rendManager ){//bool editionMode,QVector
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)(12*sizeof(float)));
 
-	// Draw the triangles 
-	glDrawElements(
-		GL_QUADS, // mode
-		indicesCount,    // count
-		GL_UNSIGNED_SHORT,   // type
-		(void*)0           // element array buffer offset
-		);
+	// Bind back to the default state.
+	glBindVertexArray(0); 
+	glBindBuffer(GL_ARRAY_BUFFER,0);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glCullFace(GL_BACK);
-		glEnable(GL_CULL_FACE);
-		glBindVertexArray(0);
-	glDeleteVertexArrays(1,&vao);
-
-
+	initialized=true;
 }
 
-void VBOLayer::updateTerrainNewValue(float coordX,float coordY,float newValue,float rad){
-	layer.updateLayerNewValue(coordX,coordY,newValue,rad);
+void VBOLayer::render(VBORenderManager& rendManager) {
+	// デフォルトのテクスチャユニットを使用する
+	glUniform1i(glGetUniformLocation (program, "tex0"), 0);//tex0: 0
 
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D,layer.texData); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glActiveTexture(GL_TEXTURE0);
-}//
+	// テクスチャをバインド
+	glBindTexture(GL_TEXTURE_2D, layer.texData);
 
-void VBOLayer::updateTerrain(float coordX,float coordY,float change,float rad){
+	// テクスチャモード
+	glUniform1i (glGetUniformLocation (program, "mode"), 2);
 
-	layer.updateLayer(coordX,coordY,change,rad);
+	// 描画
+	glBindVertexArray(vao);
+	glDrawArrays(GL_QUADS, 0, 4);
 
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D,layer.texData); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glActiveTexture(GL_TEXTURE0);
-}//
-
-float VBOLayer::getTerrainHeight(float xM,float yM){
-	float value255=layer.getValue(xM,yM);
-	const float maxHeight=7.0;//7=255*7 1785m (change in vertex as well)
-	float height=maxHeight*value255;
-	return height;
-}//
-
-void VBOLayer::loadTerrain(QString& fileName){
-	layer.loadLayer(fileName);
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D,layer.texData); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glActiveTexture(GL_TEXTURE0);
-}//
-	
-void VBOLayer::saveTerrain(QString& fileName){
-	layer.saveLayer(fileName);
-}//
-
+	// クリーンアップ
+	glBindVertexArray(0);
+}

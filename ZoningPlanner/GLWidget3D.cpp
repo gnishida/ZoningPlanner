@@ -172,6 +172,9 @@ void GLWidget3D::drawScene(int drawMode) {
 
 	vboRenderManager.vboTerrain.render(vboRenderManager);
 
+	// デバッグ中
+	//vboRenderManager.vboLayer.render(vboRenderManager);
+
 	vboRenderManager.renderStaticGeometry(QString("3d_sidewalk"));
 	vboRenderManager.renderStaticGeometry(QString("3d_parcel"));
 
@@ -179,18 +182,28 @@ void GLWidget3D::drawScene(int drawMode) {
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_inter"));
 	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));
 
-	if (mainWin->ui.actionViewZoning->isChecked()) {
-		if (mainWin->ui.actionViewPeople->isChecked()) {
-			vboRenderManager.renderStaticGeometry("people");
-		}
-		if (drawMode == 0) {
+	// ゾーン表示
+	if (drawMode == 0) {
+		if (mainWin->ui.actionViewZoning->isChecked()) {
 			vboRenderManager.renderStaticGeometry("zoning");
 		}
-	} else if (mainWin->ui.actionViewNoise->isChecked()) {
-		if (drawMode == 0) {
-			vboRenderManager.renderStaticGeometry("noise");
+	}
+
+	// 人を表示
+	if (mainWin->ui.actionViewPeople->isChecked()) {
+		vboRenderManager.renderStaticGeometry("people");
+	}
+
+	// レイヤー表示
+	if (drawMode == 0) {
+		if (mainWin->ui.actionViewStore->isChecked()) {
+			vboRenderManager.vboStoreLayer.render(vboRenderManager);
+		} else if (mainWin->ui.actionViewNoise->isChecked()) {
+			vboRenderManager.vboNoiseLayer.render(vboRenderManager);
 		}
-	} else {
+	}
+
+	if (false) {
 		vboRenderManager.renderStaticGeometry(QString("3d_building"));
 		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
 

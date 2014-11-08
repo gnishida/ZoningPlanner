@@ -81,6 +81,8 @@
     </property>
     <addaction name="actionViewZoning"/>
     <addaction name="actionViewPeople"/>
+    <addaction name="actionViewStore"/>
+    <addaction name="actionViewNoise"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
@@ -328,6 +330,19 @@
   <action name="actionViewPeople">
    <property name="text">
     <string>People</string>
+   </property>
+  </action>
+  <action name="actionViewNoise">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Noise</string>
+   </property>
+  </action>
+  <action name="actionViewStore">
+   <property name="text">
+    <string>Store</string>
    </property>
   </action>
  </widget>

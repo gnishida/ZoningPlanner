@@ -228,8 +228,6 @@ bool UrbanGeometry::allocateAll() {
 
 	allocateCommputingPlace();
 
-	generateNoiseMap(QVector2D(10000, 10000));
-
 	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 
 	if (schools.size() == 0 || restaurants.size() == 0 || amusements.size() == 0 || parks.size() == 0 || libraries.size() == 0 || factories.size() == 0) {
@@ -278,27 +276,41 @@ void UrbanGeometry::setFeatureForPerson(Person& person) {
 	person.feature.clear();
 	person.feature.resize(8);
 
-	person.feature[0] = nearestStore(person).second;
-	person.feature[1] = nearestSchool(person).second;
-	person.feature[2] = nearestRestaurant(person).second;
-	person.feature[3] = nearestPark(person).second;
+	person.feature[0] = nearestStore(person.homeLocation).second;
+	person.feature[1] = nearestSchool(person.homeLocation).second;
+	person.feature[2] = nearestRestaurant(person.homeLocation).second;
+	person.feature[3] = nearestPark(person.homeLocation).second;
 	if (person.type() == Person::TYPE_STUDENT) {
 		person.feature[4] = (schools[person.commuteTo].location - person.homeLocation).length();
 	} else if (person.type() == Person::TYPE_OFFICEWORKER) {
 		person.feature[4] = (offices[person.commuteTo].location - person.homeLocation).length();
 	}
-	person.feature[5] = nearestLibrary(person).second;
+	person.feature[5] = nearestLibrary(person.homeLocation).second;
 	person.feature[6] = noise(person.homeLocation);
 	person.feature[7] = airpollution(person.homeLocation);
 
-	person.nearestLibrary = nearestLibrary(person).first;
+	person.nearestLibrary = nearestLibrary(person.homeLocation).first;
 }
 
-std::pair<int, float> UrbanGeometry::nearestSchool(const Person& person) {
+std::pair<int, float> UrbanGeometry::nearestPerson(const QVector2D& pt) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestPerson = -1;
+	for (int i = 0; i < people.size(); ++i) {
+		float dist2 = (people[i].homeLocation - pt).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestPerson = i;
+		}
+	}
+
+	return std::make_pair(nearestPerson, sqrtf(min_dist2));
+}
+
+std::pair<int, float> UrbanGeometry::nearestSchool(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
 	int nearestSchool = -1;
 	for (int i = 0; i < schools.size(); ++i) {
-		float dist2 = (schools[i].location - person.homeLocation).lengthSquared();
+		float dist2 = (schools[i].location - pt).lengthSquared();
 		if (dist2 < min_dist2) {
 			min_dist2 = dist2;
 			nearestSchool = i;
@@ -308,11 +320,11 @@ std::pair<int, float> UrbanGeometry::nearestSchool(const Person& person) {
 	return std::make_pair(nearestSchool, sqrtf(min_dist2));
 }
 
-std::pair<int, float> UrbanGeometry::nearestStore(const Person& person) {
+std::pair<int, float> UrbanGeometry::nearestStore(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
 	int nearestStore = -1;
 	for (int i = 0; i < stores.size(); ++i) {
-		float dist2 = (stores[i].location - person.homeLocation).lengthSquared();
+		float dist2 = (stores[i].location - pt).lengthSquared();
 		if (dist2 < min_dist2) {
 			min_dist2 = dist2;
 			nearestStore = i;
@@ -322,11 +334,11 @@ std::pair<int, float> UrbanGeometry::nearestStore(const Person& person) {
 	return std::make_pair(nearestStore, sqrtf(min_dist2));
 }
 
-std::pair<int, float> UrbanGeometry::nearestRestaurant(const Person& person) {
+std::pair<int, float> UrbanGeometry::nearestRestaurant(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
 	int nearestRestaurant = -1;
 	for (int i = 0; i < restaurants.size(); ++i) {
-		float dist2 = (restaurants[i].location - person.homeLocation).lengthSquared();
+		float dist2 = (restaurants[i].location - pt).lengthSquared();
 		if (dist2 < min_dist2) {
 			min_dist2 = dist2;
 			nearestRestaurant = i;
@@ -336,11 +348,11 @@ std::pair<int, float> UrbanGeometry::nearestRestaurant(const Person& person) {
 	return std::make_pair(nearestRestaurant, sqrtf(min_dist2));
 }
 
-std::pair<int, float> UrbanGeometry::nearestPark(const Person& person) {
+std::pair<int, float> UrbanGeometry::nearestPark(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
 	int nearestPark = -1;
 	for (int i = 0; i < parks.size(); ++i) {
-		float dist2 = (parks[i].location - person.homeLocation).lengthSquared();
+		float dist2 = (parks[i].location - pt).lengthSquared();
 		if (dist2 < min_dist2) {
 			min_dist2 = dist2;
 			nearestPark = i;
@@ -350,11 +362,11 @@ std::pair<int, float> UrbanGeometry::nearestPark(const Person& person) {
 	return std::make_pair(nearestPark, sqrtf(min_dist2));
 }
 
-std::pair<int, float> UrbanGeometry::nearestAmusement(const Person& person) {
+std::pair<int, float> UrbanGeometry::nearestAmusement(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
 	int nearestPark = -1;
 	for (int i = 0; i < amusements.size(); ++i) {
-		float dist2 = (amusements[i].location - person.homeLocation).lengthSquared();
+		float dist2 = (amusements[i].location - pt).lengthSquared();
 		if (dist2 < min_dist2) {
 			min_dist2 = dist2;
 			nearestPark = i;
@@ -364,11 +376,11 @@ std::pair<int, float> UrbanGeometry::nearestAmusement(const Person& person) {
 	return std::make_pair(nearestPark, sqrtf(min_dist2));
 }
 
-std::pair<int, float> UrbanGeometry::nearestLibrary(const Person& person) {
+std::pair<int, float> UrbanGeometry::nearestLibrary(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
 	int nearestLibrary = -1;
 	for (int i = 0; i < libraries.size(); ++i) {
-		float dist2 = (libraries[i].location - person.homeLocation).lengthSquared();
+		float dist2 = (libraries[i].location - pt).lengthSquared();
 		if (dist2 < min_dist2) {
 			min_dist2 = dist2;
 			nearestLibrary = i;
@@ -461,24 +473,29 @@ Person UrbanGeometry::findNearestPerson(const QVector2D& pt) {
 	return people[id];
 }
 
-void UrbanGeometry::generateNoiseMap(const QVector2D& size) {
-	noiseMap.init(QVector3D(-size.x() * 0.5, -size.y() * 0.5, 0), QVector3D(size.x() * 0.5, size.y() * 0.5, 0), 100, 100, 0, 100, 100);
-	for (int r = 0; r < noiseMap.layerData.rows; ++r) {
-		float y = -size.y() * 0.5 + size.y() / noiseMap.layerData.rows * r;
-		for (int c = 0; c < noiseMap.layerData.cols; ++c) {
-			float x = -size.x() * 0.5 + size.x() / noiseMap.layerData.cols * c;
+void UrbanGeometry::updateStoreMap(VBOLayer& layer) {
+	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
+		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
+		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
+			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
 
-			int n = noise(QVector2D(x, y)) * 0.25f;
-			if (n > 255) n = 255;
-
-			noiseMap.layerData.at<uchar>(r, c) = n;
+			layer.layer.layerData.at<float>(r, c) = nearestStore(QVector2D(x, y)).second;
 		}
 	}
 
-	Polygon3D quad;
-	quad.push_back(QVector3D(-size.x() * 0.5f, -size.y() * 0.5, 0));
-	quad.push_back(QVector3D(size.x() * 0.5f, -size.y() * 0.5, 0));
-	quad.push_back(QVector3D(size.x() * 0.5f, size.y() * 0.5, 0));
-	quad.push_back(QVector3D(-size.x() * 0.5f, size.y() * 0.5, 0));
-	rendManager.addStaticGeometry2("noise", quad, 0.5f, false, grassFileNames[randPark], GL_QUADS, 2, QVector3D(0.05f,0.05f,0.05f), QColor());
+	layer.layer.updateTexFromData(0, 1000);
+}
+
+void UrbanGeometry::updateNoiseMap(VBOLayer& layer) {
+	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
+		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
+		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
+			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
+
+			layer.layer.layerData.at<float>(r, c) = noise(QVector2D(x, y));
+			//layer.layer.layerData.at<float>(r, c) = nearestPerson(QVector2D(x, y)).second;
+		}
+	}
+
+	layer.layer.updateTexFromData(0, 1000);
 }

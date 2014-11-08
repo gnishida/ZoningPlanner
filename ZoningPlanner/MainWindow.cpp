@@ -33,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionGenerateAll, SIGNAL(triggered()), this, SLOT(onGenerateAll()));
 
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
+	connect(ui.actionViewStore, SIGNAL(triggered()), this, SLOT(onViewStore()));
+	connect(ui.actionViewNoise, SIGNAL(triggered()), this, SLOT(onViewNoise()));
 	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
 	connect(ui.actionFindBest, SIGNAL(triggered()), this, SLOT(onFindBest()));
 	connect(ui.actionCameraCar, SIGNAL(triggered()), this, SLOT(onCameraCar()));
@@ -75,7 +77,9 @@ void MainWindow::onLoadZoning() {
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	urbanGeometry->allocateAll();
-	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
+	//VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	// compute the feature vectors
 	urbanGeometry->computeScore();
@@ -166,6 +170,16 @@ void MainWindow::onGenerateAll() {
 
 void MainWindow::onViewZoning() {
 	glWidget->shadow.makeShadowMap(glWidget);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewStore() {
+	ui.actionViewNoise->setChecked(false);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewNoise() {
+	ui.actionViewStore->setChecked(false);
 	glWidget->updateGL();
 }
 
