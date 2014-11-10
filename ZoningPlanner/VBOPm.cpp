@@ -69,7 +69,6 @@ bool VBOPm::generateBlocks(VBORenderManager& rendManager,RoadGraph &roadGraph, B
 		printf("ERROR: generateBlocks\n");
 		return false;
 	}
-	printf(">>Num Blocks %d\n",blocks.blocks.size());
 
 	generateBlockModels(rendManager, roadGraph, blocks);
 

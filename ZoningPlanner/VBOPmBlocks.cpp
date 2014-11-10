@@ -204,9 +204,7 @@ bool removeIntersectingEdges(RoadGraph &roadGraph)
  * 道路網から、Block情報を抽出する。
  */
 bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet &blocks) {
-	std::cout << "normalizing loop of roads." << std::endl;
 	GraphUtil::normalizeLoop(roadGraph);
-	std::cout << "normalizing done." << std::endl;
 
 	roadGraphPtr = &roadGraph;
 	blocksPtr = &blocks.blocks;
@@ -226,7 +224,6 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 
 	// Test for planarity
 	while (cont<2) {
-		std::cout << "planarity_test..." << std::endl;
 		if (boost::boyer_myrvold_planarity_test(boost::boyer_myrvold_params::graph =roadGraph.graph,
 			boost::boyer_myrvold_params::embedding = &embedding[0]) 
 			){
@@ -256,15 +253,13 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 	boost::associative_property_map<EdgeIndexMap> pmEdgeIndex(mapEdgeIdx);		
 	RoadEdgeIter ei, ei_end;	
 	int edge_count = 0;
-	for(boost::tie(ei, ei_end) = boost::edges(roadGraph.graph); ei != ei_end; ++ei){
+	for (boost::tie(ei, ei_end) = boost::edges(roadGraph.graph); ei != ei_end; ++ei) {
 		mapEdgeIdx.insert(std::make_pair(*ei, edge_count++));	
 	}
-	std::cout << "edge index was built." << std::endl;
 
 	//Extract blocks from road graph using boost graph planar_face_traversal
 	vertex_output_visitor v_vis;	
 	boost::planar_face_traversal(roadGraph.graph, &embedding[0], v_vis, pmEdgeIndex);
-	std::cout << "faces were traversed." << std::endl;
 
 	//Misc postprocessing operations on blocks =======
 	int maxVtxCount = 0;
@@ -333,7 +328,6 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 }
 
 void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadEdgeDesc> > &embedding) {
-	std::cout << "building embedding..." << std::endl;
 	time_t start = clock();
 
 	for (int i = 0; i < embedding.size(); ++i) {

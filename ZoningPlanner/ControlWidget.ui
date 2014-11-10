@@ -24,9 +24,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>240</y>
+      <y>260</y>
       <width>191</width>
-      <height>191</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="title">
@@ -141,12 +141,12 @@
       <rect>
        <x>10</x>
        <y>100</y>
-       <width>101</width>
+       <width>111</width>
        <height>21</height>
       </rect>
      </property>
      <property name="text">
-      <string>Distance to office</string>
+      <string>Distance to amusement</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEditFeature4">
@@ -240,6 +240,32 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QLineEdit" name="lineEditFeature8">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>180</y>
+       <width>61</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Distance to station</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -247,7 +273,7 @@
       <x>10</x>
       <y>40</y>
       <width>191</width>
-      <height>191</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="title">
@@ -310,12 +336,12 @@
       <rect>
        <x>10</x>
        <y>100</y>
-       <width>101</width>
+       <width>111</width>
        <height>21</height>
       </rect>
      </property>
      <property name="text">
-      <string>Distance to office</string>
+      <string>Distance to amusement</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEditPreference7">
@@ -461,6 +487,32 @@
       <string>Distance to park</string>
      </property>
     </widget>
+    <widget class="QLineEdit" name="lineEditPreference8">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>180</y>
+       <width>61</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_19">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Distance to station</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
@@ -491,8 +543,8 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>450</y>
+      <x>30</x>
+      <y>480</y>
       <width>61</width>
       <height>21</height>
      </rect>
@@ -504,8 +556,8 @@
    <widget class="QLineEdit" name="lineEditScore">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>450</y>
+      <x>90</x>
+      <y>480</y>
       <width>111</width>
       <height>20</height>
      </rect>

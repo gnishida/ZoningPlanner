@@ -335,6 +335,9 @@
    </property>
   </action>
   <action name="actionViewPeople">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>People</string>
    </property>

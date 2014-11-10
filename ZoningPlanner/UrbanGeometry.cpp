@@ -279,17 +279,20 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
 
 void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& renderManager) {
 	person.feature.clear();
-	person.feature.resize(8);
+	person.feature.resize(9);
 
-	person.feature[0] = renderManager.vboStoreLayer.layer.getValue(person.homeLocation);
-	person.feature[1] = renderManager.vboSchoolLayer.layer.getValue(person.homeLocation);
-	person.feature[2] = renderManager.vboRestaurantLayer.layer.getValue(person.homeLocation);
-	person.feature[3] = renderManager.vboParkLayer.layer.getValue(person.homeLocation);
-	person.feature[4] = renderManager.vboAmusementLayer.layer.getValue(person.homeLocation);
-	person.feature[5] = renderManager.vboLibraryLayer.layer.getValue(person.homeLocation);
-	person.feature[6] = renderManager.vboNoiseLayer.layer.getValue(person.homeLocation);
-	person.feature[7] = renderManager.vboPollutionLayer.layer.getValue(person.homeLocation);
-	person.feature[8] = renderManager.vboStationLayer.layer.getValue(person.homeLocation);
+	// 各propertyのsensitivity
+	float K[] = {0.002, 0.002, 0.001, 0.003, 0.001, 0.001, 0.01, 0.01, 0.001};
+
+	person.feature[0] = expf(-K[0] * renderManager.vboStoreLayer.layer.getValue(person.homeLocation));
+	person.feature[1] = expf(-K[1] * renderManager.vboSchoolLayer.layer.getValue(person.homeLocation));
+	person.feature[2] = expf(-K[2] * renderManager.vboRestaurantLayer.layer.getValue(person.homeLocation));
+	person.feature[3] = expf(-K[3] * renderManager.vboParkLayer.layer.getValue(person.homeLocation));
+	person.feature[4] = expf(-K[4] * renderManager.vboAmusementLayer.layer.getValue(person.homeLocation));
+	person.feature[5] = expf(-K[5] * renderManager.vboLibraryLayer.layer.getValue(person.homeLocation));
+	person.feature[6] = expf(-K[6] * renderManager.vboNoiseLayer.layer.getValue(person.homeLocation));
+	person.feature[7] = expf(-K[7] * renderManager.vboPollutionLayer.layer.getValue(person.homeLocation));
+	person.feature[8] = expf(-K[8] * renderManager.vboStationLayer.layer.getValue(person.homeLocation));
 
 
 
