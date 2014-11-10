@@ -298,6 +298,7 @@ void VBOPm::generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person
 void VBOPm::generateSelecionMesh(VBORenderManager& rendManager, Person& person, UrbanGeometry& urbanGeometry) {
 	// 3Dモデルを生成する
 	rendManager.removeStaticGeometry("selection");
+	rendManager.removeStaticGeometry("line");
 
 	rendManager.addSphere("selection", QVector3D(person.homeLocation, 80), 10, QColor(255, 0, 0));
 	rendManager.addSphere("selection", QVector3D(urbanGeometry.stores[person.nearestStore].location, 80), 10, QColor(0, 0, 255));
