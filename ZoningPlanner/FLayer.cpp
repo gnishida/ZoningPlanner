@@ -53,60 +53,11 @@ void FLayer::updateTexFromData(float minValue, float maxValue) {
 }
 
 // return the interpolated value
-float FLayer::getValue(float xM,float yM){
-	int c1=floor(xM*imgResX);//0-imgRes
-	int c2=c1+1;
-	int r1=floor(yM*imgResY);
-	int r2=r1+1;
-	if (c1 < 0) c1 = 0;
-	if (c1 >= layerData.cols) c1 = layerData.cols - 1;
-	if (c2 < 0) c2 = 0;
-	if (c2 >= layerData.cols) c2 = layerData.cols - 1;
-	if (r1 < 0) r1 = 0;
-	if (r1 >= layerData.rows) r1 = layerData.rows - 1;
-	if (r2 < 0) r2 = 0;
-	if (r2 >= layerData.rows) r2 = layerData.rows - 1;
+float FLayer::getValue(const QVector2D& pt) {
+	int c = (pt.x() - minPos.x()) / (maxPos.x() - minPos.x()) * imgResX;
+	int r = (pt.y() - minPos.y()) / (maxPos.y() - minPos.y()) * imgResY;
 
-	float v1 = layerData.at<uchar>(r1,c1);
-	float v2 = layerData.at<uchar>(r2,c1);
-	float v3 = layerData.at<uchar>(r1,c2);
-	float v4 = layerData.at<uchar>(r2,c2);
+	// ToDo: bilinear linterpolation
 
-	float v12,v34;
-	if (yM*imgResY<=r1){
-		v12 = v1;
-		v34 = v3;
-	} else if (yM*imgResY>=r2){
-		v12 = v2;
-		v34 = v4;
-	} else {
-		float s = yM*imgResY - r1;
-		float t = r2 - yM*imgResY;
-		v12 = (v1 * t + v2 * s) / (s + t);
-		v34 = (v3 * t + v4 * s) / (s + t);
-	}
-
-	if (xM*imgResX<=c1){
-		return v12;
-	} else if (xM*imgResX>=c2){
-		return v34;
-	} else {
-		float s = xM*imgResX - c1;
-		float t = c2 - xM*imgResX;
-		return (v12 * t + v34 * s) / (s + t);
-	}
+	return layerData.at<float>(r, c);
 }
-
-/*void FLayer::loadLayer(const QString& fileName) {
-	layerData = cv::imread(fileName.toUtf8().data(), 0);//load one channel
-
-	layerData /= 255.0f;
-
-	// update image
-	updateTexFromData(0, 1);
-}
-	
-void FLayer::saveLayer(const QString& fileName) {
-	cv::imwrite(fileName.toUtf8().data(), layerData);
-}*/
-

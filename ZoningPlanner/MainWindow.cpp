@@ -5,6 +5,7 @@
 #include "VBOPmBlocks.h"
 #include "VBOPmParcels.h"
 #include "ConvexHull.h"
+#include <time.h>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -71,22 +72,37 @@ void MainWindow::keyReleaseEvent(QKeyEvent* e) {
 }
 
 void MainWindow::onLoadZoning() {
+	clock_t startTime, endTime;
+
 	QString filename = QFileDialog::getOpenFileName(this, tr("Open zoning file..."), "", tr("Zoning Files (*.xml)"));
 	if (filename.isEmpty()) return;
 
+	startTime = clock();
 	urbanGeometry->zones.load(filename);
+	endTime = clock();
+	printf("Load zone file: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	// re-generate blocks
+	startTime = clock();
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+	endTime = clock();
+	printf("Blocks generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
+	startTime = clock();
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+	endTime = clock();
+	printf("Zoning mesh generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	// re-generate parcels
+	startTime = clock();
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	endTime = clock();
+	printf("Parcels generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	urbanGeometry->allocateAll();
 
 	// レイヤー情報を更新する
+	startTime = clock();
 	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
 	urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
 	urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
@@ -96,12 +112,20 @@ void MainWindow::onLoadZoning() {
 	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
 	urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
 	urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
+	endTime = clock();
+	printf("Layers generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	// 人のモデルを生成
+	startTime = clock();
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+	endTime = clock();
+	printf("People model generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	// compute the feature vectors
+	startTime = clock();
 	urbanGeometry->computeScore(glWidget->vboRenderManager);
+	endTime = clock();
+	printf("Compute score: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	glWidget->shadow.makeShadowMap(glWidget);
 

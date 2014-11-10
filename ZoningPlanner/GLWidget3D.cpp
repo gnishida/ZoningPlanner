@@ -172,9 +172,6 @@ void GLWidget3D::drawScene(int drawMode) {
 
 	vboRenderManager.vboTerrain.render(vboRenderManager);
 
-	// デバッグ中
-	//vboRenderManager.vboLayer.render(vboRenderManager);
-
 	vboRenderManager.renderStaticGeometry(QString("3d_sidewalk"));
 	vboRenderManager.renderStaticGeometry(QString("3d_parcel"));
 

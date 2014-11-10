@@ -281,6 +281,19 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
 	person.feature.clear();
 	person.feature.resize(8);
 
+	person.feature[0] = renderManager.vboStoreLayer.layer.getValue(person.homeLocation);
+	person.feature[1] = renderManager.vboSchoolLayer.layer.getValue(person.homeLocation);
+	person.feature[2] = renderManager.vboRestaurantLayer.layer.getValue(person.homeLocation);
+	person.feature[3] = renderManager.vboParkLayer.layer.getValue(person.homeLocation);
+	person.feature[4] = renderManager.vboAmusementLayer.layer.getValue(person.homeLocation);
+	person.feature[5] = renderManager.vboLibraryLayer.layer.getValue(person.homeLocation);
+	person.feature[6] = renderManager.vboNoiseLayer.layer.getValue(person.homeLocation);
+	person.feature[7] = renderManager.vboPollutionLayer.layer.getValue(person.homeLocation);
+	person.feature[8] = renderManager.vboStationLayer.layer.getValue(person.homeLocation);
+
+
+
+	/*
 	person.feature[0] = nearestStore(person.homeLocation).second;
 	person.feature[1] = nearestSchool(person.homeLocation).second;
 	person.feature[2] = nearestRestaurant(person.homeLocation).second;
@@ -290,6 +303,7 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
 	person.feature[6] = noise(person.homeLocation);
 	person.feature[7] = pollution(person.homeLocation);
 	person.feature[8] = nearestStation(person.homeLocation).second;
+	*/
 
 	person.nearestLibrary = nearestLibrary(person.homeLocation).first;
 }

@@ -59,7 +59,7 @@ void Person::initPreference() {
 
 
 	float total = 0.0f;
-	for (int i = 0; i < 8; ++i) {
+	for (int i = 0; i < preference.size(); ++i) {
 		total += preference[i];
 	}
 	if (fabs(total - 1.0f) > 0.01f) {

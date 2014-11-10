@@ -43,19 +43,6 @@ void VBOLayer::init(VBORenderManager& rendManager){
 	vert.push_back(Vertex(maxPos.x(), maxPos.y(), 80, 0, 0, 0, alpha, 0, 0, 1, 1, 1, 0));
 	vert.push_back(Vertex(minPos.x(), maxPos.y(), 80, 0, 0, 0, alpha, 0, 0, 1, 0, 1, 0));
 
-	// デバッグ用　適当なテクスチャを生成
-	/*
-	for (int r = 0; r < layer.layerData.rows; ++r) {
-		for (int c = 0; c < layer.layerData.cols; ++c) {
-			if (c < layer.layerData.cols / 3) {
-				layer.layerData.at<float>(r, c) = Util::genRand(0, 1);
-			} else {
-				layer.layerData.at<float>(r, c) = 1.0f;
-			}
-		}
-	}
-	layer.updateTexFromData(0, 1);*/
-
 	glGenVertexArrays(1,&vao);
 	glBindVertexArray(vao);
 

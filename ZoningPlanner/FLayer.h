@@ -6,6 +6,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QFile.h>
 #include <QVector3D>
+#include <QVector2D>
 
 class FLayer{
 public:
@@ -27,8 +28,5 @@ public:
 	void init(QVector3D _minPos, QVector3D _maxPos, int imgResX, int imgResY);
 
 	// control
-	float getValue(float xM,float yM);
-
-	//void loadLayer(const QString& fileName);
-	//void saveLayer(const QString& fileName);
+	float getValue(const QVector2D& pt);
 };
