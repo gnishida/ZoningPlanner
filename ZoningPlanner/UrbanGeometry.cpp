@@ -287,7 +287,7 @@ void UrbanGeometry::setFeatureForPerson(Person& person) {
 	}
 	person.feature[5] = nearestLibrary(person.homeLocation).second;
 	person.feature[6] = noise(person.homeLocation);
-	person.feature[7] = airpollution(person.homeLocation);
+	person.feature[7] = pollution(person.homeLocation);
 
 	person.nearestLibrary = nearestLibrary(person.homeLocation).first;
 }
@@ -438,7 +438,7 @@ float UrbanGeometry::noise(const QVector2D& pt) {
 	return n;
 }
 
-float UrbanGeometry::airpollution(const QVector2D& pt) {
+float UrbanGeometry::pollution(const QVector2D& pt) {
 	float n = 0.0f;
 	float Km = 120.0f;
 
@@ -486,6 +486,58 @@ void UrbanGeometry::updateStoreMap(VBOLayer& layer) {
 	layer.layer.updateTexFromData(0, 1000);
 }
 
+void UrbanGeometry::updateSchoolMap(VBOLayer& layer) {
+	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
+		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
+		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
+			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
+
+			layer.layer.layerData.at<float>(r, c) = nearestSchool(QVector2D(x, y)).second;
+		}
+	}
+
+	layer.layer.updateTexFromData(0, 1000);
+}
+
+void UrbanGeometry::updateRestaurantMap(VBOLayer& layer) {
+	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
+		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
+		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
+			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
+
+			layer.layer.layerData.at<float>(r, c) = nearestRestaurant(QVector2D(x, y)).second;
+		}
+	}
+
+	layer.layer.updateTexFromData(0, 1000);
+}
+
+void UrbanGeometry::updateParkMap(VBOLayer& layer) {
+	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
+		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
+		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
+			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
+
+			layer.layer.layerData.at<float>(r, c) = nearestPark(QVector2D(x, y)).second;
+		}
+	}
+
+	layer.layer.updateTexFromData(0, 1000);
+}
+
+void UrbanGeometry::updateLibraryMap(VBOLayer& layer) {
+	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
+		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
+		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
+			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
+
+			layer.layer.layerData.at<float>(r, c) = nearestLibrary(QVector2D(x, y)).second;
+		}
+	}
+
+	layer.layer.updateTexFromData(0, 1000);
+}
+
 void UrbanGeometry::updateNoiseMap(VBOLayer& layer) {
 	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
 		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
@@ -493,7 +545,19 @@ void UrbanGeometry::updateNoiseMap(VBOLayer& layer) {
 			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
 
 			layer.layer.layerData.at<float>(r, c) = noise(QVector2D(x, y));
-			//layer.layer.layerData.at<float>(r, c) = nearestPerson(QVector2D(x, y)).second;
+		}
+	}
+
+	layer.layer.updateTexFromData(0, 1000);
+}
+
+void UrbanGeometry::updatePollutionMap(VBOLayer& layer) {
+	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
+		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
+		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
+			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
+
+			layer.layer.layerData.at<float>(r, c) = pollution(QVector2D(x, y));
 		}
 	}
 

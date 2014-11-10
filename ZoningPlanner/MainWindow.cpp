@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include <QFileDialog>
 #include "VBOPm.h"
 #include "Util.h"
@@ -34,7 +34,12 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
 	connect(ui.actionViewStore, SIGNAL(triggered()), this, SLOT(onViewStore()));
+	connect(ui.actionViewSchool, SIGNAL(triggered()), this, SLOT(onViewSchool()));
+	connect(ui.actionViewRestaurant, SIGNAL(triggered()), this, SLOT(onViewRestaurant()));
+	connect(ui.actionViewPark, SIGNAL(triggered()), this, SLOT(onViewPark()));
+	connect(ui.actionViewLibrary, SIGNAL(triggered()), this, SLOT(onViewLibrary()));
 	connect(ui.actionViewNoise, SIGNAL(triggered()), this, SLOT(onViewNoise()));
+	connect(ui.actionViewPollution, SIGNAL(triggered()), this, SLOT(onViewPollution()));
 	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
 	connect(ui.actionFindBest, SIGNAL(triggered()), this, SLOT(onFindBest()));
 	connect(ui.actionCameraCar, SIGNAL(triggered()), this, SLOT(onCameraCar()));
@@ -77,8 +82,17 @@ void MainWindow::onLoadZoning() {
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	urbanGeometry->allocateAll();
-	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
+
+	// レイヤー情報を更新する
 	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
+
+
 	//VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	// compute the feature vectors
@@ -174,12 +188,72 @@ void MainWindow::onViewZoning() {
 }
 
 void MainWindow::onViewStore() {
+	ui.actionViewSchool->setChecked(false);
+	ui.actionViewRestaurant->setChecked(false);
+	ui.actionViewPark->setChecked(false);
+	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
+	ui.actionViewPollution->setChecked(false);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewSchool() {
+	ui.actionViewStore->setChecked(false);
+	ui.actionViewRestaurant->setChecked(false);
+	ui.actionViewPark->setChecked(false);
+	ui.actionViewLibrary->setChecked(false);
+	ui.actionViewNoise->setChecked(false);
+	ui.actionViewPollution->setChecked(false);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewRestaurant() {
+	ui.actionViewStore->setChecked(false);
+	ui.actionViewSchool->setChecked(false);
+	ui.actionViewPark->setChecked(false);
+	ui.actionViewLibrary->setChecked(false);
+	ui.actionViewNoise->setChecked(false);
+	ui.actionViewPollution->setChecked(false);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewPark() {
+	ui.actionViewStore->setChecked(false);
+	ui.actionViewSchool->setChecked(false);
+	ui.actionViewRestaurant->setChecked(false);
+	ui.actionViewLibrary->setChecked(false);
+	ui.actionViewNoise->setChecked(false);
+	ui.actionViewPollution->setChecked(false);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewLibrary() {
+	ui.actionViewStore->setChecked(false);
+	ui.actionViewSchool->setChecked(false);
+	ui.actionViewRestaurant->setChecked(false);
+	ui.actionViewPark->setChecked(false);
+	ui.actionViewNoise->setChecked(false);
+	ui.actionViewPollution->setChecked(false);
 	glWidget->updateGL();
 }
 
 void MainWindow::onViewNoise() {
 	ui.actionViewStore->setChecked(false);
+	ui.actionViewSchool->setChecked(false);
+	ui.actionViewRestaurant->setChecked(false);
+	ui.actionViewPark->setChecked(false);
+	ui.actionViewLibrary->setChecked(false);
+	ui.actionViewPollution->setChecked(false);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewPollution() {
+	ui.actionViewStore->setChecked(false);
+	ui.actionViewSchool->setChecked(false);
+	ui.actionViewRestaurant->setChecked(false);
+	ui.actionViewPark->setChecked(false);
+	ui.actionViewLibrary->setChecked(false);
+	ui.actionViewNoise->setChecked(false);
 	glWidget->updateGL();
 }
 

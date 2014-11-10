@@ -198,8 +198,18 @@ void GLWidget3D::drawScene(int drawMode) {
 	if (drawMode == 0) {
 		if (mainWin->ui.actionViewStore->isChecked()) {
 			vboRenderManager.vboStoreLayer.render(vboRenderManager);
+		} else if (mainWin->ui.actionViewSchool->isChecked()) {
+			vboRenderManager.vboSchoolLayer.render(vboRenderManager);
+		} else if (mainWin->ui.actionViewRestaurant->isChecked()) {
+			vboRenderManager.vboRestaurantLayer.render(vboRenderManager);
+		} else if (mainWin->ui.actionViewPark->isChecked()) {
+			vboRenderManager.vboParkLayer.render(vboRenderManager);
+		} else if (mainWin->ui.actionViewLibrary->isChecked()) {
+			vboRenderManager.vboLibraryLayer.render(vboRenderManager);
 		} else if (mainWin->ui.actionViewNoise->isChecked()) {
 			vboRenderManager.vboNoiseLayer.render(vboRenderManager);
+		} else if (mainWin->ui.actionViewPollution->isChecked()) {
+			vboRenderManager.vboPollutionLayer.render(vboRenderManager);
 		}
 	}
 

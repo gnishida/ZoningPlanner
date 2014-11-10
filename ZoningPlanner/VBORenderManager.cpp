@@ -22,8 +22,15 @@ void VBORenderManager::init(){
 
 	vboTerrain.init(*this);
 	vboSkyBox.init(*this);
+
+	// initialize layer
 	vboStoreLayer.init(*this);
+	vboSchoolLayer.init(*this);
+	vboRestaurantLayer.init(*this);
+	vboParkLayer.init(*this);
+	vboLibraryLayer.init(*this);
 	vboNoiseLayer.init(*this);
+	vboPollutionLayer.init(*this);
 
 	nameToTexId[""]=0;
 

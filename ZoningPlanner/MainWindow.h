@@ -40,7 +40,12 @@ public slots:
 	void onGenerateAll();
 	void onViewZoning();
 	void onViewStore();
+	void onViewSchool();
+	void onViewRestaurant();
+	void onViewPark();
+	void onViewLibrary();
 	void onViewNoise();
+	void onViewPollution();
 	void onPropose();
 	void onFindBest();
 	void onCameraCar();

@@ -70,10 +70,15 @@ public:
 	std::pair<int, float> nearestAmusement(const QVector2D& pt);
 	std::pair<int, float> nearestLibrary(const QVector2D& pt);
 	float noise(const QVector2D& pt);
-	float airpollution(const QVector2D& pt);
+	float pollution(const QVector2D& pt);
 
 	Person findNearestPerson(const QVector2D& pt);
 
 	void updateStoreMap(VBOLayer& layer);
+	void updateSchoolMap(VBOLayer& layer);
+	void updateRestaurantMap(VBOLayer& layer);
+	void updateParkMap(VBOLayer& layer);
+	void updateLibraryMap(VBOLayer& layer);
 	void updateNoiseMap(VBOLayer& layer);
+	void updatePollutionMap(VBOLayer& layer);
 };
