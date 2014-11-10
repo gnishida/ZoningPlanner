@@ -395,7 +395,7 @@ void MainWindow::onFindBest() {
 			VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
 
 			// re-generate parcels
-			VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+			//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 			if (urbanGeometry->allocateAll()) break;
 		}

@@ -109,14 +109,72 @@ bool UrbanGeometry::allocateAll() {
 	libraries.clear();
 	factories.clear();
 	
-	Block::parcelGraphVertexIter vi, viEnd;
+	//Block::parcelGraphVertexIter vi, viEnd;
+	time_t start, end;
+	start = clock();
 	for (int i = 0; i < blocks.size(); ++i) {
+		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
+
 		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
-			QVector2D location = QVector2D(blocks[i].blockContour.getCentroid());
 			parks.push_back(Office(location));
 			continue;
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+			// 住人の数を決定
+			int num = Util::genRand(1, 5);
+			if (blocks[i].zone.level() == 2) {
+				num = blocks[i].blockContour.area() * 0.05f;
+			} else if (blocks[i].zone.level() == 3) {
+				num = blocks[i].blockContour.area() * 0.20f;
+			}
+
+			for (int n = 0; n < num; ++n) {
+				//QVector2D noise(Util::genRand(-size.x() * 0.5, size.x() * 0.5), Util::genRand(-size.y() * 0.5, size.y() * 0.5));
+				float r = Util::genRand(0, 1);
+				int type = Person::TYPE_UNKNOWN;
+				if (r < 0.2) {
+					type = Person::TYPE_STUDENT;
+				} else if (r < 0.5) {
+					type = Person::TYPE_HOUSEWIFE;
+				} else if (r < 0.8) {
+					type = Person::TYPE_OFFICEWORKER;
+				} else {
+					type = Person::TYPE_ELDERLY;
+				}
+
+				people.push_back(Person(type, location));
+			}
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
+			float r = Util::genRand(0, 1);
+			if (r < 0.6) {
+				offices.push_back(Office(location));
+			} else if (r < 0.8) {
+				stores.push_back(Office(location));
+			} else {
+				restaurants.push_back(Office(location));
+			}
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {
+			factories.push_back(Office(location));
+			offices.push_back(Office(location));
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {
+			float r = Util::genRand(0, 1);
+			if (r < 0.6) {
+				amusements.push_back(Office(location));
+			} else if (r < 0.8) {
+				stores.push_back(Office(location));
+			} else {
+				restaurants.push_back(Office(location));
+			}
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {
+			float r = Util::genRand(0, 1);
+			if (r < 0.3) {
+				libraries.push_back(Office(location));
+			} else {
+				schools.push_back(Office(location));
+			}
 		}
 
+
+		/*
 		for (boost::tie(vi, viEnd) = boost::vertices(blocks[i].myParcels); vi != viEnd; ++vi) {
 			QVector2D location = QVector2D(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.getCentroid());
 
@@ -181,55 +239,11 @@ bool UrbanGeometry::allocateAll() {
 				}
 			}
 		}
+		*/
 	}
 
-	// put schools outside this region
-	/*
-	{
-		schools.push_back(Office(QVector2D(-10000, -10000)));
-		schools.push_back(Office(QVector2D(10000, -10000)));
-		schools.push_back(Office(QVector2D(10000, 10000)));
-		schools.push_back(Office(QVector2D(-10000, 10000)));
-	}
-	*/
-
-	// put libraries outside this region
-	/*
-	{
-		libraries.push_back(Office(QVector2D(-10000, -10000)));
-		libraries.push_back(Office(QVector2D(10000, -10000)));
-		libraries.push_back(Office(QVector2D(10000, 10000)));
-		libraries.push_back(Office(QVector2D(-10000, 10000)));
-	}
-	*/
-
-	// put amusements outside this region
-	/*
-	{
-		amusements.push_back(Office(QVector2D(-10000, -10000)));
-		amusements.push_back(Office(QVector2D(10000, -10000)));
-		amusements.push_back(Office(QVector2D(10000, 10000)));
-		amusements.push_back(Office(QVector2D(-10000, 10000)));
-	}
-	*/
-
-	// put parks outside this region
-	/*
-	{
-		parks.push_back(Office(QVector2D(-10000, -10000)));
-		parks.push_back(Office(QVector2D(10000, -10000)));
-		parks.push_back(Office(QVector2D(10000, 10000)));
-		parks.push_back(Office(QVector2D(-10000, 10000)));
-	}
-	*/
-
-	// put offices outside this region
-	{
-		offices.push_back(Office(QVector2D(-10000, -10000)));
-		offices.push_back(Office(QVector2D(10000, -10000)));
-		offices.push_back(Office(QVector2D(10000, 10000)));
-		offices.push_back(Office(QVector2D(-10000, 10000)));
-	}
+	end = clock();
+	printf("%lf\n", (double)(end - start) / CLOCKS_PER_SEC);
 
 	// put a train station
 	{

@@ -27,6 +27,7 @@ public:
 	void removeSelectedBlock();
 
 	Block& operator[](int index) { return blocks[index]; }
+	Block& at(int index) { return blocks.at(index); }
 	const Block& operator[](int index) const { return blocks[index]; }
 	size_t size() const { return blocks.size(); }
 	void clear();
