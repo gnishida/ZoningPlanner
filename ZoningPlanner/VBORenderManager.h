@@ -94,9 +94,11 @@ public:
 	VBOLayer vboSchoolLayer;
 	VBOLayer vboRestaurantLayer;
 	VBOLayer vboParkLayer;
+	VBOLayer vboAmusementLayer;
 	VBOLayer vboLibraryLayer;
 	VBOLayer vboNoiseLayer;
 	VBOLayer vboPollutionLayer;
+	VBOLayer vboStationLayer;
 
 	// sky
 	VBOSkyBox vboSkyBox;

@@ -29,6 +29,7 @@ public:
 	std::vector<Office> amusements;
 	std::vector<Office> libraries;
 	std::vector<Office> factories;
+	std::vector<Office> stations;
 	Layer noiseMap;
 
 public:
@@ -60,11 +61,13 @@ public:
 
 	bool allocateAll();
 	void allocateCommputingPlace();
-	float computeScore();
-	void setFeatureForPerson(Person& person);
+	float computeScore(VBORenderManager& renderManager);
+	void setFeatureForPerson(Person& person, VBORenderManager& renderManager);
+
 	std::pair<int, float> nearestPerson(const QVector2D& pt);
-	std::pair<int, float> nearestSchool(const QVector2D& pt);
+	std::pair<int, float> nearestStation(const QVector2D& pt);
 	std::pair<int, float> nearestStore(const QVector2D& pt);
+	std::pair<int, float> nearestSchool(const QVector2D& pt);
 	std::pair<int, float> nearestRestaurant(const QVector2D& pt);
 	std::pair<int, float> nearestPark(const QVector2D& pt);
 	std::pair<int, float> nearestAmusement(const QVector2D& pt);
@@ -74,10 +77,12 @@ public:
 
 	Person findNearestPerson(const QVector2D& pt);
 
+	void updateStationMap(VBOLayer& layer);
 	void updateStoreMap(VBOLayer& layer);
 	void updateSchoolMap(VBOLayer& layer);
 	void updateRestaurantMap(VBOLayer& layer);
 	void updateParkMap(VBOLayer& layer);
+	void updateAmusementMap(VBOLayer& layer);
 	void updateLibraryMap(VBOLayer& layer);
 	void updateNoiseMap(VBOLayer& layer);
 	void updatePollutionMap(VBOLayer& layer);

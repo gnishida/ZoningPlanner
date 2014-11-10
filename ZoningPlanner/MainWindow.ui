@@ -85,9 +85,11 @@
     <addaction name="actionViewSchool"/>
     <addaction name="actionViewRestaurant"/>
     <addaction name="actionViewPark"/>
+    <addaction name="actionViewAmusement"/>
     <addaction name="actionViewLibrary"/>
     <addaction name="actionViewNoise"/>
     <addaction name="actionViewPollution"/>
+    <addaction name="actionViewStation"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
@@ -391,6 +393,22 @@
    </property>
    <property name="text">
     <string>Pollution</string>
+   </property>
+  </action>
+  <action name="actionViewAmusement">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Amusement</string>
+   </property>
+  </action>
+  <action name="actionViewStation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Station</string>
    </property>
   </action>
  </widget>

@@ -19,7 +19,8 @@ public:
 	int nearestPark;
 	int nearestAmusement;
 	int nearestLibrary;
-	float preference[8];
+	//float preference[8];
+	std::vector<float> preference;
 	std::vector<float> feature;
 	float score;
 
