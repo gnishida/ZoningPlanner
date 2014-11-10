@@ -39,6 +39,7 @@ public slots:
 	void onGenerateVegetation();
 	void onGenerateAll();
 	void onViewZoning();
+	void onViewPeople();
 	void onViewStore();
 	void onViewSchool();
 	void onViewRestaurant();

@@ -328,8 +328,6 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 }
 
 void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadEdgeDesc> > &embedding) {
-	time_t start = clock();
-
 	for (int i = 0; i < embedding.size(); ++i) {
 		QMap<float, RoadEdgeDesc> edges;
 
@@ -346,9 +344,6 @@ void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadE
 
 		embedding[i] = edge_descs;
 	}
-
-	time_t end = clock();
-	std::cout << "embedding was built. Elapsed time: " << (double)(end-start)/CLOCKS_PER_SEC << "[sec]" << std::endl;
 }
 
 void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {

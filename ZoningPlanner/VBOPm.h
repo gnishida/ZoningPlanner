@@ -14,6 +14,7 @@
 #include "RoadGraph.h"
 #include "BlockSet.h"
 #include "Person.h"
+#include "UrbanGeometry.h"
 
 class VBORenderManager;
 
@@ -31,9 +32,7 @@ public:
 
 	static void generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks);
 	static void generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person>& people);
-
-private:
-
+	static void generateSelecionMesh(VBORenderManager& rendManager, Person& person, UrbanGeometry& urbanGeometry);
 };
 
 

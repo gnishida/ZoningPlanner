@@ -1,11 +1,11 @@
 #include "Person.h"
 #include "Util.h"
 
-Person::Person() : _type(TYPE_UNKNOWN), commuteTo(-1) {
+Person::Person() : _type(TYPE_UNKNOWN) {
 	initPreference();
 }
 
-Person::Person(int type, const QVector2D& homeLocation) : _type(type), homeLocation(homeLocation), commuteTo(-1) {
+Person::Person(int type, const QVector2D& homeLocation) : _type(type), homeLocation(homeLocation) {
 	initPreference();
 }
 

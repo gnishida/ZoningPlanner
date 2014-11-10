@@ -309,6 +309,15 @@ void VBORenderManager::addBox(QString geoName, const QVector3D& center, const QV
 	addStaticGeometry(geoName, vert, "", GL_QUADS, 1|mode_Lighting);
 }
 
+void VBORenderManager::addLine(QString geoName, const QVector3D& pt1, const QVector3D& pt2, const QColor& color) {
+	std::vector<Vertex> vert;
+
+	vert.push_back(Vertex(pt1.x(), pt1.y(), pt1.z(), color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0));
+	vert.push_back(Vertex(pt2.x(), pt2.y(), pt2.z(), color.redF(), color.greenF(), color.blueF(), color.alphaF(), 0, 0, 1, 0, 0, 0));
+
+	addStaticGeometry(geoName, vert, "", GL_LINES, 1);
+}
+
 using namespace boost::polygon::operators;
 
 /**
@@ -430,18 +439,6 @@ void VBORenderManager::renderStaticGeometry(QString geoName){
 	}
 }//
 
-///////////////////////////////////////////////////////////////////
-// GRID
-bool VBORenderManager::addGridGeometry(QString geoName,std::vector<Vertex>& vert,QString textureName){
-	return false;
-}//
-bool VBORenderManager::removeGridGeometry(QString geoName){
-	return false;
-}//
-	
-void VBORenderManager::renderGridGeometry(QString geoName){
-		
-}//
 ////////////////////////////////////////////////////////////////////
 // MODEL
 void VBORenderManager::addStreetElementModel(QString name,ModelSpec mSpec){

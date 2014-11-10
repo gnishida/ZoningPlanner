@@ -107,9 +107,6 @@ public:
 	VBOWater vboWater;
 	void renderWater();
 
-	/// GUI
-	//VBOGUI vboGUI;
-
 	// textures
 	QHash<QString,GLuint> nameToTexId;
 	GLuint loadTexture(const QString fileName,bool mirrored=false);
@@ -122,13 +119,10 @@ public:
 	void renderStaticGeometry(QString geoName);
 	bool checkIfGeoNameInUse(QString geoName);
 
+	// some convenient functions for drawing basic primitives
 	void addSphere(QString geoName, const QVector3D& center, float radius, const QColor& color);
 	void addBox(QString geoName, const QVector3D& center, const QVector3D& size, const QColor& color);
-
-	//grid
-	bool addGridGeometry(QString geoName,std::vector<Vertex>& vert,QString textureName);
-	bool removeGridGeometry(QString geoName);
-	void renderGridGeometry(QString geoName);
+	void addLine(QString geoName, const QVector3D& pt1, const QVector3D& pt2, const QColor& color);
 
 	//models
 	QHash<QString,std::vector<ModelSpec>> nameToVectorModels;

@@ -13,13 +13,15 @@ private:
 
 public:
 	QVector2D homeLocation;
-	int commuteTo;
+	//int commuteTo;
 	int nearestStore;
+	int nearestSchool;
 	int nearestRestaurant;
 	int nearestPark;
 	int nearestAmusement;
 	int nearestLibrary;
-	//float preference[8];
+	int nearestStation;
+
 	std::vector<float> preference;
 	std::vector<float> feature;
 	float score;

@@ -295,3 +295,22 @@ void VBOPm::generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person
 	}
 }
 
+void VBOPm::generateSelecionMesh(VBORenderManager& rendManager, Person& person, UrbanGeometry& urbanGeometry) {
+	// 3Dモデルを生成する
+	rendManager.removeStaticGeometry("selection");
+
+	rendManager.addSphere("selection", QVector3D(person.homeLocation, 80), 10, QColor(255, 0, 0));
+	rendManager.addSphere("selection", QVector3D(urbanGeometry.stores[person.nearestStore].location, 80), 10, QColor(0, 0, 255));
+	rendManager.addSphere("selection", QVector3D(urbanGeometry.schools[person.nearestSchool].location, 80), 10, QColor(0, 192, 192));
+	rendManager.addSphere("selection", QVector3D(urbanGeometry.restaurants[person.nearestRestaurant].location, 80), 10, QColor(0, 0, 128));
+	rendManager.addSphere("selection", QVector3D(urbanGeometry.parks[person.nearestPark].location, 80), 10, QColor(0, 255, 0));
+	rendManager.addSphere("selection", QVector3D(urbanGeometry.amusements[person.nearestAmusement].location, 80), 10, QColor(255, 0, 255));
+	rendManager.addSphere("selection", QVector3D(urbanGeometry.libraries[person.nearestLibrary].location, 80), 10, QColor(0, 255, 255));
+
+	rendManager.addLine("line", QVector3D(person.homeLocation, 80), QVector3D(urbanGeometry.stores[person.nearestStore].location, 80), QColor(255, 255, 255));
+	rendManager.addLine("line", QVector3D(person.homeLocation, 80), QVector3D(urbanGeometry.schools[person.nearestSchool].location, 80), QColor(255, 255, 255));
+	rendManager.addLine("line", QVector3D(person.homeLocation, 80), QVector3D(urbanGeometry.restaurants[person.nearestRestaurant].location, 80), QColor(255, 255, 255));
+	rendManager.addLine("line", QVector3D(person.homeLocation, 80), QVector3D(urbanGeometry.parks[person.nearestPark].location, 80), QColor(255, 255, 255));
+	rendManager.addLine("line", QVector3D(person.homeLocation, 80), QVector3D(urbanGeometry.amusements[person.nearestAmusement].location, 80), QColor(255, 255, 255));
+	rendManager.addLine("line", QVector3D(person.homeLocation, 80), QVector3D(urbanGeometry.libraries[person.nearestLibrary].location, 80), QColor(255, 255, 255));
+}

@@ -32,6 +32,14 @@ public:
 	std::vector<Office> stations;
 	Layer noiseMap;
 
+	int selectedPerson;
+	int selectedStore;
+	int selectedSchool;
+	int selectedRestaurant;
+	int selectedPark;
+	int selectedAmusement;
+	int selectedLibrary;
+
 public:
 	UrbanGeometry(MainWindow* mainWin);
 	~UrbanGeometry();
@@ -45,12 +53,7 @@ public:
 	void clear();
 	void clearGeometry();
 
-	//void render(VBORenderManager &vboRenderManager);
 	void adaptToTerrain();
-
-	//void newTerrain(int width, int depth, int cellLength);
-	//void loadTerrain(const QString &filename);
-	//void saveTerrain(const QString &filename);
 
 	void loadRoads(const QString& filename);
 	void saveRoads(const QString& filename);
@@ -60,7 +63,6 @@ public:
 	void saveBlocks(const QString& filename);
 
 	bool allocateAll();
-	void allocateCommputingPlace();
 	float computeScore(VBORenderManager& renderManager);
 	void setFeatureForPerson(Person& person, VBORenderManager& renderManager);
 
@@ -75,7 +77,7 @@ public:
 	float noise(const QVector2D& pt);
 	float pollution(const QVector2D& pt);
 
-	Person findNearestPerson(const QVector2D& pt);
+	int findNearestPerson(const QVector2D& pt);
 
 	void updateStationMap(VBOLayer& layer);
 	void updateStoreMap(VBOLayer& layer);

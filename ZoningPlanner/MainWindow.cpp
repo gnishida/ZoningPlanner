@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionGenerateAll, SIGNAL(triggered()), this, SLOT(onGenerateAll()));
 
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
+	connect(ui.actionViewPeople, SIGNAL(triggered()), this, SLOT(onViewPeople()));
 	connect(ui.actionViewStore, SIGNAL(triggered()), this, SLOT(onViewStore()));
 	connect(ui.actionViewSchool, SIGNAL(triggered()), this, SLOT(onViewSchool()));
 	connect(ui.actionViewRestaurant, SIGNAL(triggered()), this, SLOT(onViewRestaurant()));
@@ -212,6 +213,11 @@ void MainWindow::onGenerateAll() {
 }
 
 void MainWindow::onViewZoning() {
+	glWidget->shadow.makeShadowMap(glWidget);
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewPeople() {
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }

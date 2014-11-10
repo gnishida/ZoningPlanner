@@ -17,6 +17,14 @@ UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
 
 	zones.load("zoning.xml");
+
+	selectedPerson = -1;
+	selectedStore = -1;
+	selectedSchool = -1;
+	selectedRestaurant = -1;
+	selectedPark = -1;
+	selectedAmusement = -1;
+	selectedLibrary = -1;
 }
 
 UrbanGeometry::~UrbanGeometry() {
@@ -41,18 +49,6 @@ void UrbanGeometry::adaptToTerrain() {
 		blocks[i].adaptToTerrain(&mainWin->glWidget->vboRenderManager);
 	}
 }
-
-/*void UrbanGeometry::newTerrain(int width, int depth, int cellLength) {
-	clear();
-}*/
-
-/*void UrbanGeometry::loadTerrain(const QString &filename) {
-	printf("NOT IMPLEMENTED YET\n");
-}
-
-void UrbanGeometry::saveTerrain(const QString &filename) {
-	printf("NOT IMPLEMENTED YET\n");
-}*/
 
 void UrbanGeometry::loadRoads(const QString &filename) {
 	QFile file(filename);
@@ -174,7 +170,8 @@ bool UrbanGeometry::allocateAll() {
 					restaurants.push_back(Office(location));
 				}
 			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PARK) {
-				parks.push_back(Office(location));
+				// MODIFIED: Since this is a small park, we do not count this as a park.
+				//parks.push_back(Office(location));
 			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PUBLIC) {
 				float r = Util::genRand(0, 1);
 				if (r < 0.3) {
@@ -243,19 +240,6 @@ bool UrbanGeometry::allocateAll() {
 }
 
 /**
- * Allocate a commuting place to each person.
- */
-void UrbanGeometry::allocateCommputingPlace() {
-	for (int i = 0; i < people.size(); ++i) {
-		if (people[i].type() == Person::TYPE_STUDENT) {
-			people[i].commuteTo = Util::genRand(0, schools.size());
-		} else if (people[i].type() == Person::TYPE_OFFICEWORKER) {
-			people[i].commuteTo = Util::genRand(0, offices.size());
-		}
-	}
-}
-
-/**
  * 各住人にとっての、都市のfeatureベクトルを計算する。結果は、各personのfeatureに格納される。
  * また、それに対する評価結果を、各personのscoreに格納する。
  * さらに、全住人によるscoreの平均を返却する。
@@ -282,8 +266,9 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
 	person.feature.resize(9);
 
 	// 各propertyのsensitivity
-	float K[] = {0.002, 0.002, 0.001, 0.003, 0.001, 0.001, 0.01, 0.01, 0.001};
+	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
 
+	/*
 	person.feature[0] = expf(-K[0] * renderManager.vboStoreLayer.layer.getValue(person.homeLocation));
 	person.feature[1] = expf(-K[1] * renderManager.vboSchoolLayer.layer.getValue(person.homeLocation));
 	person.feature[2] = expf(-K[2] * renderManager.vboRestaurantLayer.layer.getValue(person.homeLocation));
@@ -293,22 +278,57 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
 	person.feature[6] = expf(-K[6] * renderManager.vboNoiseLayer.layer.getValue(person.homeLocation));
 	person.feature[7] = expf(-K[7] * renderManager.vboPollutionLayer.layer.getValue(person.homeLocation));
 	person.feature[8] = expf(-K[8] * renderManager.vboStationLayer.layer.getValue(person.homeLocation));
-
-
-
-	/*
-	person.feature[0] = nearestStore(person.homeLocation).second;
-	person.feature[1] = nearestSchool(person.homeLocation).second;
-	person.feature[2] = nearestRestaurant(person.homeLocation).second;
-	person.feature[3] = nearestPark(person.homeLocation).second;
-	person.feature[4] = nearestAmusement(person.homeLocation).second;
-	person.feature[5] = nearestLibrary(person.homeLocation).second;
-	person.feature[6] = noise(person.homeLocation);
-	person.feature[7] = pollution(person.homeLocation);
-	person.feature[8] = nearestStation(person.homeLocation).second;
 	*/
 
-	person.nearestLibrary = nearestLibrary(person.homeLocation).first;
+	{ // nearest store
+		std::pair<int, float> n = nearestStore(person.homeLocation);
+		person.nearestStore = n.first;
+		person.feature[0] = expf(-K[0] * n.second);
+	}
+
+	{ // nearest school
+		std::pair<int, float> n = nearestSchool(person.homeLocation);
+		person.nearestSchool = n.first;
+		person.feature[1] = expf(-K[1] * n.second);
+	}
+
+	{ // nearest restaurant
+		std::pair<int, float> n = nearestRestaurant(person.homeLocation);
+		person.nearestRestaurant = n.first;
+		person.feature[2] = expf(-K[2] * n.second);
+	}
+
+	{ // nearest park
+		std::pair<int, float> n = nearestPark(person.homeLocation);
+		person.nearestPark = n.first;
+		person.feature[3] = expf(-K[3] * n.second);
+	}
+
+	{ // nearest amusement
+		std::pair<int, float> n = nearestAmusement(person.homeLocation);
+		person.nearestAmusement = n.first;
+		person.feature[4] = expf(-K[4] * n.second);
+	}
+
+	{ // nearest library
+		std::pair<int, float> n = nearestLibrary(person.homeLocation);
+		person.nearestLibrary = n.first;
+		person.feature[5] = expf(-K[5] * n.second);
+	}
+
+	{ // noise
+		person.feature[6] = expf(-K[6] * noise(person.homeLocation));
+	}
+
+	{ // pollution
+		person.feature[7] = expf(-K[7] * pollution(person.homeLocation));
+	}
+
+	{ // nearest station
+		std::pair<int, float> n = nearestStation(person.homeLocation);
+		person.nearestStation = n.first;
+		person.feature[8] = expf(-K[8] * n.second);
+	}
 }
 
 std::pair<int, float> UrbanGeometry::nearestPerson(const QVector2D& pt) {
@@ -397,16 +417,16 @@ std::pair<int, float> UrbanGeometry::nearestPark(const QVector2D& pt) {
 
 std::pair<int, float> UrbanGeometry::nearestAmusement(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
-	int nearestPark = -1;
+	int nearestAmusement = -1;
 	for (int i = 0; i < amusements.size(); ++i) {
 		float dist2 = (amusements[i].location - pt).lengthSquared();
 		if (dist2 < min_dist2) {
 			min_dist2 = dist2;
-			nearestPark = i;
+			nearestAmusement = i;
 		}
 	}
 
-	return std::make_pair(nearestPark, sqrtf(min_dist2));
+	return std::make_pair(nearestAmusement, sqrtf(min_dist2));
 }
 
 std::pair<int, float> UrbanGeometry::nearestLibrary(const QVector2D& pt) {
@@ -491,7 +511,7 @@ float UrbanGeometry::pollution(const QVector2D& pt) {
 	return n;
 }
 
-Person UrbanGeometry::findNearestPerson(const QVector2D& pt) {
+int UrbanGeometry::findNearestPerson(const QVector2D& pt) {
 	float min_dist = std::numeric_limits<float>::max();
 	int id = -1;
 
@@ -503,7 +523,7 @@ Person UrbanGeometry::findNearestPerson(const QVector2D& pt) {
 		}
 	}
 
-	return people[id];
+	return id;
 }
 
 void UrbanGeometry::updateStationMap(VBOLayer& layer) {

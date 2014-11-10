@@ -51,15 +51,11 @@ void GLWidget3D::mousePressEvent(QMouseEvent *event) {
 	mouseTo2D(event->x(), event->y(), pos);
 
 	if (controlPressed) {
-		Person person = mainWin->urbanGeometry->findNearestPerson(pos);
-		mainWin->controlWidget->showPersonInfo(person);
+		int selectedPerson = mainWin->urbanGeometry->findNearestPerson(pos);
+		if (selectedPerson >= 0) {
+			mainWin->controlWidget->showPersonInfo(mainWin->urbanGeometry->people[selectedPerson]);
 
-		if (person.commuteTo >= 0) {
-			if (person.type() == Person::TYPE_STUDENT) {
-				printf("school: (%lf, %lf)\n", mainWin->urbanGeometry->schools[person.commuteTo].location.x(), mainWin->urbanGeometry->schools[person.commuteTo].location.y());
-			} else if (person.type() == Person::TYPE_OFFICEWORKER) {
-				printf("office: (%lf, %lf)\n", mainWin->urbanGeometry->offices[person.commuteTo].location.x(), mainWin->urbanGeometry->offices[person.commuteTo].location.y());
-			}
+			VBOPm::generateSelecionMesh(vboRenderManager, mainWin->urbanGeometry->people[selectedPerson], *mainWin->urbanGeometry);
 		}
 	}
 }
@@ -157,12 +153,12 @@ void GLWidget3D::paintGL() {
  * @param drawMode		0 -- 通常の描画 / 1 -- shadowmap生成用の描画
  */
 void GLWidget3D::drawScene(int drawMode) {
-	glLineWidth(10);
+	glLineWidth(2);
 	
 	if (drawMode == 0) {
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
-		vboRenderManager.renderStaticGeometry(QString("sky"));
+		vboRenderManager.renderStaticGeometry("sky");
 		vboRenderManager.vboWater.render(vboRenderManager);
 
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 1);
@@ -172,12 +168,12 @@ void GLWidget3D::drawScene(int drawMode) {
 
 	vboRenderManager.vboTerrain.render(vboRenderManager);
 
-	vboRenderManager.renderStaticGeometry(QString("3d_sidewalk"));
-	vboRenderManager.renderStaticGeometry(QString("3d_parcel"));
+	vboRenderManager.renderStaticGeometry("3d_sidewalk");
+	vboRenderManager.renderStaticGeometry("3d_parcel");
 
-	vboRenderManager.renderStaticGeometry(QString("3d_roads"));			
-	vboRenderManager.renderStaticGeometry(QString("3d_roads_inter"));
-	vboRenderManager.renderStaticGeometry(QString("3d_roads_interCom"));
+	vboRenderManager.renderStaticGeometry("3d_roads");			
+	vboRenderManager.renderStaticGeometry("3d_roads_inter");
+	vboRenderManager.renderStaticGeometry("3d_roads_interCom");
 
 	// ゾーン表示
 	if (drawMode == 0) {
@@ -189,6 +185,9 @@ void GLWidget3D::drawScene(int drawMode) {
 	// 人を表示
 	if (mainWin->ui.actionViewPeople->isChecked()) {
 		vboRenderManager.renderStaticGeometry("people");
+
+		vboRenderManager.renderStaticGeometry("selection");
+		vboRenderManager.renderStaticGeometry("line");
 	}
 
 	// レイヤー表示
@@ -215,10 +214,10 @@ void GLWidget3D::drawScene(int drawMode) {
 	}
 
 	if (false) {
-		vboRenderManager.renderStaticGeometry(QString("3d_building"));
-		vboRenderManager.renderStaticGeometry(QString("3d_building_fac"));
+		vboRenderManager.renderStaticGeometry("3d_building");
+		vboRenderManager.renderStaticGeometry("3d_building_fac");
 
-		vboRenderManager.renderStaticGeometry(QString("3d_trees"));
+		vboRenderManager.renderStaticGeometry("3d_trees");
 		vboRenderManager.renderAllStreetElementName("tree");
 		vboRenderManager.renderAllStreetElementName("streetLamp");
 	}
