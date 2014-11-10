@@ -184,36 +184,44 @@ bool UrbanGeometry::allocateAll() {
 	}
 
 	// put schools outside this region
+	/*
 	{
 		schools.push_back(Office(QVector2D(-10000, -10000)));
 		schools.push_back(Office(QVector2D(10000, -10000)));
 		schools.push_back(Office(QVector2D(10000, 10000)));
 		schools.push_back(Office(QVector2D(-10000, 10000)));
 	}
+	*/
 
 	// put libraries outside this region
+	/*
 	{
 		libraries.push_back(Office(QVector2D(-10000, -10000)));
 		libraries.push_back(Office(QVector2D(10000, -10000)));
 		libraries.push_back(Office(QVector2D(10000, 10000)));
 		libraries.push_back(Office(QVector2D(-10000, 10000)));
 	}
+	*/
 
 	// put amusements outside this region
+	/*
 	{
 		amusements.push_back(Office(QVector2D(-10000, -10000)));
 		amusements.push_back(Office(QVector2D(10000, -10000)));
 		amusements.push_back(Office(QVector2D(10000, 10000)));
 		amusements.push_back(Office(QVector2D(-10000, 10000)));
 	}
+	*/
 
 	// put parks outside this region
+	/*
 	{
 		parks.push_back(Office(QVector2D(-10000, -10000)));
 		parks.push_back(Office(QVector2D(10000, -10000)));
 		parks.push_back(Office(QVector2D(10000, 10000)));
 		parks.push_back(Office(QVector2D(-10000, 10000)));
 	}
+	*/
 
 	// put offices outside this region
 	{
@@ -243,6 +251,10 @@ bool UrbanGeometry::allocateAll() {
  * さらに、全住人によるscoreの平均を返却する。
  */
 float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
+	QFile file("features.txt");
+	file.open(QIODevice::WriteOnly);
+	QTextStream out(&file);
+
 	float score_total = 0.0f;
 	for (int i = 0; i < people.size(); ++i) {
 		setFeatureForPerson(people[i], renderManager);
@@ -252,11 +264,19 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
 
 		for (int j = 0; j < f.size(); ++j) {
 			f[j] = exp(-K[j] * f[j]);
+			out << f[j];
+			if (j < f.size() - 1) {
+				out << ",";
+			}
 		}
+		out << "\n";
 
 		people[i].score = std::inner_product(std::begin(f), std::end(f), std::begin(people[i].preference), 0.0);
 		score_total += people[i].score;
 	}
+
+	out.flush();
+	file.close();
 
 	return score_total / (float)people.size();
 }

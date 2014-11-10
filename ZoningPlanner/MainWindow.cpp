@@ -386,7 +386,7 @@ void MainWindow::onFindBest() {
 
 	srand(time(NULL));
 
-	for (int loop = 0; loop < 20; ++loop) {
+	for (int loop = 0; loop < 1000; ++loop) {
 		while (true) {
 			// randomly generate the zoning
 			urbanGeometry->zones.generate(taretArea);
