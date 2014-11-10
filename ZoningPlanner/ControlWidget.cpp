@@ -42,15 +42,15 @@ void ControlWidget::showPersonInfo(const Person& person) {
 	ui.lineEditPreference7->setText(QString::number(person.preference[7]));
 	ui.lineEditPreference8->setText(QString::number(person.preference[8]));
 
-	ui.lineEditFeature0->setText(QString::number(person.feature[0], 'f', 2));
-	ui.lineEditFeature1->setText(QString::number(person.feature[1], 'f', 2));
-	ui.lineEditFeature2->setText(QString::number(person.feature[2], 'f', 2));
-	ui.lineEditFeature3->setText(QString::number(person.feature[3], 'f', 2));
-	ui.lineEditFeature4->setText(QString::number(person.feature[4], 'f', 2));
-	ui.lineEditFeature5->setText(QString::number(person.feature[5], 'f', 2));
-	ui.lineEditFeature6->setText(QString::number(person.feature[6], 'f', 2));
-	ui.lineEditFeature7->setText(QString::number(person.feature[7], 'f', 2));
-	ui.lineEditFeature8->setText(QString::number(person.feature[8], 'f', 2));
+	ui.lineEditFeature0->setText(QString::number(person.feature[0], 'f', 0));
+	ui.lineEditFeature1->setText(QString::number(person.feature[1], 'f', 0));
+	ui.lineEditFeature2->setText(QString::number(person.feature[2], 'f', 0));
+	ui.lineEditFeature3->setText(QString::number(person.feature[3], 'f', 0));
+	ui.lineEditFeature4->setText(QString::number(person.feature[4], 'f', 0));
+	ui.lineEditFeature5->setText(QString::number(person.feature[5], 'f', 0));
+	ui.lineEditFeature6->setText(QString::number(person.feature[6], 'f', 0));
+	ui.lineEditFeature7->setText(QString::number(person.feature[7], 'f', 0));
+	ui.lineEditFeature8->setText(QString::number(person.feature[8], 'f', 0));
 
 	ui.lineEditScore->setText(QString::number(person.score));
 }

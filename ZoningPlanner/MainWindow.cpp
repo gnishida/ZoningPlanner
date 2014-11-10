@@ -400,23 +400,23 @@ void MainWindow::onFindBest() {
 			if (urbanGeometry->allocateAll()) break;
 		}
 
-		// レイヤー情報を更新する
-		urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
-		urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
-		urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
-		urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
-		urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
-		urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
-		urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
-		urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
-		urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
-
 		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
 		printf("%d: score=%lf\n", loop, score);
 
 		QString filename = QString("zoning/score_%1.xml").arg(score, 4, 'f', 6);
 		urbanGeometry->zones.save(filename);
 	}
+
+	// レイヤー情報を更新する
+	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
+	urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
+	urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
 }
 
 void MainWindow::onCameraCar() {

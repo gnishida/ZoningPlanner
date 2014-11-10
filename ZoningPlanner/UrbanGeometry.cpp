@@ -228,8 +228,6 @@ bool UrbanGeometry::allocateAll() {
 		stations.push_back(Office(QVector2D(-896, 1232)));
 	}
 
-	//allocateCommputingPlace();
-
 	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 
 	if (schools.size() == 0 || restaurants.size() == 0 || amusements.size() == 0 || parks.size() == 0 || libraries.size() == 0 || factories.size() == 0) {
@@ -250,8 +248,10 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
 		setFeatureForPerson(people[i], renderManager);
 		std::vector<float> f = people[i].feature;
 
+		float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
+
 		for (int j = 0; j < f.size(); ++j) {
-			f[j] = exp(-f[j] * 0.001);
+			f[j] = exp(-K[j] * f[j]);
 		}
 
 		people[i].score = std::inner_product(std::begin(f), std::end(f), std::begin(people[i].preference), 0.0);
@@ -283,51 +283,51 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
 	{ // nearest store
 		std::pair<int, float> n = nearestStore(person.homeLocation);
 		person.nearestStore = n.first;
-		person.feature[0] = expf(-K[0] * n.second);
+		person.feature[0] = n.second;
 	}
 
 	{ // nearest school
 		std::pair<int, float> n = nearestSchool(person.homeLocation);
 		person.nearestSchool = n.first;
-		person.feature[1] = expf(-K[1] * n.second);
+		person.feature[1] = n.second;
 	}
 
 	{ // nearest restaurant
 		std::pair<int, float> n = nearestRestaurant(person.homeLocation);
 		person.nearestRestaurant = n.first;
-		person.feature[2] = expf(-K[2] * n.second);
+		person.feature[2] = n.second;
 	}
 
 	{ // nearest park
 		std::pair<int, float> n = nearestPark(person.homeLocation);
 		person.nearestPark = n.first;
-		person.feature[3] = expf(-K[3] * n.second);
+		person.feature[3] = n.second;
 	}
 
 	{ // nearest amusement
 		std::pair<int, float> n = nearestAmusement(person.homeLocation);
 		person.nearestAmusement = n.first;
-		person.feature[4] = expf(-K[4] * n.second);
+		person.feature[4] = n.second;
 	}
 
 	{ // nearest library
 		std::pair<int, float> n = nearestLibrary(person.homeLocation);
 		person.nearestLibrary = n.first;
-		person.feature[5] = expf(-K[5] * n.second);
+		person.feature[5] = n.second;
 	}
 
 	{ // noise
-		person.feature[6] = expf(-K[6] * noise(person.homeLocation));
+		person.feature[6] = noise(person.homeLocation);
 	}
 
 	{ // pollution
-		person.feature[7] = expf(-K[7] * pollution(person.homeLocation));
+		person.feature[7] = pollution(person.homeLocation);
 	}
 
 	{ // nearest station
 		std::pair<int, float> n = nearestStation(person.homeLocation);
 		person.nearestStation = n.first;
-		person.feature[8] = expf(-K[8] * n.second);
+		person.feature[8] = n.second;
 	}
 }
 
@@ -343,20 +343,6 @@ std::pair<int, float> UrbanGeometry::nearestPerson(const QVector2D& pt) {
 	}
 
 	return std::make_pair(nearestPerson, sqrtf(min_dist2));
-}
-
-std::pair<int, float> UrbanGeometry::nearestStation(const QVector2D& pt) {
-	float min_dist2 = std::numeric_limits<float>::max();
-	int nearestStation = -1;
-	for (int i = 0; i < stations.size(); ++i) {
-		float dist2 = (stations[i].location - pt).lengthSquared();
-		if (dist2 < min_dist2) {
-			min_dist2 = dist2;
-			nearestStation = i;
-		}
-	}
-
-	return std::make_pair(nearestStation, sqrtf(min_dist2));
 }
 
 std::pair<int, float> UrbanGeometry::nearestStore(const QVector2D& pt) {
@@ -441,6 +427,20 @@ std::pair<int, float> UrbanGeometry::nearestLibrary(const QVector2D& pt) {
 	}
 
 	return std::make_pair(nearestLibrary, sqrtf(min_dist2));
+}
+
+std::pair<int, float> UrbanGeometry::nearestStation(const QVector2D& pt) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestStation = -1;
+	for (int i = 0; i < stations.size(); ++i) {
+		float dist2 = (stations[i].location - pt).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestStation = i;
+		}
+	}
+
+	return std::make_pair(nearestStation, sqrtf(min_dist2));
 }
 
 float UrbanGeometry::noise(const QVector2D& pt) {
