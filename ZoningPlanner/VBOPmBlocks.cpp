@@ -312,15 +312,6 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		blockAreas.erase(blockAreas.begin()+maxAreaIdx);
 	}
 
-	// 歩道の分を確保するため、ブロックを縮小する。
-	for (int i = 0; i < blocks.size(); ++i) {
-		Loop3D blockContourInset;
-		float sidewalk_width = blocks[i].zone.sidewalk_width;
-		blocks[i].sidewalkContour.computeInset(sidewalk_width, blockContourInset, false);
-		blocks[i].blockContour.contour = blockContourInset;
-		blocks[i].blockContour.getBBox3D(blocks[i].bbox.minPt, blocks[i].bbox.maxPt);
-	}
-
 	// assign a zone to each block
 	assignZonesToBlocks(zoning, blocks);
 
@@ -346,17 +337,35 @@ void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadE
 	}
 }
 
+/**
+ * 全部のブロックに、ゾーンプランに基づいてゾーンタイプを割り当てる。
+ * ゾーンタイプによって、各ブロックの歩道の幅も決まる。
+ * なので、当然ながら、既存の区画は無効となる。
+ * （現状、区画をクリアはしていない。クリアした方がよいか？）
+ * 必要なら、この関数の後で、区画生成を実行してください。
+ */
 void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 	for (int i = 0; i < blocks.size(); ++i) {
 		// assign a zone type to the block
 		{
-			int zoneId = zoning.getZone(QVector2D(blocks[i].bbox.midPt()));
+			BBox3D bbox;
+			blocks[i].sidewalkContour.getBBox3D(bbox.minPt, bbox.maxPt);
+
+			int zoneId = zoning.getZone(QVector2D(bbox.midPt()));
 			if (zoneId >= 0) {
 				blocks[i].zone = zoning.zones[zoneId].second;
-				VBOPmParcels::assignZoneType(blocks[i]);
 			} else {
 				printf("ERROR: no zone is assigned to this block.\n");
 			}
 		}
+	}
+
+	// 歩道の分を確保するため、ブロックを縮小する。
+	for (int i = 0; i < blocks.size(); ++i) {
+		Loop3D blockContourInset;
+		float sidewalk_width = blocks[i].zone.sidewalk_width;
+		blocks[i].sidewalkContour.computeInset(sidewalk_width, blockContourInset, false);
+		blocks[i].blockContour.contour = blockContourInset;
+		blocks[i].blockContour.getBBox3D(blocks[i].bbox.minPt, blocks[i].bbox.maxPt);
 	}
 }

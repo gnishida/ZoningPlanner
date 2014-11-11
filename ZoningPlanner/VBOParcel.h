@@ -8,7 +8,7 @@
 #include "VBOBuilding.h"
 #include <QTextStream>
 #include "Polygon3D.h"
-#include "Zoning.h"
+#include "ZoneType.h"
 
 const int PAR_PARK=0;
 const int PAR_WITH_BLDG=1;
@@ -16,54 +16,22 @@ const int PAR_WITH_BLDG=1;
 /**
 * Parcel.
 **/
-class Parcel{
-
+class Parcel {
 public:
-
-	/**
-	* Interface
-	**/
 	Polygon3D parcelContour;
 	Polygon3D parcelBuildableAreaContour;
 
-	//int parcelType;
 	ZoneType zone;
 
 	Building myBuilding;
 
-	/**
-	* Methods
-	**/
+	BBox3D bbox;
+	boost::geometry::ring_type<Polygon3D>::type bg_parcelContour;
 
+public:
 	Parcel();
 
-	/*Parcel(const Parcel &ref){					
-		parcelContour = ref.parcelContour;
-		parcelBuildableAreaContour = ref.parcelBuildableAreaContour;
-		myBuilding = ref.myBuilding;
-		bbox = ref.bbox;
-		myPlaceTypeIdx = ref.myPlaceTypeIdx;
-		parcelType = ref.parcelType;
-		initializeParcel();
-	}*/
-
-
-	/*inline Parcel &operator=(const Parcel &ref){	
-		parcelContour = ref.parcelContour;
-		parcelBuildableAreaContour = ref.parcelBuildableAreaContour;
-		myBuilding = ref.myBuilding;				
-
-		bbox = ref.bbox;
-		initializeParcel();
-		myPlaceTypeIdx = ref.myPlaceTypeIdx;
-		parcelType = ref.parcelType;
-		initializeParcel();
-		return (*this);
-	}*/
-
-	/**
-	* Set Contour
-	**/
+	/** Set Contour */
 	inline void setContour(Polygon3D &inContour)
 	{
 		this->parcelContour = inContour;
@@ -104,39 +72,7 @@ public:
 	**/
 	int unionWithParcel(Parcel &other);
 
-	/**
-	* Export parcel contour to OBJ
-	**/
-	void writeParcelContourToOBJ(QTextStream &objStream);
-
-	/**
-	* Export parcel building to OBJ
-	**/
-	void writeParcelBuildingToOBJ(QTextStream &objStream);
-
-
-	/**
-	* Compute Parcel Buildable Area
-	**/
-	float computeBuildableArea(float frontSetback, float rearSetback, float sideSetback,
-		std::vector<int> &frontEdges, 
-		std::vector<int> &rearEdges, 
-		std::vector<int> &sideEdges,
-		Loop3D &pgonInset);
-
-
-	/*inline void setMyPlaceTypeIdx(int inIdx){
-		myPlaceTypeIdx = inIdx;
-	}*/
-
-	/*inline int getMyPlaceTypeIdx(void){
-		return myPlaceTypeIdx;
-	}*/
-
-	BBox3D bbox;
-	boost::geometry::ring_type<Polygon3D>::type bg_parcelContour;
-private:	
-	//int myPlaceTypeIdx;
-
+	/** Compute Parcel Buildable Area */
+	float computeBuildableArea(float frontSetback, float rearSetback, float sideSetback, std::vector<int> &frontEdges, std::vector<int> &rearEdges, std::vector<int> &sideEdges, Loop3D &pgonInset);
 };
 

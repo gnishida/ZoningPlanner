@@ -201,6 +201,7 @@
     <ClCompile Include="VBOUtil.cpp" />
     <ClCompile Include="VBOVegetation.cpp" />
     <ClCompile Include="VBOWater.cpp" />
+    <ClCompile Include="ZoneType.cpp" />
     <ClCompile Include="Zoning.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -316,6 +317,7 @@
     <ClInclude Include="VBOUtil.h" />
     <ClInclude Include="VBOVegetation.h" />
     <ClInclude Include="VBOWater.h" />
+    <ClInclude Include="ZoneType.h" />
     <ClInclude Include="Zoning.h" />
   </ItemGroup>
   <ItemGroup>

@@ -12,7 +12,7 @@
 #include "VBOParcel.h"
 #include <QVector3D>
 #include "Polygon3D.h"
-#include "Zoning.h"
+#include "ZoneType.h"
 
 /**
 * Block.
@@ -22,24 +22,13 @@ class Block {
 public:
 	/**
 	* BGL Graph of parcels into which block is subdivided.
-	**/				 
-
-	typedef boost::adjacency_list
-		<boost::vecS, boost::vecS, boost::undirectedS, Parcel> parcelGraph;				
-
+	**/
+	typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Parcel> parcelGraph;
 	typedef boost::graph_traits<parcelGraph>::vertex_descriptor parcelGraphVertexDesc;
-
 	typedef boost::graph_traits<parcelGraph>::vertex_iterator parcelGraphVertexIter;
-
 	typedef boost::graph_traits<parcelGraph>::edge_iterator parcelGraphEdgeIter;
-
 	typedef boost::graph_traits<parcelGraph>::adjacency_iterator parcelGraphAdjIter;// Carlos
 
-
-private:
-	//int myPlaceTypeIdx;
-	//int myNeighborhoodID;
-	//int myCityID;
 
 public:
 	parcelGraph myParcels;
@@ -47,7 +36,6 @@ public:
 	BBox3D bbox;
 
 	int randSeed;
-	//bool isPark;
 	ZoneType zone;
 
 	/** Contour of the block */
@@ -79,19 +67,11 @@ public:
 		std::vector<int> &sideEdges );
 
 
-
-	/**
-	* Adapt block to vboRenderManager
-	**/
-	//void adaptBlockToTerrain(MTC::geometry::ElevationGrid *elGrid);
-
-
 	bool splitBlockParcelsWithRoadSegment(std::vector<QVector3D> &roadSegmentGeometry,
 		float roadSegmentWidth, BBox3D roadSegmentBBox3D, std::list<Parcel> &blockParcels);
 
 	bool areParcelsAdjacent(parcelGraphVertexIter &p0, parcelGraphVertexIter &p1);
 	
-	//void generateMesh(VBORenderManager& rendManager);
 	void adaptToTerrain(VBORenderManager* vboRenderManager);
 };
 

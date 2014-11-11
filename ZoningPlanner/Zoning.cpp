@@ -1,216 +1,39 @@
-#include "Zoning.h"
+﻿#include "Zoning.h"
 #include <QFile>
 #include <QDomDocument>
 #include "Util.h"
-
-void ZoneType::init() {
-	if (_type == TYPE_RESIDENTIAL) {
-		if (_level == 1) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 200;
-			parcel_area_min = 100;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 2;
-			parcel_setback_sides = 2;
-			parcel_setback_rear = 2;
-			building_stories_mean = 2;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 2;
-			tree_setback = 1;
-			building_type = 0;
-		} else if (_level == 2) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 2000;
-			parcel_area_min = 1000;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 8;
-			parcel_setback_sides = 6;
-			parcel_setback_rear = 8;
-			building_stories_mean = 4;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 3;
-			tree_setback = 1;
-			building_type = 0;
-		} else if (_level == 3) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 4000;
-			parcel_area_min = 2000;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 10;
-			parcel_setback_sides = 8;
-			parcel_setback_rear = 12;
-			building_stories_mean = 12;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 4;
-			tree_setback = 1;
-			building_type = 0;
-		}
-	} else if (_type == TYPE_COMMERCIAL) {
-		if (_level == 1) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 500;
-			parcel_area_min = 250;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 2;
-			parcel_setback_sides = 2;
-			parcel_setback_rear = 2;
-			building_stories_mean = 2;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 2;
-			tree_setback = 1;
-			building_type = 0;
-		} else if (_level == 2) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 2500;
-			parcel_area_min = 1250;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 8;
-			parcel_setback_sides = 6;
-			parcel_setback_rear = 8;
-			building_stories_mean = 4;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 3;
-			tree_setback = 1;
-			building_type = 0;
-		} else if (_level == 3) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 4000;
-			parcel_area_min = 2000;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 10;
-			parcel_setback_sides = 8;
-			parcel_setback_rear = 12;
-			building_stories_mean = 12;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 4;
-			tree_setback = 1;
-			building_type = 0;
-		}
-	} else if (_type == TYPE_MANUFACTURING) {
-		if (_level == 1) {
-			park_percentage = 0.05;
-			parcel_area_mean = 500;
-			parcel_area_min = 250;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 2;
-			parcel_setback_sides = 2;
-			parcel_setback_rear = 2;
-			building_stories_mean = 2;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 2;
-			tree_setback = 1;
-			building_type = 0;
-		} else if (_level == 2) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 2500;
-			parcel_area_min = 1250;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 5;
-			parcel_setback_sides = 4;
-			parcel_setback_rear = 4;
-			building_stories_mean = 4;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 3;
-			tree_setback = 1;
-			building_type = 0;
-		} else if (_level == 3) {
-			park_percentage = 0.0f;
-			parcel_area_mean = 4000;
-			parcel_area_min = 2000;
-			parcel_area_deviation = 1;
-			parcel_split_deviation = 0.2;
-			parcel_setback_front = 7;
-			parcel_setback_sides = 4;
-			parcel_setback_rear = 4;
-			building_stories_mean = 12;
-			building_stories_deviation = 50;
-			building_max_depth = 0;
-			building_max_frontage = 0;
-			sidewalk_width = 4;
-			tree_setback = 1;
-			building_type = 0;
-		}
-	} else if (_type == TYPE_PARK) {
-		park_percentage = 1.0f;
-		parcel_area_mean = 4000;
-		parcel_area_min = 2000;
-		parcel_area_deviation = 1;
-		parcel_split_deviation = 0.2;
-		parcel_setback_front = 7;
-		parcel_setback_sides = 4;
-		parcel_setback_rear = 4;
-		building_stories_mean = 1;
-		building_stories_deviation = 50;
-		building_max_depth = 0;
-		building_max_frontage = 0;
-		sidewalk_width = 4;
-		tree_setback = 1;
-		building_type = 0;
-	} else if (_type == TYPE_AMUSEMENT) {
-		park_percentage = 0.0f;
-		parcel_area_mean = 2000;
-		parcel_area_min = 1000;
-		parcel_area_deviation = 1;
-		parcel_split_deviation = 0.2;
-		parcel_setback_front = 8;
-		parcel_setback_sides = 6;
-		parcel_setback_rear = 8;
-		building_stories_mean = 4;
-		building_stories_deviation = 50;
-		building_max_depth = 0;
-		building_max_frontage = 0;
-		sidewalk_width = 4;
-		tree_setback = 1;
-		building_type = 0;
-	} else if (_type == TYPE_PUBLIC) {
-		park_percentage = 0.0f;
-		parcel_area_mean = 2000;
-		parcel_area_min = 1000;
-		parcel_area_deviation = 1;
-		parcel_split_deviation = 0.2;
-		parcel_setback_front = 8;
-		parcel_setback_sides = 6;
-		parcel_setback_rear = 8;
-		building_stories_mean = 3;
-		building_stories_deviation = 50;
-		building_max_depth = 0;
-		building_max_frontage = 0;
-		sidewalk_width = 4;
-		tree_setback = 1;
-		building_type = 0;
-	}
-}
-
-void ZoneType::setType(int type) {
-	_type = type;
-	init();
-}
+#include "BlockSet.h"
 
 Zoning::Zoning() {
+	// residential
+	zoneTypeDistribution.push_back(0.2f);
+	zoneTypeDistribution.push_back(0.38f);
+	zoneTypeDistribution.push_back(0.2f);
+
+	// commercial
+	zoneTypeDistribution.push_back(0.06f);
+	zoneTypeDistribution.push_back(0.05f);
+	zoneTypeDistribution.push_back(0.03f);
+
+	// manufacturing
+	zoneTypeDistribution.push_back(0.02f);
+	zoneTypeDistribution.push_back(0.01f);
+	zoneTypeDistribution.push_back(0.01f);
+
+	// park
+	zoneTypeDistribution.push_back(0.02f);
+	zoneTypeDistribution.push_back(0);
+	zoneTypeDistribution.push_back(0);
+
+	// amusement
+	zoneTypeDistribution.push_back(0.01f);
+	zoneTypeDistribution.push_back(0);
+	zoneTypeDistribution.push_back(0);
+
+	// public
+	zoneTypeDistribution.push_back(0.01f);
+	zoneTypeDistribution.push_back(0);
+	zoneTypeDistribution.push_back(0);
 }
 
 int Zoning::getZone(const QVector2D& pt) const {
@@ -227,15 +50,6 @@ int Zoning::getZone(const QVector2D& pt) const {
 
 void Zoning::load(const QString& filename) {
 	zones.clear();
-
-	{
-		Polygon2D polygon;
-		polygon.push_back(QVector2D(-100000, -100000));
-		polygon.push_back(QVector2D(100000, -100000));
-		polygon.push_back(QVector2D(100000, 100000));
-		polygon.push_back(QVector2D(-100000, 100000));
-		zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
-	}
 
 	QFile file(filename);
 
@@ -373,4 +187,69 @@ void Zoning::generate(Polygon2D& targetArea) {
 		}
 		if (valid) break;
 	}
+}
+
+/**
+ * 指定されたdistributionに従い、ブロックにゾーンタイプを割り当てる。
+ */
+void Zoning::randomlyAssignZoneType(BlockSet& blocks) {
+	zones.clear();
+	zones.push_back(defaultZone());
+
+	float totalArea = 0.0f;
+
+	QVector3D size;
+	QMatrix4x4 xformMat;
+	for (int i = 0; i < blocks.size(); ++i) {
+		totalArea += blocks[i].blockContour.area();
+	}
+
+	float Z = 0.0f;
+	for (int i = 0; i < zoneTypeDistribution.size(); ++i) {
+		Z += zoneTypeDistribution[i];
+	}
+
+	std::vector<float> remainedArea;
+	for (int i = 0; i < zoneTypeDistribution.size(); ++i) {
+		remainedArea.push_back(zoneTypeDistribution[i] / Z * totalArea);
+	}
+
+	for (int i = 0; i < blocks.size(); ++i) {
+		Z = 0.0f;
+		for (int type = 0; type < zoneTypeDistribution.size(); ++type) {
+			if (remainedArea[type] < 0) continue;
+			Z += remainedArea[type];
+		}
+
+		float r = Util::genRand(0, Z);
+		Z = 0.0f;
+		for (int type = 0; type < zoneTypeDistribution.size(); ++type) {
+			if (remainedArea[type] < 0) continue;
+
+			Z += remainedArea[type];
+			if (r < Z) {
+				blocks[i].zone = ZoneType(type / 3, type % 3);
+				remainedArea[type] -= blocks[i].blockContour.area();
+				Polygon2D polygon;
+				for (int k = 0; k < blocks[i].blockContour.contour.size(); ++k) {
+					polygon.push_back(QVector2D(blocks[i].blockContour.contour[k]));
+				}
+				zones.push_back(std::make_pair(polygon, blocks[i].zone));
+				break;
+			}
+		}
+	}
+}
+
+std::pair<Polygon2D, ZoneType> Zoning::defaultZone() {
+	Polygon2D polygon;
+	polygon.push_back(QVector2D(-100000, -100000));
+	polygon.push_back(QVector2D(100000, -100000));
+	polygon.push_back(QVector2D(100000, 100000));
+	polygon.push_back(QVector2D(-100000, 100000));
+
+	ZoneType zone(ZoneType::TYPE_RESIDENTIAL, 1);
+	zone.init();
+
+	return std::make_pair(polygon, zone);
 }

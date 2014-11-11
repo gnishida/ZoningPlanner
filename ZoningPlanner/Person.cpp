@@ -1,7 +1,7 @@
 #include "Person.h"
 #include "Util.h"
 
-Person::Person() : _type(TYPE_UNKNOWN) {
+Person::Person() : _type(TYPE_STUDENT) {
 	initPreference();
 }
 

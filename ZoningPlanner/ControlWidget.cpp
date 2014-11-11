@@ -15,9 +15,6 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 
 void ControlWidget::showPersonInfo(const Person& person) {
 	switch (person.type()) {
-	case Person::TYPE_UNKNOWN:
-		ui.lineEditPersonType->setText("---");
-		break;
 	case Person::TYPE_STUDENT:
 		ui.lineEditPersonType->setText("Student");
 		break;

@@ -213,7 +213,7 @@ void GLWidget3D::drawScene(int drawMode) {
 		}
 	}
 
-	if (false) {
+	if (mainWin->ui.actionViewGeometry->isChecked()) {
 		vboRenderManager.renderStaticGeometry("3d_building");
 		vboRenderManager.renderStaticGeometry("3d_building_fac");
 

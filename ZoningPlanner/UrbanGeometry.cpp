@@ -96,9 +96,8 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 
 /**
  * 住民、オフィス、レストラン、図書館、公園、工場、などなどを配備する
- * １つも配備されない施設があった場合は、falseを返却する。
  */
-bool UrbanGeometry::allocateAll() {
+void UrbanGeometry::allocateAll() {
 	people.clear();
 	offices.clear();
 	schools.clear();
@@ -108,6 +107,48 @@ bool UrbanGeometry::allocateAll() {
 	parks.clear();
 	libraries.clear();
 	factories.clear();
+
+	// 予想される数を先に計算する
+	std::vector<float> numPeople(4, 0.0f);
+	std::vector<float> numCommercials(3, 0.0f);
+	std::vector<float> numManufacturings(2, 0.0f);
+	std::vector<float> numAmusements(3, 0.0f);
+	std::vector<float> numPublics(2, 0.0f);
+	for (int i = 0; i < blocks.size(); ++i) {
+		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
+
+		// 予測される区画数を計算
+		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
+
+		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+			// 住人の数を決定
+			int num = numParcels * Util::genRand(1, 5);
+			if (blocks[i].zone.level() == 2) {
+				num = blocks[i].blockContour.area() * 0.01f;
+			} else if (blocks[i].zone.level() == 3) {
+				num = blocks[i].blockContour.area() * 0.02f;
+			}
+			numPeople[0] += num * 0.2f;
+			numPeople[1] += num * 0.3f;
+			numPeople[2] += num * 0.3f;
+			numPeople[3] += num * 0.2f;
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
+			numCommercials[0] += numParcels * 0.6f; // office
+			numCommercials[1] += numParcels * 0.2f; // store
+			numCommercials[2] += numParcels * 0.2f; // restaurant
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {
+			numManufacturings[0] += numParcels * 0.2f;
+			numManufacturings[1] += numParcels * 0.8f;
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {
+			numAmusements[0] += numParcels * 0.6f; // amusement
+			numAmusements[1] += numParcels * 0.2f; // store
+			numAmusements[2] += numParcels * 0.2f; // restaurant
+		} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {
+			numPublics[0] += numParcels * 0.3f;
+			numPublics[1] += numParcels * 0.7;
+		}
+	}
 	
 	//Block::parcelGraphVertexIter vi, viEnd;
 	time_t start, end;
@@ -115,135 +156,75 @@ bool UrbanGeometry::allocateAll() {
 	for (int i = 0; i < blocks.size(); ++i) {
 		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
 
+		// 予測される区画数を計算
+		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
+
 		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
 			parks.push_back(Office(location));
-			continue;
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
 			// 住人の数を決定
-			int num = Util::genRand(1, 5);
+			int num = numParcels * Util::genRand(1, 5);
 			if (blocks[i].zone.level() == 2) {
-				num = blocks[i].blockContour.area() * 0.05f;
+				num = blocks[i].blockContour.area() * 0.01f;
 			} else if (blocks[i].zone.level() == 3) {
-				num = blocks[i].blockContour.area() * 0.20f;
+				num = blocks[i].blockContour.area() * 0.02f;
 			}
 
 			for (int n = 0; n < num; ++n) {
-				//QVector2D noise(Util::genRand(-size.x() * 0.5, size.x() * 0.5), Util::genRand(-size.y() * 0.5, size.y() * 0.5));
-				float r = Util::genRand(0, 1);
-				int type = Person::TYPE_UNKNOWN;
-				if (r < 0.2) {
-					type = Person::TYPE_STUDENT;
-				} else if (r < 0.5) {
-					type = Person::TYPE_HOUSEWIFE;
-				} else if (r < 0.8) {
-					type = Person::TYPE_OFFICEWORKER;
-				} else {
-					type = Person::TYPE_ELDERLY;
-				}
+				int type = Util::sampleFromPdf(numPeople);
+				numPeople[type]--;
 
 				people.push_back(Person(type, location));
 			}
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
-			float r = Util::genRand(0, 1);
-			if (r < 0.6) {
-				offices.push_back(Office(location));
-			} else if (r < 0.8) {
-				stores.push_back(Office(location));
-			} else {
-				restaurants.push_back(Office(location));
+			for (int n = 0; n < numParcels; ++n) {
+				int type = Util::sampleFromPdf(numCommercials);
+				if (type == 0) {
+					offices.push_back(Office(location));
+				} else if (type == 1) {
+					stores.push_back(Office(location));
+				} else {
+					restaurants.push_back(Office(location));
+				}
+				numCommercials[type]--;
 			}
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {
-			factories.push_back(Office(location));
-			offices.push_back(Office(location));
+			for (int n = 0; n < numParcels; ++n) {
+				int type = Util::sampleFromPdf(numManufacturings);
+				if (type == 0) {
+					factories.push_back(Office(location));
+				} else {
+					offices.push_back(Office(location));
+				}
+				numManufacturings[type]--;
+			}
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {
-			float r = Util::genRand(0, 1);
-			if (r < 0.6) {
-				amusements.push_back(Office(location));
-			} else if (r < 0.8) {
-				stores.push_back(Office(location));
-			} else {
-				restaurants.push_back(Office(location));
+			for (int n = 0; n < numParcels; ++n) {
+				int type = Util::sampleFromPdf(numAmusements);
+				if (type == 0) {
+					amusements.push_back(Office(location));
+				} else if (type == 1) {
+					stores.push_back(Office(location));
+				} else {
+					restaurants.push_back(Office(location));
+				}
+				numAmusements[type]--;
 			}
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {
-			float r = Util::genRand(0, 1);
-			if (r < 0.3) {
-				libraries.push_back(Office(location));
-			} else {
-				schools.push_back(Office(location));
-			}
-		}
-
-
-		/*
-		for (boost::tie(vi, viEnd) = boost::vertices(blocks[i].myParcels); vi != viEnd; ++vi) {
-			QVector2D location = QVector2D(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.getCentroid());
-
-			if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
-				int num = Util::genRand(1, 5);
-				if (blocks[i].myParcels[*vi].zone.level() == 2) {
-					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.05f;
-				} else if (blocks[i].myParcels[*vi].zone.level() == 3) {
-					num = blocks[i].myParcels[*vi].myBuilding.buildingFootprint.area() * 0.20f;
-				}
-
-				QVector3D size;
-				QMatrix4x4 xformMat;
-				Polygon3D::getLoopOBB(blocks[i].myParcels[*vi].myBuilding.buildingFootprint.contour, size, xformMat);
-
-				for (int n = 0; n < num; ++n) {
-					QVector2D noise(Util::genRand(-size.x() * 0.5, size.x() * 0.5), Util::genRand(-size.y() * 0.5, size.y() * 0.5));
-					float r = Util::genRand(0, 1);
-					int type = Person::TYPE_UNKNOWN;
-					if (r < 0.2) {
-						type = Person::TYPE_STUDENT;
-					} else if (r < 0.5) {
-						type = Person::TYPE_HOUSEWIFE;
-					} else if (r < 0.8) {
-						type = Person::TYPE_OFFICEWORKER;
-					} else {
-						type = Person::TYPE_ELDERLY;
-					}
-
-					people.push_back(Person(type, location + noise));
-				}
-			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_COMMERCIAL) {
-				float r = Util::genRand(0, 1);
-				if (r < 0.6) {
-					offices.push_back(Office(location));
-				} else if (r < 0.8) {
-					stores.push_back(Office(location));
-				} else {
-					restaurants.push_back(Office(location));
-				}
-			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_MANUFACTURING) {
-				factories.push_back(Office(location));
-				offices.push_back(Office(location));
-			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_AMUSEMENT) {
-				float r = Util::genRand(0, 1);
-				if (r < 0.6) {
-					amusements.push_back(Office(location));
-				} else if (r < 0.8) {
-					stores.push_back(Office(location));
-				} else {
-					restaurants.push_back(Office(location));
-				}
-			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PARK) {
-				// MODIFIED: Since this is a small park, we do not count this as a park.
-				//parks.push_back(Office(location));
-			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PUBLIC) {
-				float r = Util::genRand(0, 1);
-				if (r < 0.3) {
+			for (int n = 0; n < numParcels; ++n) {
+				int type = Util::sampleFromPdf(numPublics);
+				if (type == 0) {
 					libraries.push_back(Office(location));
 				} else {
 					schools.push_back(Office(location));
 				}
+				numPublics[type]--;
 			}
 		}
-		*/
 	}
 
 	end = clock();
-	printf("%lf\n", (double)(end - start) / CLOCKS_PER_SEC);
+	printf("allocateAll: %lf\n", (double)(end - start) / CLOCKS_PER_SEC);
 
 	// put a train station
 	{
@@ -251,24 +232,16 @@ bool UrbanGeometry::allocateAll() {
 	}
 
 	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
-
-	if (schools.size() == 0 || restaurants.size() == 0 || amusements.size() == 0 || parks.size() == 0 || libraries.size() == 0 || factories.size() == 0) {
-		return false;
-	} else {
-		return true;
-	}
 }
 
 /**
  * 各住人にとっての、都市のfeatureベクトルを計算する。結果は、各personのfeatureに格納される。
  * また、それに対する評価結果を、各personのscoreに格納する。
  * さらに、全住人によるscoreの平均を返却する。
+ * この関数は、レイヤー情報を使うのでちょっと速い代わりに、直近の店IDなどが分からない。
+ * なので、この関数は、findBest()からコールされるべきだ。
  */
 float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
-	QFile file("features.txt");
-	file.open(QIODevice::WriteOnly);
-	QTextStream out(&file);
-
 	float score_total = 0.0f;
 	for (int i = 0; i < people.size(); ++i) {
 		setFeatureForPerson(people[i], renderManager);
@@ -278,41 +251,79 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
 
 		for (int j = 0; j < f.size(); ++j) {
 			f[j] = exp(-K[j] * f[j]);
-			out << f[j];
-			if (j < f.size() - 1) {
-				out << ",";
-			}
 		}
-		out << "\n";
 
 		people[i].score = std::inner_product(std::begin(f), std::end(f), std::begin(people[i].preference), 0.0);
 		score_total += people[i].score;
 	}
 
-	out.flush();
-	file.close();
+	return score_total / (float)people.size();
+}
+
+/**
+ * 各住人にとっての、都市のfeatureベクトルを計算する。結果は、各personのfeatureに格納される。
+ * また、それに対する評価結果を、各personのscoreに格納する。
+ * さらに、全住人によるscoreの平均を返却する。
+ * この関数は、直近の店IDなどが分かる代わり、ちょっと遅い。
+ * なので、この関数は、loadZoning()からコールされるべきだ。
+ */
+float UrbanGeometry::computeScore() {
+	float score_total = 0.0f;
+	for (int i = 0; i < people.size(); ++i) {
+		setFeatureForPerson(people[i]);
+		std::vector<float> f = people[i].feature;
+
+		float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
+
+		for (int j = 0; j < f.size(); ++j) {
+			f[j] = exp(-K[j] * f[j]);
+		}
+
+		people[i].score = std::inner_product(std::begin(f), std::end(f), std::begin(people[i].preference), 0.0);
+		score_total += people[i].score;
+	}
 
 	return score_total / (float)people.size();
 }
 
+/**
+ * 指定された人の家に最も近い店、学校、レストラン、公園などの距離を計算する。
+ * レイヤー情報を使うので、ちょっと速いはず。
+ * ただし、直近の店ID、学校ID、レストランIDなどは分からないので、-1としておく。
+ * というわけで、この関数は、findBest()からコールされるべきだ。
+ * loadZoning()からは、もう一方の関数をコールすべき。
+ */
 void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& renderManager) {
-	person.feature.clear();
 	person.feature.resize(9);
 
-	// 各propertyのsensitivity
-	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
+	person.feature[0] = renderManager.vboStoreLayer.layer.getValue(person.homeLocation);
+	person.feature[1] = renderManager.vboSchoolLayer.layer.getValue(person.homeLocation);
+	person.feature[2] = renderManager.vboRestaurantLayer.layer.getValue(person.homeLocation);
+	person.feature[3] = renderManager.vboParkLayer.layer.getValue(person.homeLocation);
+	person.feature[4] = renderManager.vboAmusementLayer.layer.getValue(person.homeLocation);
+	person.feature[5] = renderManager.vboLibraryLayer.layer.getValue(person.homeLocation);
+	person.feature[6] = renderManager.vboNoiseLayer.layer.getValue(person.homeLocation);
+	person.feature[7] = renderManager.vboPollutionLayer.layer.getValue(person.homeLocation);
+	person.feature[8] = renderManager.vboStationLayer.layer.getValue(person.homeLocation);
 
-	/*
-	person.feature[0] = expf(-K[0] * renderManager.vboStoreLayer.layer.getValue(person.homeLocation));
-	person.feature[1] = expf(-K[1] * renderManager.vboSchoolLayer.layer.getValue(person.homeLocation));
-	person.feature[2] = expf(-K[2] * renderManager.vboRestaurantLayer.layer.getValue(person.homeLocation));
-	person.feature[3] = expf(-K[3] * renderManager.vboParkLayer.layer.getValue(person.homeLocation));
-	person.feature[4] = expf(-K[4] * renderManager.vboAmusementLayer.layer.getValue(person.homeLocation));
-	person.feature[5] = expf(-K[5] * renderManager.vboLibraryLayer.layer.getValue(person.homeLocation));
-	person.feature[6] = expf(-K[6] * renderManager.vboNoiseLayer.layer.getValue(person.homeLocation));
-	person.feature[7] = expf(-K[7] * renderManager.vboPollutionLayer.layer.getValue(person.homeLocation));
-	person.feature[8] = expf(-K[8] * renderManager.vboStationLayer.layer.getValue(person.homeLocation));
-	*/
+	person.nearestStore = -1;
+	person.nearestSchool = -1;
+	person.nearestRestaurant = -1;
+	person.nearestPark = -1;
+	person.nearestAmusement = -1;
+	person.nearestLibrary = -1;
+	person.nearestStation = -1;
+}
+
+/**
+ * 指定された人の家に最も近い店、学校、レストラン、公園などの距離を計算する。
+ * レイヤー情報を使わない代わり、具体的に、直近の店ID、直近の学校ID、直近のレストランIDを計算して保存するので、
+ * 人をクリックした際に、直近の店、学校、レストランなどを表示できる。
+ * というわけで、この関数は、loadZoning()からコールされるべきだ。
+ * findBest()からは、もう一方の関数をコールすべき。そっちの方がちょっと速いから。
+ */
+void UrbanGeometry::setFeatureForPerson(Person& person) {
+	person.feature.resize(9);
 
 	{ // nearest store
 		std::pair<int, float> n = nearestStore(person.homeLocation);

@@ -202,6 +202,9 @@
     <ClCompile Include="FLayer.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
+    <ClCompile Include="ZoneType.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -378,6 +381,9 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="FLayer.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ZoneType.h">
       <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,6 +6,7 @@
 #include "VBOPmParcels.h"
 #include "ConvexHull.h"
 #include <time.h>
+#include <algorithm>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionGenerateVegetation, SIGNAL(triggered()), this, SLOT(onGenerateVegetation()));
 	connect(ui.actionGenerateAll, SIGNAL(triggered()), this, SLOT(onGenerateAll()));
 
+	connect(ui.actionViewGeometry, SIGNAL(triggered()), this, SLOT(onViewGeometry()));
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
 	connect(ui.actionViewPeople, SIGNAL(triggered()), this, SLOT(onViewPeople()));
 	connect(ui.actionViewStore, SIGNAL(triggered()), this, SLOT(onViewStore()));
@@ -124,7 +126,7 @@ void MainWindow::onLoadZoning() {
 
 	// compute the feature vectors
 	startTime = clock();
-	urbanGeometry->computeScore(glWidget->vboRenderManager);
+	urbanGeometry->computeScore();
 	endTime = clock();
 	printf("Compute score: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
@@ -180,8 +182,8 @@ void MainWindow::onGenerateBlocks() {
 
 void MainWindow::onGenerateParcels() {
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-	urbanGeometry->allocateAll();
-	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+	//urbanGeometry->allocateAll();
+	//VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 	glWidget->updateGL();
 }
 
@@ -202,13 +204,18 @@ void MainWindow::onGenerateAll() {
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-	urbanGeometry->allocateAll();
-	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+	//urbanGeometry->allocateAll();
+	//VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	VBOPm::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateVegetation(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	glWidget->shadow.makeShadowMap(glWidget);
 
+	glWidget->updateGL();
+}
+
+void MainWindow::onViewGeometry() {
+	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
 
@@ -330,26 +337,10 @@ void MainWindow::onViewStation() {
 }
 
 void MainWindow::onPropose() {
-	ConvexHull ch;
-	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
-		for (int j = 0; j < urbanGeometry->blocks[i].sidewalkContour.contour.size(); ++j) {
-			ch.addPoint(QVector2D(urbanGeometry->blocks[i].sidewalkContour.contour[j]));
-		}
-	}
-	Polygon2D taretArea = ch.convexHull();
+	// randomly assign zone types to the blocks
+	urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
 
-	while (true) {
-		// randomly generate the zoning
-		urbanGeometry->zones.generate(taretArea);
-
-		// assign zone type to blocks
-		VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
-
-		// re-generate parcels
-		VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-		if (urbanGeometry->allocateAll()) break;
-	}
+	urbanGeometry->allocateAll();
 
 	// generate 3D mesh
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
@@ -376,38 +367,58 @@ void MainWindow::onFindBest() {
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
-	ConvexHull ch;
-	for (int i = 0; i < urbanGeometry->blocks.size(); ++i) {
-		for (int j = 0; j < urbanGeometry->blocks[i].sidewalkContour.contour.size(); ++j) {
-			ch.addPoint(QVector2D(urbanGeometry->blocks[i].sidewalkContour.contour[j]));
-		}
-	}
-	Polygon2D taretArea = ch.convexHull();
-
 	srand(time(NULL));
 
+	std::vector<std::pair<float, Zoning> > zones;
 	for (int loop = 0; loop < 1000; ++loop) {
-		while (true) {
-			// randomly generate the zoning
-			urbanGeometry->zones.generate(taretArea);
+		// randomly assign zone types to the blocks
+		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
 
-			// assign zone type to blocks
-			VBOPmBlocks::assignZonesToBlocks(urbanGeometry->zones, urbanGeometry->blocks);
+		urbanGeometry->allocateAll();
 
-			// re-generate parcels
-			//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-			if (urbanGeometry->allocateAll()) break;
-		}
+		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
+ 		urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
+		urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
+		urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
+		urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
+		urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
+		urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
+		urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
+		urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
+		urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
 
 		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
 		printf("%d: score=%lf\n", loop, score);
 
-		QString filename = QString("zoning/score_%1.xml").arg(score, 4, 'f', 6);
-		urbanGeometry->zones.save(filename);
+		zones.push_back(std::make_pair(score, urbanGeometry->zones));
+	}
+
+	// ベスト３を保存する
+	std::make_heap(zones.begin(), zones.end(), CompareZoning());
+	for (int i = 0; i < 3; ++i) {
+		std::pop_heap(zones.begin(), zones.end(), CompareZoning());
+		std::pair<float, Zoning> z = zones.back();
+
+		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
+		z.second.save(filename);
+
+		zones.pop_back();
+	}
+
+	// ワースト３を保存する
+	std::make_heap(zones.begin(), zones.end(), CompareZoningReverse());
+	for (int i = 0; i < 3; ++i) {
+		std::pop_heap(zones.begin(), zones.end(), CompareZoningReverse());
+		std::pair<float, Zoning> z = zones.back();
+
+		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
+		z.second.save(filename);
+
+		zones.pop_back();
 	}
 
 	// レイヤー情報を更新する
+	/*
 	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
 	urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
 	urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
@@ -417,6 +428,7 @@ void MainWindow::onFindBest() {
 	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
 	urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
 	urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
+	*/
 }
 
 void MainWindow::onCameraCar() {

@@ -62,9 +62,11 @@ public:
 	void loadBlocks(const QString& filename);
 	void saveBlocks(const QString& filename);
 
-	bool allocateAll();
+	void allocateAll();
 	float computeScore(VBORenderManager& renderManager);
+	float computeScore();
 	void setFeatureForPerson(Person& person, VBORenderManager& renderManager);
+	void setFeatureForPerson(Person& person);
 
 	std::pair<int, float> nearestPerson(const QVector2D& pt);
 	std::pair<int, float> nearestStation(const QVector2D& pt);

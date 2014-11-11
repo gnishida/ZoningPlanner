@@ -6,7 +6,7 @@
 class Person
 {
 public:
-	static enum { TYPE_UNKNOWN = 0, TYPE_STUDENT, TYPE_HOUSEWIFE, TYPE_OFFICEWORKER, TYPE_ELDERLY };
+	static enum { TYPE_STUDENT = 0, TYPE_HOUSEWIFE, TYPE_OFFICEWORKER, TYPE_ELDERLY };
 
 private:
 	int _type;
