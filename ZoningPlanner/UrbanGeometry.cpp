@@ -107,6 +107,7 @@ void UrbanGeometry::allocateAll() {
 	parks.clear();
 	libraries.clear();
 	factories.clear();
+	stations.clear();
 
 	// 予想される数を先に計算する
 	std::vector<float> numPeople(4, 0.0f);
@@ -114,6 +115,7 @@ void UrbanGeometry::allocateAll() {
 	std::vector<float> numManufacturings(2, 0.0f);
 	std::vector<float> numAmusements(3, 0.0f);
 	std::vector<float> numPublics(2, 0.0f);
+	
 	for (int i = 0; i < blocks.size(); ++i) {
 		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
 
@@ -151,8 +153,6 @@ void UrbanGeometry::allocateAll() {
 	}
 	
 	//Block::parcelGraphVertexIter vi, viEnd;
-	time_t start, end;
-	start = clock();
 	for (int i = 0; i < blocks.size(); ++i) {
 		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
 
@@ -223,15 +223,12 @@ void UrbanGeometry::allocateAll() {
 		}
 	}
 
-	end = clock();
-	printf("allocateAll: %lf\n", (double)(end - start) / CLOCKS_PER_SEC);
-
 	// put a train station
 	{
 		stations.push_back(Office(QVector2D(-896, 1232)));
 	}
 
-	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
+	//printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 }
 
 /**

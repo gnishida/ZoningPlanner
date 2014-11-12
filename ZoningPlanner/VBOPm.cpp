@@ -103,12 +103,12 @@ void VBOPm::generateBlockModels(VBORenderManager& rendManager,RoadGraph &roadGra
 				QVector3D p3 = blocks[i].sidewalkContour.contour[ind2]+QVector3D(0,0, 0.3f);//1.5f);
 				QVector3D p4 = blocks[i].sidewalkContour.contour[ind1]+QVector3D(0,0, 0.3f);//1.5f);
 				QVector3D normal = QVector3D::crossProduct(p2-p1,p4-p1).normalized();
-				vert.push_back(Vertex(p1,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p2,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p3,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p4,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
+				vert.push_back(Vertex(p1, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p2, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p3, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p4, QColor(128, 128, 128), normal, QVector3D()));
 			}
-			rendManager.addStaticGeometry("3d_sidewalk",vert,"",GL_QUADS,1|mode_Lighting);
+			rendManager.addStaticGeometry("3d_sidewalk", vert, "", GL_QUADS, 1 | mode_Lighting);
 		}
 
 		// 公園の3Dモデルを生成
@@ -131,10 +131,10 @@ void VBOPm::generateBlockModels(VBORenderManager& rendManager,RoadGraph &roadGra
 				QVector3D p3 = blocks[i].blockContour.contour[ind2]+QVector3D(0,0, 0.5f);//1.5f);
 				QVector3D p4 = blocks[i].blockContour.contour[ind1]+QVector3D(0,0, 0.5f);//1.5f);
 				QVector3D normal = QVector3D::crossProduct(p2-p1,p4-p1).normalized();
-				vert.push_back(Vertex(p1,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p2,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p3,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p4,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
+				vert.push_back(Vertex(p1, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p2, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p3, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p4, QColor(128, 128, 128), normal, QVector3D()));
 			}
 			rendManager.addStaticGeometry("3d_sidewalk", vert, "", GL_QUADS, 1|mode_Lighting);
 		}
@@ -176,24 +176,6 @@ void VBOPm::generateParcelModels(VBORenderManager& rendManager, BlockSet& blocks
 			std::vector<Vertex> vert;
 			QVector3D color;
 
-			if (i == blocks.selectedBlockIndex && cnt == blocks.selectedParcelIndex) {
-				color = QVector3D(1.0f, 1.0f, 1.0f);
-			} else if (blocks[i].myParcels[*vi].zone.type() == ZoneType::TYPE_PARK) {
-				color = QVector3D(0.8f, 0.8f, 0.0f);
-			} else {
-				color = QVector3D(0.0f, 0.5f, 0.8f);
-			}
-				
-			/*
-			for (int j = 0; j < blocks[i].myParcels[*vi].parcelContour.contour.size(); ++j) {
-				int next = (j+1) % blocks[i].myParcels[*vi].parcelContour.contour.size();
-
-				vert.push_back(Vertex(QVector3D(blocks[i].myParcels[*vi].parcelContour.contour[j].x(), blocks[i].myParcels[*vi].parcelContour.contour[j].y(), 1), color, QVector3D(), QVector3D()));
-				vert.push_back(Vertex(QVector3D(blocks[i].myParcels[*vi].parcelContour.contour[next].x(), blocks[i].myParcels[*vi].parcelContour.contour[next].y(), 1), color, QVector3D(), QVector3D()));
-			}
-			*/
-			//rendManager.addStaticGeometry("3d_parcel", vert, "", GL_LINES, 1);
-
 			// 上面のモデル
 			int randPark=1;//qrand()%grassFileNames.size();
 			rendManager.addStaticGeometry2("3d_parcel",blocks[i].myParcels[*vi].parcelContour.contour,0.5f,false,grassFileNames[randPark],GL_QUADS,2,QVector3D(0.05f,0.05f,0.05f),QColor());
@@ -211,10 +193,10 @@ void VBOPm::generateParcelModels(VBORenderManager& rendManager, BlockSet& blocks
 				QVector3D p3 = blocks[i].myParcels[*vi].parcelContour.contour[ind2]+QVector3D(0,0, 0.5f);//1.5f);
 				QVector3D p4 = blocks[i].myParcels[*vi].parcelContour.contour[ind1]+QVector3D(0,0, 0.5f);//1.5f);
 				QVector3D normal = QVector3D::crossProduct(p2-p1,p4-p1).normalized();
-				vert.push_back(Vertex(p1,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p4,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p3,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
-				vert.push_back(Vertex(p2,QColor(0.5f,0.5f,0.5f),normal,QVector3D()));
+				vert.push_back(Vertex(p1, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p4, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p3, QColor(128, 128, 128), normal, QVector3D()));
+				vert.push_back(Vertex(p2, QColor(128, 128, 128), normal, QVector3D()));
 			}
 			rendManager.addStaticGeometry("3d_parcel",vert,"",GL_QUADS,1|mode_Lighting);
 		}
@@ -290,7 +272,6 @@ void VBOPm::generatePeopleMesh(VBORenderManager& rendManager, std::vector<Person
 		{
 			QColor color(255, 255, 255);
 			rendManager.addSphere("people", QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 80), 5.0, color);
-			//rendManager.addBox("people", QVector3D(people[i].homeLocation.x(), people[i].homeLocation.y(), 80), QVector3D(10, 10, 10), color);
 		}
 	}
 }

@@ -370,7 +370,7 @@ void MainWindow::onFindBest() {
 	srand(time(NULL));
 
 	std::vector<std::pair<float, Zoning> > zones;
-	for (int loop = 0; loop < 1000; ++loop) {
+	for (int loop = 0; loop < 10; ++loop) {
 		// randomly assign zone types to the blocks
 		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
 

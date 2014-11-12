@@ -228,7 +228,7 @@ void Zoning::randomlyAssignZoneType(BlockSet& blocks) {
 
 			Z += remainedArea[type];
 			if (r < Z) {
-				blocks[i].zone = ZoneType(type / 3, type % 3);
+				blocks[i].zone = ZoneType(type / 3, (type % 3) + 1);
 				remainedArea[type] -= blocks[i].blockContour.area();
 				Polygon2D polygon;
 				for (int k = 0; k < blocks[i].blockContour.contour.size(); ++k) {
