@@ -160,7 +160,7 @@ void UrbanGeometry::allocateAll() {
 		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
 
 		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
-			parks.push_back(Office(location));
+			parks.push_back(Office(location, 1));
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
 			// 住人の数を決定
 			int num = numParcels * Util::genRand(1, 5);
@@ -180,11 +180,11 @@ void UrbanGeometry::allocateAll() {
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numCommercials);
 				if (type == 0) {
-					offices.push_back(Office(location));
+					offices.push_back(Office(location, blocks[i].zone.level()));
 				} else if (type == 1) {
-					stores.push_back(Office(location));
+					stores.push_back(Office(location, blocks[i].zone.level()));
 				} else {
-					restaurants.push_back(Office(location));
+					restaurants.push_back(Office(location, blocks[i].zone.level()));
 				}
 				numCommercials[type]--;
 			}
@@ -192,9 +192,9 @@ void UrbanGeometry::allocateAll() {
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numManufacturings);
 				if (type == 0) {
-					factories.push_back(Office(location));
+					factories.push_back(Office(location, blocks[i].zone.level()));
 				} else {
-					offices.push_back(Office(location));
+					offices.push_back(Office(location, blocks[i].zone.level()));
 				}
 				numManufacturings[type]--;
 			}
@@ -202,11 +202,11 @@ void UrbanGeometry::allocateAll() {
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numAmusements);
 				if (type == 0) {
-					amusements.push_back(Office(location));
+					amusements.push_back(Office(location, blocks[i].zone.level()));
 				} else if (type == 1) {
-					stores.push_back(Office(location));
+					stores.push_back(Office(location, blocks[i].zone.level()));
 				} else {
-					restaurants.push_back(Office(location));
+					restaurants.push_back(Office(location, blocks[i].zone.level()));
 				}
 				numAmusements[type]--;
 			}
@@ -214,9 +214,9 @@ void UrbanGeometry::allocateAll() {
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numPublics);
 				if (type == 0) {
-					libraries.push_back(Office(location));
+					libraries.push_back(Office(location, blocks[i].zone.level()));
 				} else {
-					schools.push_back(Office(location));
+					schools.push_back(Office(location, blocks[i].zone.level()));
 				}
 				numPublics[type]--;
 			}
@@ -225,7 +225,7 @@ void UrbanGeometry::allocateAll() {
 
 	// put a train station
 	{
-		stations.push_back(Office(QVector2D(-896, 1232)));
+		stations.push_back(Office(QVector2D(-896, 1232), 1));
 	}
 
 	//printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
@@ -493,40 +493,52 @@ float UrbanGeometry::noise(const QVector2D& pt) {
 
 	// noise by the manufactoring
 	for (int i = 0; i < factories.size(); ++i) {
+		if (factories[i].level == 0) {
+			printf("ERROR!!!!! level = 0!!!\n");
+		}
+
 		float len = (factories[i].location - pt).length();
 		if (len > 1.0f) {
 			float attenuation = 20 * logf(len);
 			if (Km > attenuation) {
-				n += Km - attenuation;
+				n += factories[i].level * (Km - attenuation);
 			}
 		} else {
-			n += Km;
+			n += factories[i].level * Km;
 		}
 	}
 
 	// noise by the amusement facilities
 	for (int i = 0; i < amusements.size(); ++i) {
+		if (amusements[i].level == 0) {
+			printf("ERROR!!!!! level = 0!!!\n");
+		}
+
 		float len = (amusements[i].location - pt).length();
 		if (len > 1.0f) {
 			float attenuation = 20 * logf(len);
 			if (Ka > attenuation) {
-				n += Ka - attenuation;
+				n += amusements[i].level * (Ka - attenuation);
 			}
 		} else {
-			n += Ka;
+			n += amusements[i].level * Ka;
 		}
 	}
 
 	// noise by the commercial stores
 	for (int i = 0; i < stores.size(); ++i) {
+		if (stores[i].level == 0) {
+			printf("ERROR!!!!! level = 0!!!\n");
+		}
+
 		float len = (stores[i].location - pt).length();
 		if (len > 1.0f) {
 			float attenuation = 20 * logf(len);
 			if (Kc > attenuation) {
-				n += Kc - attenuation;
+				n += stores[i].level * (Kc - attenuation);
 			}
 		} else {
-			n += Kc;
+			n += stores[i].level * Kc;
 		}
 	}
 
@@ -539,14 +551,18 @@ float UrbanGeometry::pollution(const QVector2D& pt) {
 
 	// pollution by the manufactoring
 	for (int i = 0; i < factories.size(); ++i) {
+		if (factories[i].level == 0) {
+			printf("ERROR!!!!! level = 0!!!\n");
+		}
+
 		float len = (factories[i].location - pt).length();
 		if (len > 1.0f) {
 			float attenuation = 20 * logf(len);
 			if (Km > attenuation) {
-				n += Km - attenuation;
+				n += factories[i].level * (Km - attenuation);
 			}
 		} else {
-			n += Km;
+			n += factories[i].level * Km;
 		}
 	}
 
