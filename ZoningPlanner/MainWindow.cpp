@@ -48,7 +48,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionViewStation, SIGNAL(triggered()), this, SLOT(onViewStation()));
 
 	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
-	connect(ui.actionFindBest, SIGNAL(triggered()), this, SLOT(onFindBest()));
+	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
+	connect(ui.actionBestPlanAndPeople, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeople()));
 	connect(ui.actionCameraCar, SIGNAL(triggered()), this, SLOT(onCameraCar()));
 
 	// setup the GL widget
@@ -363,14 +364,14 @@ void MainWindow::onPropose() {
 	glWidget->updateGL();
 }
 
-void MainWindow::onFindBest() {
+void MainWindow::onBestPlan() {
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
 	srand(time(NULL));
 
 	std::vector<std::pair<float, Zoning> > zones;
-	for (int loop = 0; loop < 10; ++loop) {
+	for (int loop = 0; loop < 1000; ++loop) {
 		// randomly assign zone types to the blocks
 		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
 
@@ -416,19 +417,64 @@ void MainWindow::onFindBest() {
 
 		zones.pop_back();
 	}
+}
 
-	// レイヤー情報を更新する
-	/*
-	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
-	urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
-	urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
-	urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
-	urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
-	urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
-	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
-	urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
-	urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
-	*/
+void MainWindow::onBestPlanAndPeople() {
+	// generate blocks
+	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+
+	srand(time(NULL));
+
+	std::vector<std::pair<float, Zoning> > zones;
+	for (int loop = 0; loop < 1000; ++loop) {
+		// randomly assign zone types to the blocks
+		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
+
+		urbanGeometry->allocateAll();
+
+		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
+ 		urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
+		urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
+		urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
+		urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
+		urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
+		urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
+		urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
+		urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
+		urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
+
+		// 人を動かす
+		urbanGeometry->movePeople(glWidget->vboRenderManager);
+
+		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
+		printf("%d: score=%lf\n", loop, score);
+
+		zones.push_back(std::make_pair(score, urbanGeometry->zones));
+	}
+
+	// ベスト３を保存する
+	std::make_heap(zones.begin(), zones.end(), CompareZoning());
+	for (int i = 0; i < 3; ++i) {
+		std::pop_heap(zones.begin(), zones.end(), CompareZoning());
+		std::pair<float, Zoning> z = zones.back();
+
+		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
+		z.second.save(filename);
+
+		zones.pop_back();
+	}
+
+	// ワースト３を保存する
+	std::make_heap(zones.begin(), zones.end(), CompareZoningReverse());
+	for (int i = 0; i < 3; ++i) {
+		std::pop_heap(zones.begin(), zones.end(), CompareZoningReverse());
+		std::pair<float, Zoning> z = zones.back();
+
+		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
+		z.second.save(filename);
+
+		zones.pop_back();
+	}
 }
 
 void MainWindow::onCameraCar() {

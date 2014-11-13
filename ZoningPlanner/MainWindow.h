@@ -18,7 +18,6 @@ public:
 public:
 	Ui::MainWindow ui;
 	ControlWidget* controlWidget;
-	//PropertyWidget* propertyWidget;
 	GLWidget3D* glWidget;
 	UrbanGeometry* urbanGeometry;
 
@@ -51,7 +50,8 @@ public slots:
 	void onViewPollution();
 	void onViewStation();
 	void onPropose();
-	void onFindBest();
+	void onBestPlan();
+	void onBestPlanAndPeople();
 	void onCameraCar();
 };
 

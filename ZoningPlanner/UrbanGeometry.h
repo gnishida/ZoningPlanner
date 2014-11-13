@@ -68,6 +68,8 @@ public:
 	void setFeatureForPerson(Person& person, VBORenderManager& renderManager);
 	void setFeatureForPerson(Person& person);
 
+	void movePeople(VBORenderManager& renderManager);
+
 	std::pair<int, float> nearestPerson(const QVector2D& pt);
 	std::pair<int, float> nearestStation(const QVector2D& pt);
 	std::pair<int, float> nearestStore(const QVector2D& pt);

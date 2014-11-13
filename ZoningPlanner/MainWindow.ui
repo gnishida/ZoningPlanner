@@ -97,7 +97,8 @@
      <string>Tool</string>
     </property>
     <addaction name="actionPropose"/>
-    <addaction name="actionFindBest"/>
+    <addaction name="actionBestPlan"/>
+    <addaction name="actionBestPlanAndPeople"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
@@ -330,9 +331,9 @@
     <string>Propose</string>
    </property>
   </action>
-  <action name="actionFindBest">
+  <action name="actionBestPlan">
    <property name="text">
-    <string>Find Best</string>
+    <string>Best Plan</string>
    </property>
   </action>
   <action name="actionViewPeople">
@@ -421,6 +422,11 @@
    </property>
    <property name="text">
     <string>Geometry</string>
+   </property>
+  </action>
+  <action name="actionBestPlanAndPeople">
+   <property name="text">
+    <string>Best Plan And People</string>
    </property>
   </action>
  </widget>

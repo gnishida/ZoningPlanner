@@ -265,12 +265,12 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
  * なので、この関数は、loadZoning()からコールされるべきだ。
  */
 float UrbanGeometry::computeScore() {
+	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
+
 	float score_total = 0.0f;
 	for (int i = 0; i < people.size(); ++i) {
 		setFeatureForPerson(people[i]);
 		std::vector<float> f = people[i].feature;
-
-		float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
 
 		for (int j = 0; j < f.size(); ++j) {
 			f[j] = exp(-K[j] * f[j]);
@@ -370,6 +370,67 @@ void UrbanGeometry::setFeatureForPerson(Person& person) {
 		std::pair<int, float> n = nearestStation(person.homeLocation);
 		person.nearestStation = n.first;
 		person.feature[8] = n.second;
+	}
+}
+
+/**
+ * 人を動かす
+ */
+void UrbanGeometry::movePeople(VBORenderManager& renderManager) {
+	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
+
+	float score_total = 0.0f;
+	for (int i = 0; i < people.size(); ++i) {
+		setFeatureForPerson(people[i], renderManager);
+	}
+
+
+	for (int loop = 0; loop < 10; ++loop) {
+		for (int i = 0; i < people.size(); ++i) {
+			std::vector<float> f1 = people[i].feature;
+
+			for (int j = 0; j < f1.size(); ++j) {
+				f1[j] = exp(-K[j] * f1[j]);
+			}
+
+			float max_increase = 0.0f;
+			int swap_id = -1;
+			for (int j = i + 1; j < people.size(); ++j) {
+				if (people[i].type() == people[j].type()) continue;
+
+				std::vector<float> f2 = people[j].feature;
+				for (int k = 0; k < f2.size(); ++k) {
+					f2[k] = exp(-K[k] * f2[k]);
+				}
+
+				float increase = std::inner_product(std::begin(f1), std::end(f1), std::begin(people[j].preference), 0.0)
+					+ std::inner_product(std::begin(f2), std::end(f2), std::begin(people[i].preference), 0.0)
+					- std::inner_product(std::begin(f1), std::end(f1), std::begin(people[i].preference), 0.0)
+					- std::inner_product(std::begin(f2), std::end(f2), std::begin(people[j].preference), 0.0);
+				if (increase > max_increase) {
+					max_increase = increase;
+					swap_id = j;
+				}
+			}
+
+			if (swap_id >= 0) {
+				/*
+				std::vector<float> f2 = people[swap_id].feature;
+				for (int j = 0; j < f2.size(); ++j) {
+					f2[j] = exp(-K[j] * f2[j]);
+				}
+				std::vector<float> p2 = people[swap_id].preference;
+
+				float x1 = std::inner_product(std::begin(f1), std::end(f1), std::begin(people[i].preference), 0.0);
+				float x2 = std::inner_product(std::begin(f2), std::end(f2), std::begin(people[swap_id].preference), 0.0);
+				float x3 = std::inner_product(std::begin(f1), std::end(f1), std::begin(people[swap_id].preference), 0.0);
+				float x4 = std::inner_product(std::begin(f2), std::end(f2), std::begin(people[i].preference), 0.0);
+				*/
+
+				std::swap(people[i].homeLocation, people[swap_id].homeLocation);
+				std::swap(people[i].feature, people[swap_id].feature);
+			}
+		}
 	}
 }
 
