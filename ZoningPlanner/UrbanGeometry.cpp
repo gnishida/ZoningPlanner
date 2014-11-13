@@ -1,4 +1,5 @@
-﻿#include "UrbanGeometry.h"
+﻿#include <algorithm>
+#include "UrbanGeometry.h"
 #include <limits>
 #include <iostream>
 #include <QFile>
@@ -12,6 +13,7 @@
 #include "VBOPmParcels.h"
 #include "Util.h"
 #include <numeric>
+
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -346,7 +348,7 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
  * findBest()からは、もう一方の関数をコールすべき。そっちの方がちょっと速いから。
  */
 void UrbanGeometry::setFeatureForPerson(Person& person) {
-	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
+	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001, 0.001};
 
 	person.feature.resize(9);
 
@@ -539,6 +541,20 @@ std::pair<int, float> UrbanGeometry::nearestLibrary(const QVector2D& pt) {
 	return std::make_pair(nearestLibrary, sqrtf(min_dist2));
 }
 
+std::pair<int, float> UrbanGeometry::nearestFactory(const QVector2D& pt) {
+	float min_dist2 = std::numeric_limits<float>::max();
+	int nearestFactory = -1;
+	for (int i = 0; i < factories.size(); ++i) {
+		float dist2 = (factories[i].location - pt).lengthSquared();
+		if (dist2 < min_dist2) {
+			min_dist2 = dist2;
+			nearestFactory = i;
+		}
+	}
+
+	return std::make_pair(nearestFactory, sqrtf(min_dist2));
+}
+
 std::pair<int, float> UrbanGeometry::nearestStation(const QVector2D& pt) {
 	float min_dist2 = std::numeric_limits<float>::max();
 	int nearestStation = -1;
@@ -554,87 +570,17 @@ std::pair<int, float> UrbanGeometry::nearestStation(const QVector2D& pt) {
 }
 
 float UrbanGeometry::noise(const QVector2D& pt) {
-	float n = 0.0f;
-	float Km = 120.0f;
-	float Ka = 100.0f;
-	float Kc = 100.0f;
+	float Km = 800.0 - nearestFactory(pt).second;
+	float Ka = 400.0 - nearestAmusement(pt).second;
+	float Ks = 200.0 - nearestStore(pt).second;
 
-	// noise by the manufactoring
-	for (int i = 0; i < factories.size(); ++i) {
-		if (factories[i].level == 0) {
-			printf("ERROR!!!!! level = 0!!!\n");
-		}
-
-		float len = (factories[i].location - pt).length();
-		if (len > 1.0f) {
-			float attenuation = 20 * logf(len);
-			if (Km > attenuation) {
-				n += factories[i].level * (Km - attenuation);
-			}
-		} else {
-			n += factories[i].level * Km;
-		}
-	}
-
-	// noise by the amusement facilities
-	for (int i = 0; i < amusements.size(); ++i) {
-		if (amusements[i].level == 0) {
-			printf("ERROR!!!!! level = 0!!!\n");
-		}
-
-		float len = (amusements[i].location - pt).length();
-		if (len > 1.0f) {
-			float attenuation = 20 * logf(len);
-			if (Ka > attenuation) {
-				n += amusements[i].level * (Ka - attenuation);
-			}
-		} else {
-			n += amusements[i].level * Ka;
-		}
-	}
-
-	// noise by the commercial stores
-	for (int i = 0; i < stores.size(); ++i) {
-		if (stores[i].level == 0) {
-			printf("ERROR!!!!! level = 0!!!\n");
-		}
-
-		float len = (stores[i].location - pt).length();
-		if (len > 1.0f) {
-			float attenuation = 20 * logf(len);
-			if (Kc > attenuation) {
-				n += stores[i].level * (Kc - attenuation);
-			}
-		} else {
-			n += stores[i].level * Kc;
-		}
-	}
-
-	return n;
+	return std::max(std::max(std::max(Km, Ka), Ks), 0.0f);
 }
 
 float UrbanGeometry::pollution(const QVector2D& pt) {
-	float n = 0.0f;
-	float Km = 120.0f;
+	float Km = 800.0 - nearestFactory(pt).second;
 
-	// pollution by the manufactoring
-	for (int i = 0; i < factories.size(); ++i) {
-		if (factories[i].level == 0) {
-			printf("ERROR!!!!! level = 0!!!\n");
-		}
-
-		float len = (factories[i].location - pt).length();
-		if (len > 1.0f) {
-			float attenuation = 20 * logf(len);
-			if (Km > attenuation) {
-				n += factories[i].level * (Km - attenuation);
-			}
-		} else {
-			n += factories[i].level * Km;
-		}
-	}
-
-	return n;
+	return std::max(Km, 0.0f);
 }
 
 int UrbanGeometry::findNearestPerson(const QVector2D& pt) {
@@ -653,7 +599,7 @@ int UrbanGeometry::findNearestPerson(const QVector2D& pt) {
 }
 
 void UrbanGeometry::updateLayer(int featureId, VBOLayer& layer) {
-	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
+	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001, 0.001};
 
 	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
 		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
