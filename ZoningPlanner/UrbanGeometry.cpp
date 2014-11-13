@@ -155,12 +155,15 @@ void UrbanGeometry::allocateAll() {
 	//Block::parcelGraphVertexIter vi, viEnd;
 	for (int i = 0; i < blocks.size(); ++i) {
 		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
+		// BUG! To be fixed!
+		// In some cases, location has very large numbers.
+		if (location.x() > 1000000 || location.y() > 1000000) continue;
 
 		// 予測される区画数を計算
 		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
 
 		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
-			parks.push_back(Office(location, 1));
+			parks.push_back(Office(location, 1, 1));
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
 			// 住人の数を決定
 			int num = numParcels * Util::genRand(1, 5);
@@ -170,56 +173,92 @@ void UrbanGeometry::allocateAll() {
 				num = blocks[i].blockContour.area() * 0.02f;
 			}
 
+			Person person0(0, location);
+			Person person1(1, location);
+			Person person2(2, location);
+			Person person3(3, location);
+
 			for (int n = 0; n < num; ++n) {
 				int type = Util::sampleFromPdf(numPeople);
 				numPeople[type]--;
 
-				people.push_back(Person(type, location));
+				if (type == 0) person0.num++;
+				else if (type == 1) person1.num++;
+				else if (type == 2) person2.num++;
+				else if (type == 3) person3.num++;
 			}
+			people.push_back(person0);
+			people.push_back(person1);
+			people.push_back(person2);
+			people.push_back(person3);
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
+			Office office(location, blocks[i].zone.level());
+			Office store(location, blocks[i].zone.level());
+			Office restaurant(location, blocks[i].zone.level());
+
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numCommercials);
 				if (type == 0) {
-					offices.push_back(Office(location, blocks[i].zone.level()));
+					office.num++;
 				} else if (type == 1) {
-					stores.push_back(Office(location, blocks[i].zone.level()));
+					store.num++;
 				} else {
-					restaurants.push_back(Office(location, blocks[i].zone.level()));
+					restaurant.num++;
 				}
 				numCommercials[type]--;
 			}
+			offices.push_back(office);
+			stores.push_back(store);
+			restaurants.push_back(restaurant);
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {
+			Office office(location, blocks[i].zone.level());
+			Office factory(location, blocks[i].zone.level());
+
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numManufacturings);
 				if (type == 0) {
-					factories.push_back(Office(location, blocks[i].zone.level()));
+					factory.num++;
 				} else {
-					offices.push_back(Office(location, blocks[i].zone.level()));
+					office.num++;
 				}
 				numManufacturings[type]--;
 			}
+			offices.push_back(office);
+			factories.push_back(factory);
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {
+			Office amusement(location, blocks[i].zone.level());
+			Office store(location, blocks[i].zone.level());
+			Office restaurant(location, blocks[i].zone.level());
+
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numAmusements);
 				if (type == 0) {
-					amusements.push_back(Office(location, blocks[i].zone.level()));
+					amusement.num++;
 				} else if (type == 1) {
-					stores.push_back(Office(location, blocks[i].zone.level()));
+					store.num++;
 				} else {
-					restaurants.push_back(Office(location, blocks[i].zone.level()));
+					restaurant.num++;
 				}
 				numAmusements[type]--;
 			}
+			amusements.push_back(amusement);
+			stores.push_back(store);
+			restaurants.push_back(restaurant);
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {
+			Office school(location, blocks[i].zone.level());
+			Office library(location, blocks[i].zone.level());
+
 			for (int n = 0; n < numParcels; ++n) {
 				int type = Util::sampleFromPdf(numPublics);
 				if (type == 0) {
-					libraries.push_back(Office(location, blocks[i].zone.level()));
+					library.num++;
 				} else {
-					schools.push_back(Office(location, blocks[i].zone.level()));
+					school.num++;
 				}
 				numPublics[type]--;
 			}
+			schools.push_back(school);
+			libraries.push_back(library);
 		}
 	}
 
@@ -240,21 +279,14 @@ void UrbanGeometry::allocateAll() {
  */
 float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
 	float score_total = 0.0f;
+	float num = 0.0;
 	for (int i = 0; i < people.size(); ++i) {
 		setFeatureForPerson(people[i], renderManager);
-		//std::vector<float> f = people[i].feature;
-
-		/*float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
-
-		for (int j = 0; j < f.size(); ++j) {
-			f[j] = exp(-K[j] * f[j]);
-		}*/
-
-		//people[i].score = std::inner_product(std::begin(people[i].feature), std::end(people[i].feature), std::begin(people[i].preference), 0.0);
-		score_total += people[i].score;
+		score_total += people[i].score * people[i].num;
+		num += people[i].num;
 	}
 
-	return score_total / (float)people.size();
+	return score_total / num;
 }
 
 /**
@@ -265,22 +297,15 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
  * なので、この関数は、loadZoning()からコールされるべきだ。
  */
 float UrbanGeometry::computeScore() {
-	//float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.01, 0.01, 0.001};
-
 	float score_total = 0.0f;
+	float num = 0.0;
 	for (int i = 0; i < people.size(); ++i) {
 		setFeatureForPerson(people[i]);
-		/*std::vector<float> f = people[i].feature;
-
-		for (int j = 0; j < f.size(); ++j) {
-			f[j] = exp(-K[j] * f[j]);
-		}*/
-
-		//people[i].score = std::inner_product(std::begin(people[i].feature), std::end(people[i].feature), std::begin(people[i].preference), 0.0);
-		score_total += people[i].score;
+		score_total += people[i].score * people[i].num;
+		num += people[i].num;
 	}
 
-	return score_total / (float)people.size();
+	return score_total / num;
 }
 
 /**
@@ -413,8 +438,6 @@ void UrbanGeometry::movePeople(VBORenderManager& renderManager) {
 				count++;
 			}
 		}
-
-		printf("  %d people are swapped.\n", count);
 	}
 }
 
@@ -669,5 +692,5 @@ void UrbanGeometry::updateLayer(int featureId, VBOLayer& layer) {
 		}
 	}
 
-	layer.layer.updateTexFromData(0, 1000);
+	layer.layer.updateTexFromData(0, 1);
 }
