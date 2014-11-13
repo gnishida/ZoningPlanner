@@ -83,13 +83,5 @@ public:
 
 	int findNearestPerson(const QVector2D& pt);
 
-	void updateStationMap(VBOLayer& layer);
-	void updateStoreMap(VBOLayer& layer);
-	void updateSchoolMap(VBOLayer& layer);
-	void updateRestaurantMap(VBOLayer& layer);
-	void updateParkMap(VBOLayer& layer);
-	void updateAmusementMap(VBOLayer& layer);
-	void updateLibraryMap(VBOLayer& layer);
-	void updateNoiseMap(VBOLayer& layer);
-	void updatePollutionMap(VBOLayer& layer);
+	void updateLayer(int featureId, VBOLayer& layer);
 };

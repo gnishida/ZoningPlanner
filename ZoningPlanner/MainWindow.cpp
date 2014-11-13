@@ -107,15 +107,15 @@ void MainWindow::onLoadZoning() {
 
 	// レイヤー情報を更新する
 	startTime = clock();
-	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
-	urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
-	urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
-	urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
-	urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
-	urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
-	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
-	urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
-	urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
+	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 	endTime = clock();
 	printf("Layers generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
@@ -348,15 +348,15 @@ void MainWindow::onPropose() {
 	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	// レイヤー情報を更新する
-	urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
-	urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
-	urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
-	urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
-	urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
-	urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
-	urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
-	urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
-	urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
+	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 
 	float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
 	printf("score: %lf\n", score);
@@ -378,15 +378,15 @@ void MainWindow::onBestPlan() {
 		urbanGeometry->allocateAll();
 
 		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
- 		urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
-		urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
-		urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
-		urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
-		urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
-		urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
-		urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
-		urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
-		urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
+		urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+		urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+		urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+		urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+		urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+		urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+		urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+		urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+		urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 
 		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
 		printf("%d: score=%lf\n", loop, score);
@@ -433,15 +433,15 @@ void MainWindow::onBestPlanAndPeople() {
 		urbanGeometry->allocateAll();
 
 		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
- 		urbanGeometry->updateStoreMap(glWidget->vboRenderManager.vboStoreLayer);
-		urbanGeometry->updateSchoolMap(glWidget->vboRenderManager.vboSchoolLayer);
-		urbanGeometry->updateRestaurantMap(glWidget->vboRenderManager.vboRestaurantLayer);
-		urbanGeometry->updateParkMap(glWidget->vboRenderManager.vboParkLayer);
-		urbanGeometry->updateAmusementMap(glWidget->vboRenderManager.vboAmusementLayer);
-		urbanGeometry->updateLibraryMap(glWidget->vboRenderManager.vboLibraryLayer);
-		urbanGeometry->updateNoiseMap(glWidget->vboRenderManager.vboNoiseLayer);
-		urbanGeometry->updatePollutionMap(glWidget->vboRenderManager.vboPollutionLayer);
-		urbanGeometry->updateStationMap(glWidget->vboRenderManager.vboStationLayer);
+		urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+		urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+		urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+		urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+		urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+		urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+		urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+		urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+		urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 
 		// 人を動かす
 		urbanGeometry->movePeople(glWidget->vboRenderManager);
