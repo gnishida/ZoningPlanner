@@ -51,7 +51,9 @@ public slots:
 	void onViewStation();
 	void onPropose();
 	void onBestPlan();
+	void onBestPlanMT();
 	void onBestPlanAndPeople();
+	void onBestPlanAndPeopleMT();
 	void onPeopleAllocation();
 };
 

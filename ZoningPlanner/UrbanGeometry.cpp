@@ -13,7 +13,8 @@
 #include "VBOPmParcels.h"
 #include "Util.h"
 #include <numeric>
-
+#include <boost/thread.hpp>   
+#include <boost/date_time.hpp>    
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -502,8 +503,7 @@ void UrbanGeometry::movePeople(VBORenderManager& renderManager) {
 		setFeatureForPerson(people[i], renderManager);
 	}
 
-	for (int loop = 0; loop < 10; ++loop) {
-		int count = 0;
+	for (int loop = 0; loop < 1; ++loop) {
 		for (int i = 0; i < people.size(); ++i) {
 			float max_increase = 0.0f;
 			int swap_id = -1;
@@ -525,9 +525,67 @@ void UrbanGeometry::movePeople(VBORenderManager& renderManager) {
 
 				people[i].score = std::inner_product(std::begin(people[i].feature), std::end(people[i].feature), std::begin(people[i].preference), 0.0);
 				people[swap_id].score = std::inner_product(std::begin(people[swap_id].feature), std::end(people[swap_id].feature), std::begin(people[swap_id].preference), 0.0);
-				count++;
 			}
 		}
+	}
+}
+
+const int NUM_THREADS = 16;
+static std::vector<Person> static_people;
+
+void movePeopleMTWorker(int thread_id) {
+	float score_total = 0.0f;
+
+	for (int loop = 0; loop < 1; ++loop) {
+		for (int i = thread_id; i < static_people.size(); i += NUM_THREADS) {
+			float max_increase = 0.0f;
+			int swap_id = -1;
+			for (int j = i + NUM_THREADS; j < static_people.size(); j += NUM_THREADS) {
+				if (static_people[i].type() == static_people[j].type()) continue;
+
+				float increase = std::inner_product(std::begin(static_people[i].feature), std::end(static_people[i].feature), std::begin(static_people[j].preference), 0.0)
+					+ std::inner_product(std::begin(static_people[j].feature), std::end(static_people[j].feature), std::begin(static_people[i].preference), 0.0)
+					- static_people[i].score - static_people[j].score;
+				if (increase > max_increase) {
+					max_increase = increase;
+					swap_id = j;
+				}
+			}
+
+			if (swap_id >= 0) {
+				std::swap(static_people[i].homeLocation, static_people[swap_id].homeLocation);
+				std::swap(static_people[i].feature, static_people[swap_id].feature);
+
+				static_people[i].score = std::inner_product(std::begin(static_people[i].feature), std::end(static_people[i].feature), std::begin(static_people[i].preference), 0.0);
+				static_people[swap_id].score = std::inner_product(std::begin(static_people[swap_id].feature), std::end(static_people[swap_id].feature), std::begin(static_people[swap_id].preference), 0.0);
+			}
+		}
+	}
+}
+
+/**
+ * 人を動かす
+ */
+void UrbanGeometry::movePeopleMT(VBORenderManager& renderManager) {
+	for (int i = 0; i < people.size(); ++i) {
+		setFeatureForPerson(people[i], renderManager);
+	}
+
+	static_people.clear();
+	static_people.resize(people.size());
+	for (int i = 0; i < people.size(); ++i) {
+		static_people[i] = people[i];
+	}
+
+	boost::thread_group th_group;
+	for (int i = 0; i < NUM_THREADS; ++i) {
+		th_group.create_thread(boost::bind(&movePeopleMTWorker, i));
+	}
+	th_group.join_all();
+
+
+	for (int i = 0; i < people.size(); ++i) {
+		people[i] = static_people[i];
 	}
 }
 

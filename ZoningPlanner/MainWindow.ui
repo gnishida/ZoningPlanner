@@ -98,7 +98,9 @@
     </property>
     <addaction name="actionPropose"/>
     <addaction name="actionBestPlan"/>
+    <addaction name="actionBestPlanMT"/>
     <addaction name="actionBestPlanAndPeople"/>
+    <addaction name="actionBestPlanAndPeopleMT"/>
     <addaction name="actionPeopleAllocation"/>
    </widget>
    <addaction name="menuFile"/>
@@ -433,6 +435,16 @@
   <action name="actionPeopleAllocation">
    <property name="text">
     <string>People Allocation</string>
+   </property>
+  </action>
+  <action name="actionBestPlanMT">
+   <property name="text">
+    <string>Best Plan MT</string>
+   </property>
+  </action>
+  <action name="actionBestPlanAndPeopleMT">
+   <property name="text">
+    <string>Best Plan And People MT</string>
    </property>
   </action>
  </widget>
