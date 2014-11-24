@@ -394,5 +394,13 @@
     <None Include="..\data\shaders\lc_vertex_sk.glsl">
       <Filter>VBO</Filter>
     </None>
+    <None Include="PeopleAllocation.cuh">
+      <Filter>Main Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="PeopleAllocation.cu">
+      <Filter>Main Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

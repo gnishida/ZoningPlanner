@@ -101,6 +101,7 @@
     <addaction name="actionBestPlanMT"/>
     <addaction name="actionBestPlanAndPeople"/>
     <addaction name="actionBestPlanAndPeopleMT"/>
+    <addaction name="actionBestPlanAndPeopleGPU"/>
     <addaction name="actionPeopleAllocation"/>
    </widget>
    <addaction name="menuFile"/>
@@ -445,6 +446,11 @@
   <action name="actionBestPlanAndPeopleMT">
    <property name="text">
     <string>Best Plan And People MT</string>
+   </property>
+  </action>
+  <action name="actionBestPlanAndPeopleGPU">
+   <property name="text">
+    <string>Best Plan And People GPU</string>
    </property>
   </action>
  </widget>

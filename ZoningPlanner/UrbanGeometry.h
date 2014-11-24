@@ -71,7 +71,7 @@ public:
 
 	void movePeople(VBORenderManager& renderManager);
 	void movePeopleMT(VBORenderManager& renderManager);
-	//static void movePeopleMTWorker(int thread_id, VBORenderManager& renderManager);
+	void movePeopleGPU(VBORenderManager& renderManager);
 
 	std::pair<int, float> nearestPerson(const QVector2D& pt);
 	std::pair<int, float> nearestStore(const QVector2D& pt);

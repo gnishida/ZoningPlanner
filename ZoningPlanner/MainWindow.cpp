@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionBestPlanMT, SIGNAL(triggered()), this, SLOT(onBestPlanMT()));
 	connect(ui.actionBestPlanAndPeople, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeople()));
 	connect(ui.actionBestPlanAndPeopleMT, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeopleMT()));
+	connect(ui.actionBestPlanAndPeopleGPU, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeopleGPU()));
 	connect(ui.actionPeopleAllocation, SIGNAL(triggered()), this, SLOT(onPeopleAllocation()));
 
 	// setup the GL widget
@@ -599,6 +600,72 @@ void MainWindow::onBestPlanAndPeopleMT() {
 		// 人を動かす
 		time_t start = clock();
 		urbanGeometry->movePeopleMT(glWidget->vboRenderManager);
+		time_t end = clock();
+		std::cout << "duration = " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
+
+		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
+		printf("%d: score=%lf\n", loop, score);
+
+		zones.push_back(std::make_pair(score, urbanGeometry->zones));
+	}
+
+	// ベスト３を保存する
+	std::make_heap(zones.begin(), zones.end(), CompareZoning());
+	for (int i = 0; i < 3; ++i) {
+		std::pop_heap(zones.begin(), zones.end(), CompareZoning());
+		std::pair<float, Zoning> z = zones.back();
+
+		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
+		z.second.save(filename);
+
+		zones.pop_back();
+	}
+
+	// ワースト３を保存する
+	std::make_heap(zones.begin(), zones.end(), CompareZoningReverse());
+	for (int i = 0; i < 3; ++i) {
+		std::pop_heap(zones.begin(), zones.end(), CompareZoningReverse());
+		std::pair<float, Zoning> z = zones.back();
+
+		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
+		z.second.save(filename);
+
+		zones.pop_back();
+	}
+}
+
+/**
+ * ランダムにプランを生成し、ランダムに人などを配備してそのスコアを決定する。
+ * 各プランに対して、人の配置を最適化して、スコアを改善する。
+ * 一定回数繰り返して、ベスト３とワースト３のプランを保存する。
+ */
+void MainWindow::onBestPlanAndPeopleGPU() {
+	// generate blocks
+	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+
+	srand(time(NULL));
+
+	std::vector<std::pair<float, Zoning> > zones;
+	for (int loop = 0; loop < 10; ++loop) {
+		// randomly assign zone types to the blocks
+		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
+
+		urbanGeometry->allocateAll();
+
+		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
+		urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+		urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+		urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+		urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+		urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+		urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+		urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+		urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+		urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
+
+		// 人を動かす
+		time_t start = clock();
+		urbanGeometry->movePeopleGPU(glWidget->vboRenderManager);
 		time_t end = clock();
 		std::cout << "duration = " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
 

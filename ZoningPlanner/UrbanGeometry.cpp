@@ -15,6 +15,7 @@
 #include <numeric>
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>    
+#include "PeopleAllocation.cuh"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -533,6 +534,10 @@ void UrbanGeometry::movePeople(VBORenderManager& renderManager) {
 const int NUM_THREADS = 16;
 static std::vector<Person> static_people;
 
+/**
+ * マルチスレッド版の人配備のスレッドワーカー
+ * 各スレッドは、NUM_THREADS飛びに人を動かす。
+ */
 void movePeopleMTWorker(int thread_id) {
 	float score_total = 0.0f;
 
@@ -564,7 +569,7 @@ void movePeopleMTWorker(int thread_id) {
 }
 
 /**
- * 人を動かす
+ * 人を動かす（マルチスレッド版）
  */
 void UrbanGeometry::movePeopleMT(VBORenderManager& renderManager) {
 	for (int i = 0; i < people.size(); ++i) {
@@ -587,6 +592,45 @@ void UrbanGeometry::movePeopleMT(VBORenderManager& renderManager) {
 	for (int i = 0; i < people.size(); ++i) {
 		people[i] = static_people[i];
 	}
+}
+
+/**
+ * 人を動かす（CUDA版）
+ */
+void UrbanGeometry::movePeopleGPU(VBORenderManager& renderManager) {
+	for (int i = 0; i < people.size(); ++i) {
+		setFeatureForPerson(people[i], renderManager);
+	}
+
+	// 結果転送用のメモリを確保
+	float* results = new float[sizeof(cuda_person) * people.size()];
+
+	// 人のデータをCPU側バッファへ格納する
+	for (int i = 0; i < people.size(); ++i) {
+		results[i * sizeof(cuda_person) + 0] = people[i].type();
+		results[i * sizeof(cuda_person) + 1] = people[i].homeLocation.x();
+		results[i * sizeof(cuda_person) + 2] = people[i].homeLocation.y();
+		for (int j = 0; j < people[i].preference.size(); ++j) {
+			results[i * sizeof(cuda_person) + j + 3] = people[i].preference[j];
+		}
+		for (int j = 0; j < people[i].feature.size(); ++j) {
+			results[i * sizeof(cuda_person) + j + 12] = people[i].feature[j];
+		}
+		results[i * sizeof(cuda_person) + 21] = people[i].score;
+	}
+
+	movePeopleGPUfunc((cuda_person*)results, people.size());
+
+	// 結果を人データに展開する
+	for (int i = 0; i < people.size(); ++i) {
+		people[i].homeLocation.setX(results[i * sizeof(cuda_person) + 1]);
+		people[i].homeLocation.setY(results[i * sizeof(cuda_person) + 2]);
+		for (int j = 0; j < people[i].feature.size(); ++j) {
+			people[i].feature[j] = results[i * sizeof(cuda_person) + j + 12];
+		}
+		people[i].score = results[i * sizeof(cuda_person) + 21];
+	}
+
 }
 
 std::pair<int, float> UrbanGeometry::nearestPerson(const QVector2D& pt) {

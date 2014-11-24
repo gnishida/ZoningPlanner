@@ -54,6 +54,7 @@ public slots:
 	void onBestPlanMT();
 	void onBestPlanAndPeople();
 	void onBestPlanAndPeopleMT();
+	void onBestPlanAndPeopleGPU();
 	void onPeopleAllocation();
 };
 
