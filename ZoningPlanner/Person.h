@@ -25,12 +25,11 @@ public:
 	std::vector<float> feature;
 	float score;
 
-	float num;
-
 public:
 	Person();
 	Person(int type, const QVector2D& homeLocation);
 
+	void setType(int type);
 	int type() const { return _type; }
 	void initPreference();
 };

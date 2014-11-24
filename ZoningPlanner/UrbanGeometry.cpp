@@ -126,6 +126,7 @@ void UrbanGeometry::allocateAll() {
 
 		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+			/*
 			// 住人の数を決定
 			int num = numParcels * Util::genRand(1, 5);
 			if (blocks[i].zone.level() == 2) {
@@ -137,6 +138,7 @@ void UrbanGeometry::allocateAll() {
 			numPeople[1] += num * 0.3f;
 			numPeople[2] += num * 0.3f;
 			numPeople[3] += num * 0.2f;
+			*/
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
 			numCommercials[0] += numParcels * 0.6f; // office
 			numCommercials[1] += numParcels * 0.2f; // store
@@ -157,9 +159,15 @@ void UrbanGeometry::allocateAll() {
 	//Block::parcelGraphVertexIter vi, viEnd;
 	for (int i = 0; i < blocks.size(); ++i) {
 		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
+
 		// BUG! To be fixed!
 		// In some cases, location has very large numbers.
 		if (location.x() > 1000000 || location.y() > 1000000) continue;
+
+		// Bounding Boxを取得
+		QVector3D minBBox;
+		QVector3D maxBBox;
+		Polygon3D::getLoopAABB(blocks[i].blockContour.contour, minBBox, maxBBox);
 
 		// 予測される区画数を計算
 		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
@@ -175,24 +183,13 @@ void UrbanGeometry::allocateAll() {
 				num = blocks[i].blockContour.area() * 0.02f;
 			}
 
-			Person person0(0, location);
-			Person person1(1, location);
-			Person person2(2, location);
-			Person person3(3, location);
-
-			for (int n = 0; n < num; ++n) {
-				int type = Util::sampleFromPdf(numPeople);
-				numPeople[type]--;
-
-				if (type == 0) person0.num++;
-				else if (type == 1) person1.num++;
-				else if (type == 2) person2.num++;
-				else if (type == 3) person3.num++;
+			// 人の数を増やす
+			int offset = people.size();
+			people.resize(people.size() + num);
+			for (int pi = offset; pi < people.size(); ++pi) {
+				// 家の位置を、ランダムに決定
+				people[pi].homeLocation = QVector2D(Util::genRand(minBBox.x(), maxBBox.x()), Util::genRand(minBBox.y(), maxBBox.y()));
 			}
-			people.push_back(person0);
-			people.push_back(person1);
-			people.push_back(person2);
-			people.push_back(person3);
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
 			Office office(location, blocks[i].zone.level());
 			Office store(location, blocks[i].zone.level());
@@ -264,12 +261,27 @@ void UrbanGeometry::allocateAll() {
 		}
 	}
 
+	// 人の好みを割り当てる
+	{
+		numPeople[0] = people.size() * 0.2f;	// 学生
+		numPeople[1] = people.size() * 0.3f;	// 主婦
+		numPeople[2] = people.size() * 0.3f;	// サラリーマン
+		numPeople[3] = people.size() * 0.2f;	// 老人
+
+		for (int pi = 0; pi < people.size(); ++pi) {
+			int type = Util::sampleFromPdf(numPeople);
+			numPeople[type]--;
+
+			people[pi].setType(type);
+		}
+	}
+
 	// put a train station
 	{
 		stations.push_back(Office(QVector2D(-896, 1232), 1));
 	}
 
-	//printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
+	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 }
 
 /**
@@ -278,9 +290,7 @@ void UrbanGeometry::allocateAll() {
 void UrbanGeometry::allocatePeople() {
 	people.clear();
 
-	// 予想される数を先に計算する
-	std::vector<float> numPeople(4, 0.0f);
-	
+	/*
 	for (int i = 0; i < blocks.size(); ++i) {
 		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
 
@@ -301,6 +311,7 @@ void UrbanGeometry::allocatePeople() {
 			numPeople[3] += num * 0.2f;
 		}
 	}
+	*/
 	
 	//Block::parcelGraphVertexIter vi, viEnd;
 	for (int i = 0; i < blocks.size(); ++i) {
@@ -308,6 +319,11 @@ void UrbanGeometry::allocatePeople() {
 		// BUG! To be fixed!
 		// In some cases, location has very large numbers.
 		if (location.x() > 1000000 || location.y() > 1000000) continue;
+
+		// Bounding Boxを取得
+		QVector3D minBBox;
+		QVector3D maxBBox;
+		Polygon3D::getLoopAABB(blocks[i].blockContour.contour, minBBox, maxBBox);
 
 		// 予測される区画数を計算
 		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
@@ -321,24 +337,29 @@ void UrbanGeometry::allocatePeople() {
 				num = blocks[i].blockContour.area() * 0.02f;
 			}
 
-			Person person0(0, location);
-			Person person1(1, location);
-			Person person2(2, location);
-			Person person3(3, location);
-
-			for (int n = 0; n < num; ++n) {
-				int type = Util::sampleFromPdf(numPeople);
-				numPeople[type]--;
-
-				if (type == 0) person0.num++;
-				else if (type == 1) person1.num++;
-				else if (type == 2) person2.num++;
-				else if (type == 3) person3.num++;
+			// 人の数を増やす
+			int offset = people.size();
+			people.resize(people.size() + num);
+			for (int pi = offset; pi < people.size(); ++pi) {
+				// 家の位置を、ランダムに決定
+				people[pi].homeLocation = QVector2D(Util::genRand(minBBox.x(), maxBBox.x()), Util::genRand(minBBox.y(), maxBBox.y()));
 			}
-			people.push_back(person0);
-			people.push_back(person1);
-			people.push_back(person2);
-			people.push_back(person3);
+		}
+	}
+
+	// 人の好みを割り当てる
+	{
+		std::vector<float> numPeople(4, 0.0f);
+		numPeople[0] = people.size() * 0.2f;	// 学生
+		numPeople[1] = people.size() * 0.3f;	// 主婦
+		numPeople[2] = people.size() * 0.3f;	// サラリーマン
+		numPeople[3] = people.size() * 0.2f;	// 老人
+
+		for (int pi = 0; pi < people.size(); ++pi) {
+			int type = Util::sampleFromPdf(numPeople);
+			numPeople[type]--;
+
+			people[pi].setType(type);
 		}
 	}
 }
@@ -352,14 +373,12 @@ void UrbanGeometry::allocatePeople() {
  */
 float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
 	float score_total = 0.0f;
-	float num = 0.0;
 	for (int i = 0; i < people.size(); ++i) {
 		setFeatureForPerson(people[i], renderManager);
-		score_total += people[i].score * people[i].num;
-		num += people[i].num;
+		score_total += people[i].score;
 	}
 
-	return score_total / num;
+	return score_total / people.size();
 }
 
 /**
@@ -371,14 +390,12 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
  */
 float UrbanGeometry::computeScore() {
 	float score_total = 0.0f;
-	float num = 0.0;
 	for (int i = 0; i < people.size(); ++i) {
 		setFeatureForPerson(people[i]);
-		score_total += people[i].score * people[i].num;
-		num += people[i].num;
+		score_total += people[i].score;
 	}
 
-	return score_total / num;
+	return score_total / people.size();
 }
 
 /**

@@ -369,6 +369,10 @@ void MainWindow::onPropose() {
 	glWidget->updateGL();
 }
 
+/**
+ * ランダムにプランを生成し、ランダムに人などを配備してそのスコアを決定する。
+ * 一定回数繰り返して、ベスト３とワースト３のプランを保存する。
+ */
 void MainWindow::onBestPlan() {
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
@@ -376,11 +380,14 @@ void MainWindow::onBestPlan() {
 	srand(time(NULL));
 
 	std::vector<std::pair<float, Zoning> > zones;
-	for (int loop = 0; loop < 1000; ++loop) {
+	for (int loop = 0; loop < 10; ++loop) {
 		// randomly assign zone types to the blocks
 		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
 
+		time_t start = clock();
 		urbanGeometry->allocateAll();
+		time_t end = clock();
+		std::cout << "duration = " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
 
 		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
 		urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
