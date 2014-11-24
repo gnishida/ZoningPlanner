@@ -52,7 +52,7 @@ public slots:
 	void onPropose();
 	void onBestPlan();
 	void onBestPlanAndPeople();
-	void onCameraCar();
+	void onPeopleAllocation();
 };
 
 #endif // MAINWINDOW_H

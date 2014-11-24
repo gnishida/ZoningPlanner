@@ -63,6 +63,7 @@ public:
 	void saveBlocks(const QString& filename);
 
 	void allocateAll();
+	void allocatePeople();
 	float computeScore(VBORenderManager& renderManager);
 	float computeScore();
 	void setFeatureForPerson(Person& person, VBORenderManager& renderManager);

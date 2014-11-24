@@ -7,6 +7,11 @@
 #include "ConvexHull.h"
 #include <time.h>
 #include <algorithm>
+#include <QFile>
+#include <QTextStream>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -50,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
 	connect(ui.actionBestPlanAndPeople, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeople()));
-	connect(ui.actionCameraCar, SIGNAL(triggered()), this, SLOT(onCameraCar()));
+	connect(ui.actionPeopleAllocation, SIGNAL(triggered()), this, SLOT(onPeopleAllocation()));
 
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
@@ -426,7 +431,7 @@ void MainWindow::onBestPlanAndPeople() {
 	srand(time(NULL));
 
 	std::vector<std::pair<float, Zoning> > zones;
-	for (int loop = 0; loop < 1000; ++loop) {
+	for (int loop = 0; loop < 10000; ++loop) {
 		// randomly assign zone types to the blocks
 		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
 
@@ -477,6 +482,39 @@ void MainWindow::onBestPlanAndPeople() {
 	}
 }
 
-void MainWindow::onCameraCar() {
-	//glWidget->camera = &glWidget->carCamera;
+/**
+ * 現在のゾーンに対して、人をランダムに配置し、スコアを計算する。これをＮ回繰り返して、スコアリストをファイルに出力する。
+ * Pythonプログラムなどでヒストグラム生成に使用できる。
+ */
+void MainWindow::onPeopleAllocation() {
+	urbanGeometry->allocateAll();
+
+	// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
+	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
+
+	std::vector<float> scores;
+	for (int iter = 0; iter < 1000; ++iter) {
+		// 人を動かす
+		urbanGeometry->allocatePeople();
+
+		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
+		scores.push_back(score);
+		printf("%d: score=%lf\n", iter, score);
+	}
+
+	// スコアリストをファイルに保存
+	std::ofstream out("score.txt");
+	for (int i = 0; i < scores.size(); ++i) {
+		out << scores[i] << std::endl;
+	}
+	out.close();
 }
+

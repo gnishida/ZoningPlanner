@@ -273,6 +273,77 @@ void UrbanGeometry::allocateAll() {
 }
 
 /**
+ * 住民を配備する
+ */
+void UrbanGeometry::allocatePeople() {
+	people.clear();
+
+	// 予想される数を先に計算する
+	std::vector<float> numPeople(4, 0.0f);
+	
+	for (int i = 0; i < blocks.size(); ++i) {
+		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
+
+		// 予測される区画数を計算
+		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
+
+		if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+			// 住人の数を決定
+			int num = numParcels * Util::genRand(1, 5);
+			if (blocks[i].zone.level() == 2) {
+				num = blocks[i].blockContour.area() * 0.01f;
+			} else if (blocks[i].zone.level() == 3) {
+				num = blocks[i].blockContour.area() * 0.02f;
+			}
+			numPeople[0] += num * 0.2f;
+			numPeople[1] += num * 0.3f;
+			numPeople[2] += num * 0.3f;
+			numPeople[3] += num * 0.2f;
+		}
+	}
+	
+	//Block::parcelGraphVertexIter vi, viEnd;
+	for (int i = 0; i < blocks.size(); ++i) {
+		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
+		// BUG! To be fixed!
+		// In some cases, location has very large numbers.
+		if (location.x() > 1000000 || location.y() > 1000000) continue;
+
+		// 予測される区画数を計算
+		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
+
+		if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+			// 住人の数を決定
+			int num = numParcels * Util::genRand(1, 5);
+			if (blocks[i].zone.level() == 2) {
+				num = blocks[i].blockContour.area() * 0.01f;
+			} else if (blocks[i].zone.level() == 3) {
+				num = blocks[i].blockContour.area() * 0.02f;
+			}
+
+			Person person0(0, location);
+			Person person1(1, location);
+			Person person2(2, location);
+			Person person3(3, location);
+
+			for (int n = 0; n < num; ++n) {
+				int type = Util::sampleFromPdf(numPeople);
+				numPeople[type]--;
+
+				if (type == 0) person0.num++;
+				else if (type == 1) person1.num++;
+				else if (type == 2) person2.num++;
+				else if (type == 3) person3.num++;
+			}
+			people.push_back(person0);
+			people.push_back(person1);
+			people.push_back(person2);
+			people.push_back(person3);
+		}
+	}
+}
+
+/**
  * 各住人にとっての、都市のfeatureベクトルを計算する。結果は、各personのfeatureに格納される。
  * また、それに対する評価結果を、各personのscoreに格納する。
  * さらに、全住人によるscoreの平均を返却する。

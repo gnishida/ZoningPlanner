@@ -99,6 +99,7 @@
     <addaction name="actionPropose"/>
     <addaction name="actionBestPlan"/>
     <addaction name="actionBestPlanAndPeople"/>
+    <addaction name="actionPeopleAllocation"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
@@ -427,6 +428,11 @@
   <action name="actionBestPlanAndPeople">
    <property name="text">
     <string>Best Plan And People</string>
+   </property>
+  </action>
+  <action name="actionPeopleAllocation">
+   <property name="text">
+    <string>People Allocation</string>
    </property>
   </action>
  </widget>
