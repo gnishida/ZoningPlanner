@@ -15,6 +15,6 @@ struct zone_plan {
 	float score;
 };
 
-void zonePlanMCMCGPUfunc();
+void zonePlanMCMCGPUfunc(zone_plan** bestPlan);
 
 #endif

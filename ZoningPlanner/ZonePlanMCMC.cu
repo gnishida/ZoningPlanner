@@ -215,13 +215,11 @@ void zonePlanMCMCGPUKernel(zone_plan* plan, zone_plan* proposal, zone_plan* best
 				feature[7] = __expf(-K[5] * pollution(distToFactory));
 				feature[8] = 0; // 駅はなし
 
-				/*
 				// このブロックにおけるスコアを計算
 				for (int i = 0; i < 10; ++i) {
 					proposal_score += dot2(preference[i], feature) * ratioPeople[i] * levelPeople[proposal[idx].zones[r][c].level - 1];
 					count += ratioPeople[i] * levelPeople[proposal[idx].zones[r][c].level - 1];
 				}
-				*/
 			}
 		}
 
@@ -259,11 +257,11 @@ void zonePlanMCMCGPUKernel(zone_plan* plan, zone_plan* proposal, zone_plan* best
 /**
  * MCMCでベストプランを探す（CUDA版）
  */
-void zonePlanMCMCGPUfunc() {
+void zonePlanMCMCGPUfunc(zone_plan** bestPlans) {
 	// CPU側のメモリを確保
-	zone_plan* plans;
-	plans = (zone_plan*)malloc(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
-	//*bestPlans = (zone_plan*)malloc(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	//zone_plan* plans;
+	//plans = (zone_plan*)malloc(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	*bestPlans = (zone_plan*)malloc(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
 
 	// デバイスメモリを確保
 	zone_plan* devPlan;
@@ -279,7 +277,7 @@ void zonePlanMCMCGPUfunc() {
     zonePlanMCMCGPUKernel<<<ZONE_PLAN_MCMC_GRID_SIZE, ZONE_PLAN_MCMC_BLOCK_SIZE>>>(devPlan, devProposal, devBestPlan);
 
 	// 結果をCPU側のバッファへ転送する
-    cudaMemcpy(plans, devBestPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE, cudaMemcpyDeviceToHost);
+    cudaMemcpy(*bestPlans, devBestPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE, cudaMemcpyDeviceToHost);
 
 	// デバイスメモリを開放する
     cudaFree(devPlan);
@@ -300,5 +298,5 @@ void zonePlanMCMCGPUfunc() {
 	}*/
 
 	printf("data copy done.\n");
-	free(plans);
+	//free(plans);
 }

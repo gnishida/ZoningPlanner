@@ -106,9 +106,8 @@ void UrbanGeometry::findBestPlanGPU() {
 	printf("UrbanGeometry::findBestPlanGPU...\n");
 
 	zone_plan* plans;// = (zone_plan*)new zone_plan(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
-	zonePlanMCMCGPUfunc();
+	zonePlanMCMCGPUfunc(&plans);
 	
-	/*
 	std::vector<std::pair<float, Zoning> > zones;
 	zones.resize(ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
 	for (int i = 0; i < ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE; ++i) {
@@ -129,9 +128,8 @@ void UrbanGeometry::findBestPlanGPU() {
 		QString filename = QString("zoning/score_%1.xml").arg(zones[i].first, 4, 'f', 6);
 		zones[i].second.save(filename);
 	}
-	*/
 
-	//free(plans);
+	free(plans);
 }
 
 /**
