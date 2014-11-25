@@ -99,6 +99,7 @@
     <addaction name="actionPropose"/>
     <addaction name="actionBestPlan"/>
     <addaction name="actionBestPlanMT"/>
+    <addaction name="actionBestPlanGPU"/>
     <addaction name="actionBestPlanAndPeople"/>
     <addaction name="actionBestPlanAndPeopleMT"/>
     <addaction name="actionBestPlanAndPeopleGPU"/>
@@ -451,6 +452,11 @@
   <action name="actionBestPlanAndPeopleGPU">
    <property name="text">
     <string>Best Plan And People GPU</string>
+   </property>
+  </action>
+  <action name="actionBestPlanGPU">
+   <property name="text">
+    <string>Best Plan GPU</string>
    </property>
   </action>
  </widget>

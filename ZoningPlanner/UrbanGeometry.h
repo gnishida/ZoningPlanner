@@ -62,6 +62,8 @@ public:
 	void loadBlocks(const QString& filename);
 	void saveBlocks(const QString& filename);
 
+	void findBestPlanGPU();
+
 	void allocateAll();
 	void allocatePeople();
 	float computeScore(VBORenderManager& renderManager);

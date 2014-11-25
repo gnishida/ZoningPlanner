@@ -2,8 +2,8 @@
 
 #include <stdio.h>
 
-#define GRID_SIZE	8
-#define BLOCK_SIZE	128
+#define PEOPLE_ALLOCATION_GRID_SIZE		8
+#define PEOPLE_ALLOCATION_BLOCK_SIZE	128
 
 struct cuda_person {
 	int type;

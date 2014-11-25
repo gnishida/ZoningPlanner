@@ -16,6 +16,7 @@
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>    
 #include "PeopleAllocation.cuh"
+#include "ZonePlanMCMC.cuh"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -96,6 +97,41 @@ void UrbanGeometry::loadBlocks(const QString& filename) {
 
 void UrbanGeometry::saveBlocks(const QString& filename) {
 	blocks.save(filename);
+}
+
+/**
+ * ベストのゾーンプランを探す（CUDA版）
+ */
+void UrbanGeometry::findBestPlanGPU() {
+	printf("UrbanGeometry::findBestPlanGPU...\n");
+
+	zone_plan* plans;// = (zone_plan*)new zone_plan(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	zonePlanMCMCGPUfunc();
+	
+	/*
+	std::vector<std::pair<float, Zoning> > zones;
+	zones.resize(ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	for (int i = 0; i < ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE; ++i) {
+		for (int r = 0; r < 200; ++r) {
+			for (int c = 0; c < 200; ++c) {
+				Polygon2D polygon;
+				polygon.push_back(QVector2D(-4000 + c * 20, -4000 + r * 20));
+				polygon.push_back(QVector2D(-4000 + c * 20 + 20, -4000 + r * 20));
+				polygon.push_back(QVector2D(-4000 + c * 20 + 20, -4000 + r * 20 + 20));
+				polygon.push_back(QVector2D(-4000 + c * 20, -4000 + r * 20 + 20));
+				zones[i].second.zones.push_back(std::make_pair(polygon, ZoneType(plans[i].zones[r][c].type, plans[i].zones[r][c].level)));
+			}
+		}
+		zones[i].first = plans[i].score;
+	}
+
+	for (int i = 0; i < zones.size(); ++i) {
+		QString filename = QString("zoning/score_%1.xml").arg(zones[i].first, 4, 'f', 6);
+		zones[i].second.save(filename);
+	}
+	*/
+
+	//free(plans);
 }
 
 /**

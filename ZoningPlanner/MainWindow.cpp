@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
 	connect(ui.actionBestPlanMT, SIGNAL(triggered()), this, SLOT(onBestPlanMT()));
+	connect(ui.actionBestPlanGPU, SIGNAL(triggered()), this, SLOT(onBestPlanGPU()));
 	connect(ui.actionBestPlanAndPeople, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeople()));
 	connect(ui.actionBestPlanAndPeopleMT, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeopleMT()));
 	connect(ui.actionBestPlanAndPeopleGPU, SIGNAL(triggered()), this, SLOT(onBestPlanAndPeopleGPU()));
@@ -496,6 +497,20 @@ void MainWindow::onBestPlanMT() {
 
 		zones.pop_back();
 	}
+}
+
+/**
+ * ランダムにプランを生成し、ランダムに人などを配備してそのスコアを決定する。
+ * 一定回数繰り返して、ベスト３とワースト３のプランを保存する。
+ */
+void MainWindow::onBestPlanGPU() {
+	printf("onBestPlanGPU\n");
+
+	// generate blocks
+	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+
+	urbanGeometry->findBestPlanGPU();
+	printf("onBestPlanGPU done\n");
 }
 
 /**

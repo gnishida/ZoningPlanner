@@ -61,7 +61,7 @@ void movePeopleGPUfunc(cuda_person* people, int numPeople) {
 	cudaMemcpy(devResults, people, sizeof(cuda_person) * numPeople, cudaMemcpyHostToDevice);
 
 	// GPU側の関数を呼び出す
-    movePeopleGPUKernel<<<GRID_SIZE, BLOCK_SIZE>>>((cuda_person*)devResults, numPeople);
+    movePeopleGPUKernel<<<PEOPLE_ALLOCATION_GRID_SIZE, PEOPLE_ALLOCATION_BLOCK_SIZE>>>((cuda_person*)devResults, numPeople);
 
 	// 結果をCPU側のバッファへ転送する
     cudaMemcpy(people, devResults, sizeof(cuda_person) * numPeople, cudaMemcpyDeviceToHost);
