@@ -3,22 +3,26 @@
 #include <iostream>
 
 __device__
+__host__
 unsigned int rand(unsigned int* randx) {
     *randx = *randx * 1103515245 + 12345;
     return (*randx)&2147483647;
 }
 
 __device__
+__host__
 float randf(unsigned int* randx) {
 	return rand(randx) / (float(2147483647) + 1);
 }
 
 __device__
+__host__
 float randf(unsigned int* randx, float a, float b) {
 	return randf(randx) * (b - a) + a;
 }
 
 __device__
+__host__
 float sampleFromCdf(unsigned int* randx, float* cdf, int num) {
 	float rnd = randf(randx, 0, cdf[num-1]);
 
@@ -30,6 +34,7 @@ float sampleFromCdf(unsigned int* randx, float* cdf, int num) {
 }
 
 __device__
+__host__
 float sampleFromPdf(unsigned int* randx, float* pdf, int num) {
 	if (num == 0) return 0;
 
@@ -47,6 +52,7 @@ float sampleFromPdf(unsigned int* randx, float* pdf, int num) {
 }
 
 __device__
+__host__
 float sum(float* values, int num) {
 	float total = 0.0f;
 	for (int i = 0; i < num; ++i) {
@@ -56,6 +62,7 @@ float sum(float* values, int num) {
 }
 
 __device__
+__host__
 void swapZoneType(zone_type* z1, zone_type* z2) {
 	int temp_type = z1->type;
 	int temp_level = z1->level;
@@ -67,6 +74,7 @@ void swapZoneType(zone_type* z1, zone_type* z2) {
 }
 
 __device__
+__host__
 float dot2(float* preference, float* feature) {
 	float ret = 0.0;
 	for (int i = 0; i < 9; ++i) {
@@ -76,6 +84,7 @@ float dot2(float* preference, float* feature) {
 }
 
 __device__
+__host__
 float noise(float distToFactory, float distToAmusement, float distToStore) {
 	float Km = 800.0 - distToFactory;
 	float Ka = 400.0 - distToAmusement;
@@ -85,23 +94,17 @@ float noise(float distToFactory, float distToAmusement, float distToStore) {
 }
 
 __device__
+__host__
 float pollution(float distToFactory) {
 	float Km = 800.0 - distToFactory;
 
 	return max(Km, 0.0f);
 }
 
-/**
- * CUDA version of MCMCM
- */
-__global__
-void zonePlanMCMCGPUKernel(int* numIterations, zone_plan* plan, zone_plan* proposal, zone_plan* bestPlan) {
-	int idx = blockDim.x * blockIdx.x + threadIdx.x;
-
-	// initialize random
-	unsigned int randx = idx;
-
-	float K = 0.001;//[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001, 0.001};
+__device__
+__host__
+void MCMCstep(int numIterations, unsigned int randx, zone_plan* plan, zone_plan* proposal, zone_plan* bestPlan) {
+	float K = 0.001;
 
 	// preference
 	float preference[10][9];
@@ -135,22 +138,22 @@ void zonePlanMCMCGPUKernel(int* numIterations, zone_plan* plan, zone_plan* propo
 		for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
 			for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
 				int n = sampleFromPdf(&randx, remainedBlockNum, 18);
-				plan[idx].zones[r][c].type = n / 3;
-				plan[idx].zones[r][c].level = n % 3 + 1;
+				plan->zones[r][c].type = n / 3;
+				plan->zones[r][c].level = n % 3 + 1;
 				remainedBlockNum[n]--;
 			}
 		}
 
-		plan[idx].score = 0.0;
+		plan->score = 0.0;
 	}
 
-	bestPlan[idx].score = 0.0;
+	bestPlan->score = 0.0;
 	//float current_score = 0.0f;
-	for (int loop = 0; loop < 10000; ++loop) {
+	for (int loop = 0; loop < numIterations; ++loop) {
 		// create a proposal
 		{
 			// copy the current plan to the proposal
-			proposal[idx] = plan[idx];
+			*proposal = *plan;
 
 			// swap a zone type between two blocks
 			while (true) {
@@ -159,21 +162,21 @@ void zonePlanMCMCGPUKernel(int* numIterations, zone_plan* plan, zone_plan* propo
 				int x2 = randf(&randx, 0, ZONE_GRID_SIZE);
 				int y2 = randf(&randx, 0, ZONE_GRID_SIZE);
 
-				if (proposal[idx].zones[y1][x1].type != proposal[idx].zones[y2][x2].type || proposal[idx].zones[y1][x1].level != proposal[idx].zones[y2][x2].level) {
-					swapZoneType(&proposal[idx].zones[y1][x1], &proposal[idx].zones[y2][x2]);
+				if (proposal->zones[y1][x1].type != proposal->zones[y2][x2].type || proposal->zones[y1][x1].level != proposal->zones[y2][x2].level) {
+					swapZoneType(&proposal->zones[y1][x1], &proposal->zones[y2][x2]);
 					break;
 				}
 			}
 		}
 
 		// 
-		proposal[idx].score = 0.0;
+		proposal->score = 0.0;
 		float count = 0.0;
 
 		for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
 			for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
 				// skip for non-residential block
-				if (plan[idx].zones[r][c].type != 0) continue;
+				if (plan->zones[r][c].type != 0) continue;
 
 				// compute the distance to the nearest spots
 				float distToStore = 4000;
@@ -186,28 +189,28 @@ void zonePlanMCMCGPUKernel(int* numIterations, zone_plan* plan, zone_plan* propo
 
 				for (int r2 = 0; r2 < ZONE_GRID_SIZE; ++r2) {
 					for (int c2 = 0; c2 < ZONE_GRID_SIZE; ++c2) {
-						if (proposal[idx].zones[r2][c2].type == 0) continue;
+						if (proposal->zones[r2][c2].type == 0) continue;
 
 						//float dist = ZONE_CELL_LEN * sqrtf((r - r2) * (r - r2) + (c - c2) * (c - c2));
 						float dist = ZONE_CELL_LEN * (abs(r - r2) + abs(c - c2));
-						if (proposal[idx].zones[r2][c2].type == 1) { // 店・レストラン
+						if (proposal->zones[r2][c2].type == 1) { // 店・レストラン
 							if (dist < distToStore) {
 								distToStore = dist;
 								distToRestaurant = dist;
 							}
-						} else if (proposal[idx].zones[r2][c2].type == 2) { // 工場
+						} else if (proposal->zones[r2][c2].type == 2) { // 工場
 							if (dist < distToFactory) {
 								distToFactory = dist;
 							}
-						} else if (proposal[idx].zones[r2][c2].type == 3) { // 公園
+						} else if (proposal->zones[r2][c2].type == 3) { // 公園
 							if (dist < distToPark) {
 								distToPark = dist;
 							}
-						} else if (proposal[idx].zones[r2][c2].type == 4) { // アミューズメント
+						} else if (proposal->zones[r2][c2].type == 4) { // アミューズメント
 							if (dist < distToAmusement) {
 								distToAmusement = dist;
 							}
-						} else if (proposal[idx].zones[r2][c2].type == 5) { // 学校・図書館
+						} else if (proposal->zones[r2][c2].type == 5) { // 学校・図書館
 							if (dist < distToSchool) {
 								distToSchool = dist;
 								distToLibrary = dist;
@@ -218,37 +221,50 @@ void zonePlanMCMCGPUKernel(int* numIterations, zone_plan* plan, zone_plan* propo
 
 				// compute feature
 				float feature[9];
-				feature[0] = __expf(-K * distToStore);
-				feature[1] = __expf(-K * distToSchool);
-				feature[2] = __expf(-K * distToRestaurant);
-				feature[3] = __expf(-K * distToPark);
-				feature[4] = __expf(-K * distToAmusement);
-				feature[5] = __expf(-K * distToLibrary);
-				feature[6] = __expf(-K * noise(distToFactory, distToAmusement, distToStore));
-				feature[7] = __expf(-K * pollution(distToFactory));
+				feature[0] = expf(-K * distToStore);
+				feature[1] = expf(-K * distToSchool);
+				feature[2] = expf(-K * distToRestaurant);
+				feature[3] = expf(-K * distToPark);
+				feature[4] = expf(-K * distToAmusement);
+				feature[5] = expf(-K * distToLibrary);
+				feature[6] = expf(-K * noise(distToFactory, distToAmusement, distToStore));
+				feature[7] = expf(-K * pollution(distToFactory));
 				feature[8] = 0; // 駅はなし
 
 				// compute score
 				for (int i = 0; i < 10; ++i) {
-					proposal[idx].score += dot2(preference[i], feature) * ratioPeople[i] * levelPeople[proposal[idx].zones[r][c].level - 1];
-					count += ratioPeople[i] * levelPeople[proposal[idx].zones[r][c].level - 1];
+					proposal->score += dot2(preference[i], feature) * ratioPeople[i] * levelPeople[proposal->zones[r][c].level - 1];
+					count += ratioPeople[i] * levelPeople[proposal->zones[r][c].level - 1];
 				}
 			}
 		}
 
-		proposal[idx].score /= count;
+		proposal->score /= count;
 
 		// update the best plan
-		if (proposal[idx].score > bestPlan[idx].score) {
-			bestPlan[idx] = proposal[idx];
+		if (proposal->score > bestPlan->score) {
+			*bestPlan = *proposal;
 		}
 
 		// compare the current plan and the proposal
-		if (proposal[idx].score > plan[idx].score || loop % 10 == 0) {
+		if (proposal->score > plan->score || loop % 10 == 0) {
 			// accept
-			plan[idx] = proposal[idx];
+			*plan = *proposal;
 		}
 	}
+}
+
+/**
+ * CUDA version of MCMCM
+ */
+__global__
+void zonePlanMCMCGPUKernel(int* numIterations, zone_plan* plan, zone_plan* proposal, zone_plan* bestPlan) {
+	int idx = blockDim.x * blockIdx.x + threadIdx.x;
+
+	// initialize random
+	unsigned int randx = idx;
+
+	MCMCstep(*numIterations, randx, &plan[idx], &proposal[idx], &bestPlan[idx]);
 }
 
 /**

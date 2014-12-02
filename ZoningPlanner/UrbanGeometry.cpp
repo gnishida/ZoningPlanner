@@ -100,6 +100,32 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 }
 
 /**
+ * ベストのゾーンプランを探す（シングルスレッド版）
+ */
+void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, int numIterations) {
+	zone_plan plan;
+	zone_plan proposal;
+	zone_plan bestPlan;
+	MCMCstep(numIterations, 0, &plan, &proposal, &bestPlan);
+
+	this->zones.zones.resize(ZONE_GRID_SIZE * ZONE_GRID_SIZE);
+	for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
+		for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
+			Polygon2D polygon;
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
+			zones.zones[r * ZONE_GRID_SIZE + c] = std::make_pair(polygon, ZoneType(bestPlan.zones[r][c].type, bestPlan.zones[r][c].level));
+		}
+	}
+
+	printf("writing zoning to a file (score: %lf)\n", bestPlan.score);
+	QString filename = QString("zoning/score_%1.xml").arg(bestPlan.score, 4, 'f', 6);
+	zones.save(filename);
+}
+
+/**
  * ベストのゾーンプランを探す（CUDA版）
  */
 void UrbanGeometry::findBestPlanGPU(VBORenderManager& renderManager, int numIterations) {
@@ -111,11 +137,11 @@ void UrbanGeometry::findBestPlanGPU(VBORenderManager& renderManager, int numIter
 	printf("OK\n");
 	
 	float best_score = 0.0f;
+	this->zones.zones.resize(ZONE_GRID_SIZE * ZONE_GRID_SIZE);
 	for (int i = 0; i < ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE; ++i) {
 		if (plans[i].score > best_score) {
 			best_score = plans[i].score;
-			this->zones.zones.resize(ZONE_GRID_SIZE * ZONE_GRID_SIZE);
-
+			
 			for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
 				for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
 					Polygon2D polygon;

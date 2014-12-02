@@ -378,67 +378,38 @@ void MainWindow::onPropose() {
  * 一定回数繰り返して、ベスト３とワースト３のプランを保存する。
  */
 void MainWindow::onBestPlan() {
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, 500000);
+
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
-	//srand(time(NULL));
-	srand(0);
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-	std::vector<std::pair<float, Zoning> > zones;
-	//for (int loop = 0; loop < 100; ++loop) {
-	for (int loop = 0; loop < 3; ++loop) {
-		// randomly assign zone types to the blocks
-		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
+	// re-generate parcels
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-		time_t start = clock();
-		urbanGeometry->allocateAll();
-		time_t end = clock();
-		std::cout << "duration = " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
+	urbanGeometry->allocateAll();
 
-		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
-		urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
-		urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
-		urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
-		urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
-		urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
-		urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
-		urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
-		urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-		urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
+	// レイヤー情報を更新する
+	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 
-		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
-		printf("%d: score=%lf\n", loop, score);
+	// 人のモデルを生成
+	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
-		zones.push_back(std::make_pair(score, urbanGeometry->zones));
-	}
+	// compute the feature vectors
+	urbanGeometry->computeScore();
 
-	// ベスト３を保存する
-	std::make_heap(zones.begin(), zones.end(), CompareZoning());
-	for (int i = 0; i < 3; ++i) {
-		std::pop_heap(zones.begin(), zones.end(), CompareZoning());
-		std::pair<float, Zoning> z = zones.back();
+	glWidget->shadow.makeShadowMap(glWidget);
 
-		if (i == 0) {
-			urbanGeometry->zones = z.second;
-		}
-
-		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
-		z.second.save(filename);
-
-		zones.pop_back();
-	}
-
-	// ワースト３を保存する
-	std::make_heap(zones.begin(), zones.end(), CompareZoningReverse());
-	for (int i = 0; i < 3; ++i) {
-		std::pop_heap(zones.begin(), zones.end(), CompareZoningReverse());
-		std::pair<float, Zoning> z = zones.back();
-
-		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
-		z.second.save(filename);
-
-		zones.pop_back();
-	}
+	glWidget->updateGL();
 }
 
 /**
@@ -446,62 +417,38 @@ void MainWindow::onBestPlan() {
  * 一定回数繰り返して、ベスト３とワースト３のプランを保存する。
  */
 void MainWindow::onBestPlanMT() {
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, 500000);
+
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
-	//srand(time(NULL));
-	srand(0);
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-	std::vector<std::pair<float, Zoning> > zones;
-	for (int loop = 0; loop < 100; ++loop) {
-		// randomly assign zone types to the blocks
-		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
+	// re-generate parcels
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-		time_t start = clock();
-		urbanGeometry->allocateAll();
-		time_t end = clock();
-		std::cout << "duration = " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
+	urbanGeometry->allocateAll();
 
-		// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
-		urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
-		urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
-		urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
-		urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
-		urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
-		urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
-		urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
-		urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-		urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
+	// レイヤー情報を更新する
+	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 
-		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
-		printf("%d: score=%lf\n", loop, score);
+	// 人のモデルを生成
+	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
-		zones.push_back(std::make_pair(score, urbanGeometry->zones));
-	}
+	// compute the feature vectors
+	urbanGeometry->computeScore();
 
-	// ベスト３を保存する
-	std::make_heap(zones.begin(), zones.end(), CompareZoning());
-	for (int i = 0; i < 3; ++i) {
-		std::pop_heap(zones.begin(), zones.end(), CompareZoning());
-		std::pair<float, Zoning> z = zones.back();
+	glWidget->shadow.makeShadowMap(glWidget);
 
-		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
-		z.second.save(filename);
-
-		zones.pop_back();
-	}
-
-	// ワースト３を保存する
-	std::make_heap(zones.begin(), zones.end(), CompareZoningReverse());
-	for (int i = 0; i < 3; ++i) {
-		std::pop_heap(zones.begin(), zones.end(), CompareZoningReverse());
-		std::pair<float, Zoning> z = zones.back();
-
-		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
-		z.second.save(filename);
-
-		zones.pop_back();
-	}
+	glWidget->updateGL();
 }
 
 /**
@@ -510,12 +457,39 @@ void MainWindow::onBestPlanMT() {
  */
 void MainWindow::onBestPlanGPU() {
 	printf("onBestPlanGPU\n");
+	urbanGeometry->findBestPlanGPU(glWidget->vboRenderManager, 10000);
+	printf("onBestPlanGPU done\n");
 
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
-	urbanGeometry->findBestPlanGPU(glWidget->vboRenderManager, 1000);
-	printf("onBestPlanGPU done\n");
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+	// re-generate parcels
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+	urbanGeometry->allocateAll();
+
+	// レイヤー情報を更新する
+	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
+	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
+	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
+	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
+	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
+	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
+	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
+	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
+
+	// 人のモデルを生成
+	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
+
+	// compute the feature vectors
+	urbanGeometry->computeScore();
+
+	glWidget->shadow.makeShadowMap(glWidget);
+
+	glWidget->updateGL();
 }
 
 /**

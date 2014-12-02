@@ -62,6 +62,7 @@ public:
 	void loadBlocks(const QString& filename);
 	void saveBlocks(const QString& filename);
 
+	void findBestPlan(VBORenderManager& renderManager, int numIterations);
 	void findBestPlanGPU(VBORenderManager& renderManager, int numIterations);
 
 	void allocateAll();
