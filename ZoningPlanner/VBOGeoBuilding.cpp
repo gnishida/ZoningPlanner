@@ -496,12 +496,7 @@ void VBOGeoBuilding::initBuildingsTex(){
 	bldgInitialized=true;
 }
 
-void VBOGeoBuilding::generateBuilding(VBORenderManager& rendManager,Building& building,int type){
-	if (type == 0) {
-		generateHouse(rendManager, building);
-		return;
-	}
-
+void VBOGeoBuilding::generateBuilding(VBORenderManager& rendManager,Building& building,int type) {
 	Polygon3D& footprint=building.buildingFootprint;
 	int numStories=building.numStories;
 

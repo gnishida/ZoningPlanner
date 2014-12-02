@@ -37,7 +37,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.2.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 6.5.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -127,6 +127,9 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>qtmain.lib;QtCore4.lib;QtGui4.lib;QtXml4.lib;QtOpenGL4.lib;opengl32.lib;glu32.lib;opencv_core249.lib;opencv_highgui249.lib;opencv_imgproc249.lib;opencv_legacy249.lib;opencv_ml249.lib;opencv_photo249.lib;opencv_video249.lib;glew32.lib;libboost_thread-vc100-mt-1_53.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <CudaCompile>
+      <CodeGeneration>%(CodeGeneration)</CodeGeneration>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BBox.cpp" />
@@ -177,6 +180,11 @@
     <ClCompile Include="nvModel\nvModelQuery.cpp" />
     <ClCompile Include="Office.cpp" />
     <ClCompile Include="Person.cpp" />
+    <ClCompile Include="PMBuildingFactory.cpp" />
+    <ClCompile Include="PMBuildingHouse.cpp" />
+    <ClCompile Include="PMBuildingRB.cpp" />
+    <ClCompile Include="PMBuildingSchool.cpp" />
+    <ClCompile Include="PMBuildingTower.cpp" />
     <ClCompile Include="Polygon2D.cpp" />
     <ClCompile Include="Polygon3D.cpp" />
     <ClCompile Include="Polyline2D.cpp" />
@@ -187,7 +195,6 @@
     <ClCompile Include="UrbanGeometry.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="VBOBlock.cpp" />
-    <ClCompile Include="VBOGeoBuilding.cpp" />
     <ClCompile Include="VBOLayer.cpp" />
     <ClCompile Include="VBOModel.cpp" />
     <ClCompile Include="VBOModel_StreetElements.cpp" />
@@ -292,6 +299,11 @@
     <ClInclude Include="nvModel\nvVector.h" />
     <ClInclude Include="Office.h" />
     <ClInclude Include="Person.h" />
+    <ClInclude Include="PMBuildingFactory.h" />
+    <ClInclude Include="PMBuildingHouse.h" />
+    <ClInclude Include="PMBuildingRB.h" />
+    <ClInclude Include="PMBuildingSchool.h" />
+    <ClInclude Include="PMBuildingTower.h" />
     <ClInclude Include="Polygon2D.h" />
     <ClInclude Include="Polygon3D.h" />
     <ClInclude Include="Polyline2D.h" />
@@ -303,7 +315,6 @@
     <ClInclude Include="Util.h" />
     <ClInclude Include="VBOBlock.h" />
     <ClInclude Include="VBOBuilding.h" />
-    <ClInclude Include="VBOGeoBuilding.h" />
     <ClInclude Include="VBOLayer.h" />
     <ClInclude Include="VBOModel.h" />
     <ClInclude Include="VBOModel_StreetElements.h" />
@@ -377,7 +388,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.2.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 6.5.targets" />
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>

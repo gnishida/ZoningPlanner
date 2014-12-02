@@ -732,6 +732,73 @@ void Polygon3D::getLoopOBB2(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat){
 	xformMat.setColumn(3, QVector4D(-midPt.x(), -midPt.y(), -midPt.z(), 1.0f));	
 }
 
+/**
+ * Get polygon oriented bounding box
+ */
+Loop3D Polygon3D::getLoopOBB3(Loop3D &pin) {
+	float alpha = 0.0f;			
+	float deltaAlpha = 0.05*3.14159265359f;
+	float bestAlpha;
+
+	Loop3D rotLoop;
+	QMatrix4x4 rotMat;
+	QVector3D minPt, maxPt;
+	QVector3D origMidPt;
+	QVector3D boxSz;
+	QVector3D bestBoxSz;
+	float curArea;
+	float minArea = FLT_MAX;
+
+	rotLoop = pin;
+	Polygon3D::getLoopAABB(rotLoop, minPt, maxPt);
+	origMidPt = 0.5f*(minPt + maxPt);
+
+	//while(alpha < 0.5f*_PI){
+	int cSz = pin.size();
+	QVector3D difVec;
+	QVector3D leftBottom;
+	for(int i=0; i<pin.size(); ++i){
+		difVec = (pin.at((i+1)%cSz) - pin.at(i)).normalized();
+		alpha = atan2(difVec.x(), difVec.y());
+		rotMat.setToIdentity();				
+		rotMat.rotate(57.2957795f*(alpha), 0.0f, 0.0f, 1.0f);//57.2957795 rad2degree				
+
+		transformLoop(pin, rotLoop, rotMat);
+		boxSz = Polygon3D::getLoopAABB(rotLoop, minPt, maxPt);
+		curArea = boxSz.x() * boxSz.y();
+		if(curArea < minArea){
+			minArea = curArea;
+			bestAlpha = alpha;
+			bestBoxSz = boxSz;
+			leftBottom = pin[i];
+		}
+		//alpha += deltaAlpha;
+	}
+
+	QMatrix4x4 xformMat;
+	xformMat.setToIdentity();										
+	xformMat.rotate(57.2957795f*(bestAlpha), 0.0f, 0.0f, 1.0f);//57.2957795 rad2degree
+
+	transformLoop(pin, rotLoop, xformMat);
+	QVector3D minCorner, maxCorner;
+	Polygon3D::getLoopAABB(rotLoop, minCorner, maxCorner);
+
+	Loop3D box;
+	box.resize(4);
+	box[0] = minCorner;
+	box[1] = QVector3D(maxCorner.x(), minCorner.y(), minCorner.z());
+	box[2] = maxCorner;
+	box[3] = QVector3D(minCorner.x(), maxCorner.y(), minCorner.z());
+
+	Loop3D origBox;
+	xformMat.setToIdentity();
+	xformMat.rotate(57.2957795f*(-bestAlpha), 0.0f, 0.0f, 1.0f);//57.2957795 rad2degree
+	transformLoop(box, origBox, xformMat);
+
+	return origBox;
+}//
+
+
 void Polygon3D::getMyOBB(QVector3D &size, QMatrix4x4 &xformMat){
 	Polygon3D::getLoopOBB(this->contour, size, xformMat);
 }//
@@ -795,4 +862,56 @@ float Polygon3D::area() {
 	boost::geometry::correct(bg_pgon);
 
 	return boost::geometry::area(bg_pgon);
+}
+
+Loop3D Polygon3D::inscribedOBB() {
+	float reduceFactor = 0.9;
+
+	Loop3D obb = Polygon3D::getLoopOBB3(this->contour);
+
+	QVector3D center;
+	{
+		QVector3D minCorner, maxCorner;
+		Polygon3D::getLoopAABB(obb, minCorner, maxCorner);
+		center = (minCorner + maxCorner) * 0.5;
+	}
+
+	int baseIntersectsContour = true;
+	int count = 0;
+	while (baseIntersectsContour) {
+		// shrink
+		for (int i = 0; i < obb.size(); ++i) {
+			obb[i] = (obb[i] - center) * reduceFactor + center;
+		}
+
+		baseIntersectsContour = false;
+
+		// check intersection
+		for (int i = 0; i < obb.size() && !baseIntersectsContour; ++i) {
+			for (int j = 0; j < this->contour.size() && !baseIntersectsContour; ++j) {
+				float tab, tcd;
+				QVector3D intPoint;
+				if (Util::segmentSegmentIntersectXY3D(obb[i], obb[(i+1)%obb.size()], this->contour[j], this->contour[(j+1)%this->contour.size()], &tab, &tcd, true, intPoint)) {
+					baseIntersectsContour = true;
+					break;
+				}
+			}
+		}
+
+		if (++count > 3) break;
+	}
+
+	for (int i = 0; i < obb.size(); ++i) {
+		obb[i].setZ(this->contour[0].z());
+	}
+
+	return obb;
+}
+
+void Polygon3D::dump() {
+	printf("Polygon3D::dump()...\n");
+	for (int i = 0 ; i < contour.size(); ++i) {
+		printf("%lf, %lf, %lf\n", contour[i].x(), contour[i].y(), contour[i].z());
+	}
+	printf("Polygon3D::dump() done.\n");
 }

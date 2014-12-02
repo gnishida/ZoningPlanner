@@ -181,6 +181,7 @@ public:
 
 	static void getLoopOBB(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat);
 	static void getLoopOBB2(Loop3D &pin, QVector3D &size, QMatrix4x4 &xformMat);
+	static Loop3D getLoopOBB3(Loop3D &pin);
 
 	void getMyOBB(QVector3D &size, QMatrix4x4 &xformMat);
 
@@ -196,8 +197,8 @@ public:
 	//minimum distance from a loop to another loop (this considers the contour only)
 	static float distanceXYfromContourAVerticesToContourB(Loop3D &pA, Loop3D &pB);
 
-
-
+	Loop3D inscribedOBB();
+	void dump();
 };	
 
 class BBox3D{

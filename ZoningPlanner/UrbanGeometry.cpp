@@ -102,32 +102,38 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 /**
  * ベストのゾーンプランを探す（CUDA版）
  */
-void UrbanGeometry::findBestPlanGPU() {
+void UrbanGeometry::findBestPlanGPU(VBORenderManager& renderManager, int numIterations) {
 	printf("UrbanGeometry::findBestPlanGPU...\n");
 
 	zone_plan* plans;// = (zone_plan*)new zone_plan(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
-	zonePlanMCMCGPUfunc(&plans);
+	zonePlanMCMCGPUfunc(&plans, numIterations);
+
+	printf("OK\n");
 	
-	std::vector<std::pair<float, Zoning> > zones;
-	zones.resize(ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	float best_score = 0.0f;
 	for (int i = 0; i < ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE; ++i) {
-		for (int r = 0; r < 200; ++r) {
-			for (int c = 0; c < 200; ++c) {
-				Polygon2D polygon;
-				polygon.push_back(QVector2D(-4000 + c * 20, -4000 + r * 20));
-				polygon.push_back(QVector2D(-4000 + c * 20 + 20, -4000 + r * 20));
-				polygon.push_back(QVector2D(-4000 + c * 20 + 20, -4000 + r * 20 + 20));
-				polygon.push_back(QVector2D(-4000 + c * 20, -4000 + r * 20 + 20));
-				zones[i].second.zones.push_back(std::make_pair(polygon, ZoneType(plans[i].zones[r][c].type, plans[i].zones[r][c].level)));
+		if (plans[i].score > best_score) {
+			best_score = plans[i].score;
+			this->zones.zones.resize(ZONE_GRID_SIZE * ZONE_GRID_SIZE);
+
+			for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
+				for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
+					Polygon2D polygon;
+					polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
+					polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
+					polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
+					polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
+					zones.zones[r * ZONE_GRID_SIZE + c] = std::make_pair(polygon, ZoneType(plans[i].zones[r][c].type, plans[i].zones[r][c].level));
+				}
 			}
 		}
-		zones[i].first = plans[i].score;
 	}
 
-	for (int i = 0; i < zones.size(); ++i) {
-		QString filename = QString("zoning/score_%1.xml").arg(zones[i].first, 4, 'f', 6);
-		zones[i].second.save(filename);
-	}
+	printf("OK\n");
+
+	printf("writing zoning to a file (score: %lf)\n", best_score);
+	QString filename = QString("zoning/score_%1.xml").arg(best_score, 4, 'f', 6);
+	zones.save(filename);
 
 	free(plans);
 }

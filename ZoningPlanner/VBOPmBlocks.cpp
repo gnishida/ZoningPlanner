@@ -295,21 +295,31 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		blockAreas.push_back(insetArea);
 	}
 
-	//Remove the largest block
+	// Remove the largest block
 	float maxArea = -FLT_MAX;
 	int maxAreaIdx = -1;
-	for(int i=0; i<blocks.size(); ++i){
-		if(blocks[i].sidewalkContour.contour.size() < 3){
+	for (int i = 0; i < blocks.size(); ++i) {
+		if (blocks[i].sidewalkContour.contour.size() < 3) {
 			continue;
 		}
-		if(blockAreas[i] > maxArea){
+		if (blockAreas[i] > maxArea) {
 			maxArea = blockAreas[i];
 			maxAreaIdx = i;
 		}
 	}
-	if(maxAreaIdx != -1){
+	if (maxAreaIdx != -1) {
 		blocks.blocks.erase(blocks.blocks.begin()+maxAreaIdx);
-		blockAreas.erase(blockAreas.begin()+maxAreaIdx);
+	}
+
+	// GEN: remove the blocks whose edges are less than 3
+	// This problem is caused by the computeInset() function.
+	// ToDo: fix the computeInset function.
+	for (int i = 0; i < blocks.size(); ) {
+		if (blocks[i].sidewalkContour.contour.size() < 3) {
+			blocks.blocks.erase(blocks.blocks.begin() + i);
+		} else {
+			i++;
+		}
 	}
 
 	// assign a zone to each block
@@ -356,6 +366,10 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 				blocks[i].zone = zoning.zones[zoneId].second;
 			} else {
 				printf("ERROR: no zone is assigned to this block.\n");
+				printf("  %d\n", blocks[i].sidewalkContour.contour.size());
+				for (int k = 0; k < blocks[i].sidewalkContour.contour.size(); ++k) {
+					printf("  %lf, %lf\n", blocks[i].sidewalkContour.contour[k].x(), blocks[i].sidewalkContour.contour[k].y());
+				}
 			}
 		}
 	}

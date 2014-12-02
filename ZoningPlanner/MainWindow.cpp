@@ -385,7 +385,8 @@ void MainWindow::onBestPlan() {
 	srand(0);
 
 	std::vector<std::pair<float, Zoning> > zones;
-	for (int loop = 0; loop < 100; ++loop) {
+	//for (int loop = 0; loop < 100; ++loop) {
+	for (int loop = 0; loop < 3; ++loop) {
 		// randomly assign zone types to the blocks
 		urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
 
@@ -416,6 +417,10 @@ void MainWindow::onBestPlan() {
 	for (int i = 0; i < 3; ++i) {
 		std::pop_heap(zones.begin(), zones.end(), CompareZoning());
 		std::pair<float, Zoning> z = zones.back();
+
+		if (i == 0) {
+			urbanGeometry->zones = z.second;
+		}
 
 		QString filename = QString("zoning/score_%1.xml").arg(z.first, 4, 'f', 6);
 		z.second.save(filename);
@@ -509,7 +514,7 @@ void MainWindow::onBestPlanGPU() {
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 
-	urbanGeometry->findBestPlanGPU();
+	urbanGeometry->findBestPlanGPU(glWidget->vboRenderManager, 1000);
 	printf("onBestPlanGPU done\n");
 }
 

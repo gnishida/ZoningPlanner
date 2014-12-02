@@ -19,6 +19,11 @@
 #include "Polygon3D.h"
 #include "Util.h"
 #include "HeatMapColorTable.h"
+#include "PMBuildingHouse.h"
+#include "PMBuildingTower.h"
+#include "PMBuildingFactory.h"
+#include "PMBuildingRB.h"
+#include "PMBuildingSchool.h"
 
 // LC
 bool VBOPm::initializedLC=false;
@@ -214,8 +219,28 @@ bool VBOPm::generateBuildings(VBORenderManager& rendManager, BlockSet& blocks, Z
 			if (blocks[bN].myParcels[*vi].zone.type() == ZoneType::TYPE_PARK) continue;
 			if (blocks[bN].myParcels[*vi].myBuilding.buildingFootprint.contour.size() < 3) continue;
 
-			int building_type = 1;//placeTypes.myPlaceTypes[blocks[bN].getMyPlaceTypeIdx()].getInt("building_type");
-			VBOGeoBuilding::generateBuilding(rendManager,blocks[bN].myParcels[*vi].myBuilding, building_type);				
+			float c = rand() % 192;
+			blocks[bN].myParcels[*vi].myBuilding.color = QColor(c, c, c);
+			if (blocks[bN].myParcels[*vi].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
+				if (blocks[bN].myParcels[*vi].zone.level() == 1) {
+					PMBuildingHouse::generate(rendManager, "3d_building", blocks[bN].myParcels[*vi].myBuilding);
+				} else {
+					PMBuildingTower::generate(rendManager, "3d_building", blocks[bN].myParcels[*vi].myBuilding);
+				}
+			} else if (blocks[bN].myParcels[*vi].zone.type() == ZoneType::TYPE_COMMERCIAL) {
+				blocks[bN].myParcels[*vi].myBuilding.subType = rand() % 2;
+				PMBuildingRB::generate(rendManager, "3d_building", blocks[bN].myParcels[*vi].myBuilding);
+			} else if (blocks[bN].myParcels[*vi].zone.type() == ZoneType::TYPE_MANUFACTURING) {
+				blocks[bN].myParcels[*vi].myBuilding.subType = rand() % 3;
+				PMBuildingFactory::generate(rendManager, "3d_building", blocks[bN].myParcels[*vi].myBuilding);
+			} else if (blocks[bN].myParcels[*vi].zone.type() == ZoneType::TYPE_PUBLIC) {
+				PMBuildingSchool::generate(rendManager, "3d_building", blocks[bN].myParcels[*vi].myBuilding);
+			} else if (blocks[bN].myParcels[*vi].zone.type() == ZoneType::TYPE_AMUSEMENT) {
+				PMBuildingRB::generate(rendManager, "3d_building", blocks[bN].myParcels[*vi].myBuilding);
+			}
+
+			//int building_type = 1;//placeTypes.myPlaceTypes[blocks[bN].getMyPlaceTypeIdx()].getInt("building_type");
+			//VBOGeoBuilding::generateBuilding(rendManager,blocks[bN].myParcels[*vi].myBuilding, building_type);				
 		}
 	}
 	printf("Building generation is done.\n");

@@ -28,7 +28,7 @@ public:
 	float building_max_frontage;
 	float sidewalk_width;
 	float tree_setback;
-	int building_type;
+	//int building_type;
 
 public:
 	ZoneType() : _type(TYPE_RESIDENTIAL), _level(0) { init(); }

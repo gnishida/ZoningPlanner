@@ -38,6 +38,9 @@
     <Filter Include="Main Files\nvModel">
       <UniqueIdentifier>{e7ba5bc6-8d45-48da-b191-8a4ee7307a58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PMBuilding">
+      <UniqueIdentifier>{2f3576ed-05c5-4f00-97a6-d50d4d70bd70}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -124,9 +127,6 @@
     <ClCompile Include="VBOBlock.cpp">
       <Filter>VBO</Filter>
     </ClCompile>
-    <ClCompile Include="VBOGeoBuilding.cpp">
-      <Filter>VBO</Filter>
-    </ClCompile>
     <ClCompile Include="VBOModel.cpp">
       <Filter>VBO</Filter>
     </ClCompile>
@@ -205,6 +205,21 @@
     <ClCompile Include="ZoneType.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
+    <ClCompile Include="PMBuildingFactory.cpp">
+      <Filter>PMBuilding</Filter>
+    </ClCompile>
+    <ClCompile Include="PMBuildingHouse.cpp">
+      <Filter>PMBuilding</Filter>
+    </ClCompile>
+    <ClCompile Include="PMBuildingRB.cpp">
+      <Filter>PMBuilding</Filter>
+    </ClCompile>
+    <ClCompile Include="PMBuildingSchool.cpp">
+      <Filter>PMBuilding</Filter>
+    </ClCompile>
+    <ClCompile Include="PMBuildingTower.cpp">
+      <Filter>PMBuilding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -273,12 +288,6 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="VBOWater.h">
-      <Filter>VBO</Filter>
-    </ClInclude>
-    <ClInclude Include="VBOBuilding.h">
-      <Filter>VBO</Filter>
-    </ClInclude>
-    <ClInclude Include="VBOGeoBuilding.h">
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="VBOModel.h">
@@ -385,6 +394,24 @@
     </ClInclude>
     <ClInclude Include="ZoneType.h">
       <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PMBuildingFactory.h">
+      <Filter>PMBuilding</Filter>
+    </ClInclude>
+    <ClInclude Include="PMBuildingHouse.h">
+      <Filter>PMBuilding</Filter>
+    </ClInclude>
+    <ClInclude Include="PMBuildingRB.h">
+      <Filter>PMBuilding</Filter>
+    </ClInclude>
+    <ClInclude Include="PMBuildingSchool.h">
+      <Filter>PMBuilding</Filter>
+    </ClInclude>
+    <ClInclude Include="PMBuildingTower.h">
+      <Filter>PMBuilding</Filter>
+    </ClInclude>
+    <ClInclude Include="VBOBuilding.h">
+      <Filter>VBO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

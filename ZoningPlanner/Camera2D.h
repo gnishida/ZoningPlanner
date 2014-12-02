@@ -156,7 +156,7 @@ public:
 		xrot = 0.0f;
 		yrot = 0.0;
 		zrot = 0.0f;
-		setTranslation(0.0f, 0.0f,G::global().getFloat("MAX_Z") );//MAX_Z
+		setTranslation(0.0f, 0.0f, 100.0f);
 	}//
 
 	void saveCameraPose(const QString &filepath) {

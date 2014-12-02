@@ -91,16 +91,19 @@ float pollution(float distToFactory) {
 	return max(Km, 0.0f);
 }
 
+/**
+ * CUDA version of MCMCM
+ */
 __global__
-void zonePlanMCMCGPUKernel(zone_plan* plan, zone_plan* proposal, zone_plan* bestPlan) {
+void zonePlanMCMCGPUKernel(int* numIterations, zone_plan* plan, zone_plan* proposal, zone_plan* bestPlan) {
 	int idx = blockDim.x * blockIdx.x + threadIdx.x;
 
-	// 乱数初期化
+	// initialize random
 	unsigned int randx = idx;
 
-	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001, 0.001};
+	float K = 0.001;//[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001, 0.001};
 
-	// 人の好みベクトル
+	// preference
 	float preference[10][9];
 	preference[0][0] = 0; preference[0][1] = 0; preference[0][2] = 0.15; preference[0][3] = 0.15; preference[0][4] = 0.3; preference[0][5] = 0; preference[0][6] = 0.1; preference[0][7] = 0.1; preference[0][8] = 0.2;
 	preference[1][0] = 0; preference[1][1] = 0; preference[1][2] = 0.15; preference[1][3] = 0; preference[1][4] = 0.55; preference[1][5] = 0; preference[1][6] = 0.2; preference[1][7] = 0.1; preference[1][8] = 0;
@@ -113,60 +116,66 @@ void zonePlanMCMCGPUKernel(zone_plan* plan, zone_plan* proposal, zone_plan* best
 	preference[8][0] = 0.3; preference[8][1] = 0; preference[8][2] = 0.15; preference[8][3] = 0.05; preference[8][4] = 0; preference[8][5] = 0; preference[8][6] = 0.25; preference[8][7] = 0.25; preference[8][8] = 0;
 	preference[9][0] = 0.4; preference[9][1] = 0; preference[9][2] = 0.2; preference[9][3] = 0; preference[9][4] = 0; preference[9][5] = 0; preference[9][6] = 0.2; preference[9][7] = 0.2; preference[9][8] = 0;
 
-	// 人の数の比率
+	// population ratio
 	float ratioPeople[10] = {0.06667, 0.06667, 0.06667, 0.21, 0.09, 0.09, 0.09, 0.12, 0.1, 0.1};
+
+	// poppulation of each level of zone
 	float levelPeople[3] = {1, 5, 10};
 
-	// 初期プランの作成
+	// initial plan
 	{
 		float zoneTypeDistribution[18] = {0.2, 0.38, 0.2, 0.06, 0.05, 0.03, 0.02, 0.01, 0.01, 0.02, 0, 0, 0.01, 0, 0, 0.01, 0, 0};
 		float Z = sum(zoneTypeDistribution, 18);
 
 		float remainedBlockNum[18];
 		for (int zi = 0; zi < 18; ++zi) {
-			remainedBlockNum[zi] = zoneTypeDistribution[zi] / Z * 200 * 200;
+			remainedBlockNum[zi] = zoneTypeDistribution[zi] / Z * ZONE_GRID_SIZE * ZONE_GRID_SIZE;
 		}
 
-		for (int r = 0; r < 200; ++r) {
-			for (int c = 0; c < 200; ++c) {
+		for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
+			for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
 				int n = sampleFromPdf(&randx, remainedBlockNum, 18);
 				plan[idx].zones[r][c].type = n / 3;
 				plan[idx].zones[r][c].level = n % 3 + 1;
 				remainedBlockNum[n]--;
 			}
 		}
+
+		plan[idx].score = 0.0;
 	}
 
-	float best_score = 0.0;
-	float current_score = 0.0f;
-	for (int loop = 0; loop < 100; ++loop) {
-		// 提案プランの作成
+	bestPlan[idx].score = 0.0;
+	//float current_score = 0.0f;
+	for (int loop = 0; loop < 10000; ++loop) {
+		// create a proposal
 		{
-			for (int r = 0; r < 200; ++r) {
-				for (int c = 0; c < 200; ++c) {
-					proposal[idx].zones[r][c].type = plan[idx].zones[r][c].type;
-					proposal[idx].zones[r][c].level = plan[idx].zones[r][c].level;
+			// copy the current plan to the proposal
+			proposal[idx] = plan[idx];
+
+			// swap a zone type between two blocks
+			while (true) {
+				int x1 = randf(&randx, 0, ZONE_GRID_SIZE);
+				int y1 = randf(&randx, 0, ZONE_GRID_SIZE);
+				int x2 = randf(&randx, 0, ZONE_GRID_SIZE);
+				int y2 = randf(&randx, 0, ZONE_GRID_SIZE);
+
+				if (proposal[idx].zones[y1][x1].type != proposal[idx].zones[y2][x2].type || proposal[idx].zones[y1][x1].level != proposal[idx].zones[y2][x2].level) {
+					swapZoneType(&proposal[idx].zones[y1][x1], &proposal[idx].zones[y2][x2]);
+					break;
 				}
 			}
-
-			int x1 = randf(&randx, 0, 200);
-			int y1 = randf(&randx, 0, 200);
-			int x2 = randf(&randx, 0, 200);
-			int y2 = randf(&randx, 0, 200);
-
-			swapZoneType(&proposal[idx].zones[y1][x1], &proposal[idx].zones[y2][x2]);
 		}
 
-		// 提案プランのスコアを計算
-		float proposal_score = 0.0;
+		// 
+		proposal[idx].score = 0.0;
 		float count = 0.0;
 
-		for (int r = 0; r < 200; ++r) {
-			for (int c = 0; c < 200; ++c) {
-				// 住宅ブロック以外なら、人がいないので、スキップ
+		for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
+			for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
+				// skip for non-residential block
 				if (plan[idx].zones[r][c].type != 0) continue;
 
-				// 直近の店、レストランまでの距離を計算
+				// compute the distance to the nearest spots
 				float distToStore = 4000;
 				float distToRestaurant = 4000;
 				float distToFactory = 4000;
@@ -174,9 +183,13 @@ void zonePlanMCMCGPUKernel(zone_plan* plan, zone_plan* proposal, zone_plan* best
 				float distToAmusement = 4000;
 				float distToSchool = 4000;
 				float distToLibrary = 4000;
-				for (int r2 = 0; r2 < 200; ++r2) {
-					for (int c2 = 0; c2 < 200; ++c2) {
-						float dist = 20 * sqrtf((r - r2) * (r - r2) + (c - c2) * (c - c2));
+
+				for (int r2 = 0; r2 < ZONE_GRID_SIZE; ++r2) {
+					for (int c2 = 0; c2 < ZONE_GRID_SIZE; ++c2) {
+						if (proposal[idx].zones[r2][c2].type == 0) continue;
+
+						//float dist = ZONE_CELL_LEN * sqrtf((r - r2) * (r - r2) + (c - c2) * (c - c2));
+						float dist = ZONE_CELL_LEN * (abs(r - r2) + abs(c - c2));
 						if (proposal[idx].zones[r2][c2].type == 1) { // 店・レストラン
 							if (dist < distToStore) {
 								distToStore = dist;
@@ -203,81 +216,95 @@ void zonePlanMCMCGPUKernel(zone_plan* plan, zone_plan* proposal, zone_plan* best
 					}
 				}
 
-				// 特徴量を計算
+				// compute feature
 				float feature[9];
-				feature[0] = __expf(-K[0] * distToStore);
-				feature[1] = __expf(-K[1] * distToSchool);
-				feature[2] = __expf(-K[2] * distToRestaurant);
-				feature[3] = __expf(-K[3] * distToPark);
-				feature[4] = __expf(-K[4] * distToAmusement);
-				feature[5] = __expf(-K[5] * distToLibrary);
-				feature[6] = __expf(-K[5] * noise(distToFactory, distToAmusement, distToStore));
-				feature[7] = __expf(-K[5] * pollution(distToFactory));
+				feature[0] = __expf(-K * distToStore);
+				feature[1] = __expf(-K * distToSchool);
+				feature[2] = __expf(-K * distToRestaurant);
+				feature[3] = __expf(-K * distToPark);
+				feature[4] = __expf(-K * distToAmusement);
+				feature[5] = __expf(-K * distToLibrary);
+				feature[6] = __expf(-K * noise(distToFactory, distToAmusement, distToStore));
+				feature[7] = __expf(-K * pollution(distToFactory));
 				feature[8] = 0; // 駅はなし
 
-				// このブロックにおけるスコアを計算
+				// compute score
 				for (int i = 0; i < 10; ++i) {
-					proposal_score += dot2(preference[i], feature) * ratioPeople[i] * levelPeople[proposal[idx].zones[r][c].level - 1];
+					proposal[idx].score += dot2(preference[i], feature) * ratioPeople[i] * levelPeople[proposal[idx].zones[r][c].level - 1];
 					count += ratioPeople[i] * levelPeople[proposal[idx].zones[r][c].level - 1];
 				}
 			}
 		}
 
-		proposal_score /= count;
+		proposal[idx].score /= count;
 
-		continue;
-
-		// ベストプランの更新
-		if (proposal_score > best_score) {
-			best_score = proposal_score;
-			for (int r = 0; r < 200; ++r) {
-				for (int c = 0; c < 200; ++c) {
-					bestPlan[idx].zones[r][c].type = proposal[idx].zones[r][c].type;
-					bestPlan[idx].zones[r][c].level = proposal[idx].zones[r][c].level;
-				}
-			}
-			bestPlan[idx].score = best_score;
+		// update the best plan
+		if (proposal[idx].score > bestPlan[idx].score) {
+			bestPlan[idx] = proposal[idx];
 		}
 
-		// 現在のプランの提案プランを比較し、accept/rejectを決定
-		if (proposal_score > current_score || loop % 10 == 0) {
+		// compare the current plan and the proposal
+		if (proposal[idx].score > plan[idx].score || loop % 10 == 0) {
 			// accept
-			for (int r = 0; r < 200; ++r) {
-				for (int c = 0; c < 200; ++c) {
-					plan[idx].zones[r][c].type = proposal[idx].zones[r][c].type;
-					plan[idx].zones[r][c].level = proposal[idx].zones[r][c].level;
-				}
-			}
-
-			current_score = proposal_score;
+			plan[idx] = proposal[idx];
 		}
 	}
 }
 
 /**
- * MCMCでベストプランを探す（CUDA版）
+ * CUDA version of MCMC
  */
-void zonePlanMCMCGPUfunc(zone_plan** bestPlans) {
+void zonePlanMCMCGPUfunc(zone_plan** bestPlans, int numIterations) {
 	// CPU側のメモリを確保
-	//zone_plan* plans;
-	//plans = (zone_plan*)malloc(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
 	*bestPlans = (zone_plan*)malloc(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
 
 	// デバイスメモリを確保
+	int* devNumIterations;
+	if (cudaMalloc((void**)&devNumIterations, sizeof(int)) != cudaSuccess) {
+		printf("cuda memory allocation error!\n");
+		return;
+	}
 	zone_plan* devPlan;
-	cudaMalloc((void**)&devPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	if (cudaMalloc((void**)&devPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE) != cudaSuccess) {
+		printf("cuda memory allocation error!\n");
+		return;
+	}
 	zone_plan* devProposal;
-	cudaMalloc((void**)&devProposal, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	if (cudaMalloc((void**)&devProposal, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE) != cudaSuccess) {
+		cudaFree(devPlan);
+		printf("cuda memory allocation error!\n");
+		return;
+	}
 	zone_plan* devBestPlan;
-	cudaMalloc((void**)&devBestPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	if (cudaMalloc((void**)&devBestPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE) != cudaSuccess) {
+		cudaFree(devPlan);
+		cudaFree(devProposal);
+		printf("cuda memory allocation error!\n");
+		return;
+	}
+
+	// copy memory
+	if (cudaMemcpy(devNumIterations, &numIterations, sizeof(int), cudaMemcpyHostToDevice) != cudaSuccess) {
+		cudaFree(devPlan);
+		cudaFree(devProposal);
+		cudaFree(devBestPlan);
+		printf("cuda memory copy error!\n");
+		return;
+	}
 
 	printf("start GPU kernel.\n");
 
 	// GPU側のカーネル関数を呼び出す
-    zonePlanMCMCGPUKernel<<<ZONE_PLAN_MCMC_GRID_SIZE, ZONE_PLAN_MCMC_BLOCK_SIZE>>>(devPlan, devProposal, devBestPlan);
+    zonePlanMCMCGPUKernel<<<ZONE_PLAN_MCMC_GRID_SIZE, ZONE_PLAN_MCMC_BLOCK_SIZE>>>(devNumIterations, devPlan, devProposal, devBestPlan);
 
 	// 結果をCPU側のバッファへ転送する
-    cudaMemcpy(*bestPlans, devBestPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE, cudaMemcpyDeviceToHost);
+	if (cudaMemcpy(*bestPlans, devBestPlan, sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE, cudaMemcpyDeviceToHost) != cudaSuccess) {
+		cudaFree(devPlan);
+		cudaFree(devProposal);
+		cudaFree(devBestPlan);
+		printf("cuda memory copy error!\n");
+		return;
+	}
 
 	// デバイスメモリを開放する
     cudaFree(devPlan);
@@ -285,18 +312,4 @@ void zonePlanMCMCGPUfunc(zone_plan** bestPlans) {
     cudaFree(devBestPlan);
 
 	printf("GPU kernel done.\n");
-
-	// ベストプランを返す
-	/*for (int i = 0; i < ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE; ++i) {
-		bestPlans[i].score = plans[i].score;
-
-		for (int r = 0; r < 200; ++r) {
-			for (int c = 0; c < 200; ++c) {
-				bestPlans[i].zones[r][c] = plans[i].zones[r][c];
-			}
-		}
-	}*/
-
-	printf("data copy done.\n");
-	//free(plans);
 }
