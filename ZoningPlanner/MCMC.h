@@ -30,17 +30,17 @@ public:
 
 public:
 	void findBestPlan(int** zone, int* city_size);
+	void showZone(int city_size, int* zone, char* filename);
+	void loadZone(int city_size, int* zone, char* filename);
+	void saveZone(int city_size, int* zone, char* filename);
+	void dumpZone(int city_size, int* zone);
+	void dumpDist(int city_size, int* dist, int featureId);
 
 private:
 	float randf();
 	float randf(float a, float b);
 	int sampleFromCdf(float* cdf, int num);
 	int sampleFromPdf(float* pdf, int num);
-	void dumpZone(int city_size, int* zone);
-	void dumpDist(int city_size, int* dist, int featureId);
-	void showZone(int city_size, int* zone, char* filename);
-	void loadZone(int city_size, int* zone, char* filename);
-	void saveZone(int city_size, int* zone, char* filename);
 	bool isOcc(int* obst, int s, int featureId);
 	int distance(int city_size, int pos1, int pos2);
 	void clearCell(int* dist, int* obst, int s, int featureId);

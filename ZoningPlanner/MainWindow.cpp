@@ -95,16 +95,6 @@ void MainWindow::onLoadZoning() {
 	endTime = clock();
 	printf("Parcels generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
-	urbanGeometry->allocateAll();
-	
-	// compute the feature vectors
-	/*
-	startTime = clock();
-	urbanGeometry->computeScore();
-	endTime = clock();
-	printf("Compute score: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
-	*/
-
 	glWidget->shadow.makeShadowMap(glWidget);
 
 	glWidget->updateGL();
@@ -157,8 +147,6 @@ void MainWindow::onGenerateBlocks() {
 
 void MainWindow::onGenerateParcels() {
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-	//urbanGeometry->allocateAll();
-	//VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 	glWidget->updateGL();
 }
 
@@ -179,8 +167,6 @@ void MainWindow::onGenerateAll() {
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-	//urbanGeometry->allocateAll();
-	//VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	VBOPm::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateVegetation(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
@@ -213,11 +199,6 @@ void MainWindow::onBestPlan() {
 
 	// re-generate parcels
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	//urbanGeometry->allocateAll();
-	
-	// compute the feature vectors
-	//urbanGeometry->computeScore();
 
 	glWidget->shadow.makeShadowMap(glWidget);
 

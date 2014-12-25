@@ -1,6 +1,7 @@
 ﻿#include "MCMC.h"
 
 void MCMC::findBestPlan(int** zone, int* city_size) {
+	srand(10);
 	*city_size = 5;
 
 	*zone = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
@@ -49,62 +50,6 @@ void MCMC::findBestPlan(int** zone, int* city_size) {
 	
 	//showZone(city_size, zone, "zone_final.png");
 	//saveZone(city_size, zone, "zone_final.txt");
-}
-
-float MCMC::randf() {
-	return (float)rand() / RAND_MAX;
-}
-
-float MCMC::randf(float a, float b) {
-	return randf() * (b - a) + a;
-}
-
-int MCMC::sampleFromCdf(float* cdf, int num) {
-	float rnd = randf(0, cdf[num-1]);
-
-	for (int i = 0; i < num; ++i) {
-		if (rnd <= cdf[i]) return i;
-	}
-
-	return num - 1;
-}
-
-int MCMC::sampleFromPdf(float* pdf, int num) {
-	if (num == 0) return 0;
-
-	float cdf[40];
-	cdf[0] = pdf[0];
-	for (int i = 1; i < num; ++i) {
-		if (pdf[i] >= 0) {
-			cdf[i] = cdf[i - 1] + pdf[i];
-		} else {
-			cdf[i] = cdf[i - 1];
-		}
-	}
-
-	return sampleFromCdf(cdf, num);
-}
-
-void MCMC::dumpZone(int city_size, int* zone) {
-	printf("<<< Zone Map >>>\n");
-	for (int r = 0; r < city_size; ++r) {
-		for (int c = 0; c < city_size; ++c) {
-			printf("%d ", zone[r * city_size + c]);
-		}
-		printf("\n");
-	}
-	printf("\n");
-}
-
-void MCMC::dumpDist(int city_size, int* dist, int featureId) {
-	printf("<<< Distance Map (featureId = %d) >>>\n", featureId);
-	for (int r = 0; r < city_size; ++r) {
-		for (int c = 0; c < city_size; ++c) {
-			printf("%2d ", dist[(r * city_size + c) * NUM_FEATURES + featureId]);
-		}
-		printf("\n");
-	}
-	printf("\n");
 }
 
 void MCMC::showZone(int city_size, int* zone, char* filename) {
@@ -158,6 +103,72 @@ void MCMC::saveZone(int city_size, int* zone, char* filename) {
 	fprintf(fp, "\n");
 
 	fclose(fp);
+}
+
+void MCMC::dumpZone(int city_size, int* zone) {
+	printf("<<< Zone Map >>>\n");
+	for (int r = 0; r < city_size; ++r) {
+		for (int c = 0; c < city_size; ++c) {
+			printf("%d ", zone[r * city_size + c]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
+void MCMC::dumpDist(int city_size, int* dist, int featureId) {
+	printf("<<< Distance Map (featureId = %d) >>>\n", featureId);
+	for (int r = 0; r < city_size; ++r) {
+		for (int c = 0; c < city_size; ++c) {
+			printf("%2d ", dist[(r * city_size + c) * NUM_FEATURES + featureId]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
+
+
+
+
+
+
+
+
+
+
+float MCMC::randf() {
+	return (float)rand() / RAND_MAX;
+}
+
+float MCMC::randf(float a, float b) {
+	return randf() * (b - a) + a;
+}
+
+int MCMC::sampleFromCdf(float* cdf, int num) {
+	float rnd = randf(0, cdf[num-1]);
+
+	for (int i = 0; i < num; ++i) {
+		if (rnd <= cdf[i]) return i;
+	}
+
+	return num - 1;
+}
+
+int MCMC::sampleFromPdf(float* pdf, int num) {
+	if (num == 0) return 0;
+
+	float cdf[40];
+	cdf[0] = pdf[0];
+	for (int i = 1; i < num; ++i) {
+		if (pdf[i] >= 0) {
+			cdf[i] = cdf[i - 1] + pdf[i];
+		} else {
+			cdf[i] = cdf[i - 1];
+		}
+	}
+
+	return sampleFromCdf(cdf, num);
 }
 
 inline bool MCMC::isOcc(int* obst, int s, int featureId) {

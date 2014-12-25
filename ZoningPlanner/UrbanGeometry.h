@@ -60,17 +60,4 @@ public:
 
 	void findBestPlan(VBORenderManager& renderManager);
 
-	void allocateAll();
-	float computeScore();
-	void setFeatureForPerson(Person& person);
-
-	std::pair<int, float> nearestStore(const QVector2D& pt);
-	std::pair<int, float> nearestSchool(const QVector2D& pt);
-	std::pair<int, float> nearestRestaurant(const QVector2D& pt);
-	std::pair<int, float> nearestPark(const QVector2D& pt);
-	std::pair<int, float> nearestAmusement(const QVector2D& pt);
-	std::pair<int, float> nearestLibrary(const QVector2D& pt);
-	std::pair<int, float> nearestFactory(const QVector2D& pt);
-	float noise(const QVector2D& pt);
-	float pollution(const QVector2D& pt);
 };
