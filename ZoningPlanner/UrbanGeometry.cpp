@@ -15,6 +15,7 @@
 #include <numeric>
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>
+#include "MCMC.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -100,28 +101,23 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
 void UrbanGeometry::findBestPlan(VBORenderManager& renderManager) {
-	/*
-	zone_plan plan;
-	zone_plan proposal;
-	zone_plan bestPlan;
-	MCMCstep(numIterations, 0, &plan, &proposal, &bestPlan);
+	MCMC mcmc;
+	int* plan;
+	int size;
+	mcmc.findBestPlan(&plan, &size);
 
-	this->zones.zones.resize(ZONE_GRID_SIZE * ZONE_GRID_SIZE);
-	for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
-		for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
+	int cell_len = renderManager.side / size;
+
+	for (int r = 0; r < size; ++r) {
+		for (int c = 0; c < size; ++c) {
 			Polygon2D polygon;
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
-			zones.zones[r * ZONE_GRID_SIZE + c] = std::make_pair(polygon, ZoneType(bestPlan.zones[r][c].type, bestPlan.zones[r][c].level));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * cell_len, -renderManager.side * 0.5 + r * cell_len));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * cell_len, -renderManager.side * 0.5 + r * cell_len));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * cell_len, -renderManager.side * 0.5 + (r + 1) * cell_len));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * cell_len, -renderManager.side * 0.5 + (r + 1) * cell_len));
+			zones.zones[r * size + c] = std::make_pair(polygon, ZoneType(plan[r * size + c], 1));
 		}
 	}
-
-	printf("writing zoning to a file (score: %lf)\n", bestPlan.score);
-	QString filename = QString("zoning/score_%1.xml").arg(bestPlan.score, 4, 'f', 6);
-	zones.save(filename);
-	*/
 }
 
 /**

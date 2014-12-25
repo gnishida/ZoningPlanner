@@ -220,6 +220,9 @@
     <ClCompile Include="PMBuildingTower.cpp">
       <Filter>PMBuilding</Filter>
     </ClCompile>
+    <ClCompile Include="MCMC.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -412,6 +415,9 @@
     </ClInclude>
     <ClInclude Include="VBOBuilding.h">
       <Filter>VBO</Filter>
+    </ClInclude>
+    <ClInclude Include="MCMC.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
