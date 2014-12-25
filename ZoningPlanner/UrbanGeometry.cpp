@@ -108,6 +108,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager) {
 
 	int cell_len = renderManager.side / size;
 
+	zones.zones.resize(size * size);
 	for (int r = 0; r < size; ++r) {
 		for (int c = 0; c < size; ++c) {
 			Polygon2D polygon;
