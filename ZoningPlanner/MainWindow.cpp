@@ -457,7 +457,7 @@ void MainWindow::onBestPlanMT() {
  */
 void MainWindow::onBestPlanGPU() {
 	printf("onBestPlanGPU\n");
-	urbanGeometry->findBestPlanGPU(glWidget->vboRenderManager, 10000);
+	urbanGeometry->findBestPlanGPU(glWidget->vboRenderManager, 1000);
 	printf("onBestPlanGPU done\n");
 
 	// generate blocks

@@ -62,6 +62,10 @@ void Zoning::load(const QString& filename) {
 		if (node.toElement().tagName() == "zone") {
 			int type = node.toElement().attribute("type").toInt();
 			int level = node.toElement().attribute("level").toInt();
+
+			// to make level between [1,3]
+			if (level < 1 || level > 3) level = 1;
+
 			ZoneType zone(type, level);
 
 			Polygon2D polygon;

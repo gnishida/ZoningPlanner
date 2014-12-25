@@ -16,7 +16,7 @@
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>    
 #include "PeopleAllocation.cuh"
-#include "ZonePlanMCMC.cuh"
+#include "ZonePlanMCMC2.cuh"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -103,6 +103,7 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
 void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, int numIterations) {
+	/*
 	zone_plan plan;
 	zone_plan proposal;
 	zone_plan bestPlan;
@@ -123,6 +124,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, int numIterati
 	printf("writing zoning to a file (score: %lf)\n", bestPlan.score);
 	QString filename = QString("zoning/score_%1.xml").arg(bestPlan.score, 4, 'f', 6);
 	zones.save(filename);
+	*/
 }
 
 /**
@@ -131,37 +133,33 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, int numIterati
 void UrbanGeometry::findBestPlanGPU(VBORenderManager& renderManager, int numIterations) {
 	printf("UrbanGeometry::findBestPlanGPU...\n");
 
-	zone_plan* plans;// = (zone_plan*)new zone_plan(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
-	zonePlanMCMCGPUfunc(&plans, numIterations);
+	zone_plan* plan;// = (zone_plan*)new zone_plan(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
+	zonePlanMCMCGPUfunc2(&plan, numIterations);
 
 	printf("OK\n");
 	
-	float best_score = 0.0f;
-	this->zones.zones.resize(ZONE_GRID_SIZE * ZONE_GRID_SIZE);
-	for (int i = 0; i < ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE; ++i) {
-		if (plans[i].score > best_score) {
-			best_score = plans[i].score;
-			
-			for (int r = 0; r < ZONE_GRID_SIZE; ++r) {
-				for (int c = 0; c < ZONE_GRID_SIZE; ++c) {
-					Polygon2D polygon;
-					polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
-					polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + r * ZONE_CELL_LEN));
-					polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
-					polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * ZONE_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * ZONE_CELL_LEN));
-					zones.zones[r * ZONE_GRID_SIZE + c] = std::make_pair(polygon, ZoneType(plans[i].zones[r][c].type, plans[i].zones[r][c].level));
-				}
-			}
+	this->zones.zones.resize(CITY_SIZE * CITY_SIZE);
+	for (int r = 0; r < CITY_SIZE; ++r) {
+		for (int c = 0; c < CITY_SIZE; ++c) {
+			Polygon2D polygon;
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * CITY_CELL_LEN, -renderManager.side * 0.5 + r * CITY_CELL_LEN));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * CITY_CELL_LEN, -renderManager.side * 0.5 + r * CITY_CELL_LEN));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * CITY_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * CITY_CELL_LEN));
+			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * CITY_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * CITY_CELL_LEN));
+
+			// to make level between [1,3]
+			if (plan->zones[r][c].level < 1 || plan->zones[r][c].level > 3) plan->zones[r][c].level = 1;
+
+			zones.zones[r * CITY_SIZE + c] = std::make_pair(polygon, ZoneType(plan->zones[r][c].type, plan->zones[r][c].level));
 		}
 	}
 
 	printf("OK\n");
 
-	printf("writing zoning to a file (score: %lf)\n", best_score);
-	QString filename = QString("zoning/score_%1.xml").arg(best_score, 4, 'f', 6);
+	QString filename = QString("zoning/best_score.xml");
 	zones.save(filename);
 
-	free(plans);
+	free(plan);
 }
 
 /**

@@ -413,6 +413,9 @@
     <ClInclude Include="VBOBuilding.h">
       <Filter>VBO</Filter>
     </ClInclude>
+    <ClInclude Include="ZonePlanMCMC2.cuh">
+      <Filter>Main Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\data\shaders\lc_fragment_sk.glsl">
@@ -424,15 +427,12 @@
     <None Include="PeopleAllocation.cuh">
       <Filter>Main Files</Filter>
     </None>
-    <None Include="ZonePlanMCMC.cuh">
-      <Filter>Main Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="PeopleAllocation.cu">
       <Filter>Main Files</Filter>
     </CudaCompile>
-    <CudaCompile Include="ZonePlanMCMC.cu">
+    <CudaCompile Include="ZonePlanMCMC2.cu">
       <Filter>Main Files</Filter>
     </CudaCompile>
   </ItemGroup>
