@@ -397,7 +397,7 @@ int Util::sampleFromPdf(std::vector<float> &pdf) {
 	std::vector<float> cdf(pdf.size(), 0.0f);
 	cdf[0] = pdf[0];
 	for (int i = 1; i < pdf.size(); ++i) {
-		if (cdf[i] >= 0) {
+		if (pdf[i] >= 0) {
 			cdf[i] = cdf[i - 1] + pdf[i];
 		} else {
 			cdf[i] = cdf[i - 1];
