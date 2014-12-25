@@ -71,11 +71,6 @@ public:
 	void setFeatureForPerson(Person& person, VBORenderManager& renderManager);
 	void setFeatureForPerson(Person& person);
 
-	void movePeople(VBORenderManager& renderManager);
-	void movePeopleMT(VBORenderManager& renderManager);
-	void movePeopleGPU(VBORenderManager& renderManager);
-
-	std::pair<int, float> nearestPerson(const QVector2D& pt);
 	std::pair<int, float> nearestStore(const QVector2D& pt);
 	std::pair<int, float> nearestSchool(const QVector2D& pt);
 	std::pair<int, float> nearestRestaurant(const QVector2D& pt);

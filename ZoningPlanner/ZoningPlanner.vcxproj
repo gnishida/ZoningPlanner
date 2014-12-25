@@ -330,7 +330,6 @@
     <ClInclude Include="VBOUtil.h" />
     <ClInclude Include="VBOVegetation.h" />
     <ClInclude Include="VBOWater.h" />
-    <ClInclude Include="ZonePlanMCMC2.cuh" />
     <ClInclude Include="ZoneType.h" />
     <ClInclude Include="Zoning.h" />
   </ItemGroup>
@@ -377,14 +376,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
-    <None Include="PeopleAllocation.cuh" />
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="PeopleAllocation.cu">
-      <Include Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\ProgramData\NVIDIA Corporation\NVIDIA GPU Computing SDK 4.2\C\common\inc;%(Include)</Include>
-      <Runtime Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MD</Runtime>
-    </CudaCompile>
-    <CudaCompile Include="ZonePlanMCMC2.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
