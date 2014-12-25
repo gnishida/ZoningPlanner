@@ -21,7 +21,6 @@ UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 
 	zones.load("zoning.xml");
 
-	selectedPerson = -1;
 	selectedStore = -1;
 	selectedSchool = -1;
 	selectedRestaurant = -1;
@@ -129,7 +128,6 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager) {
  * 住民、オフィス、レストラン、図書館、公園、工場、などなどを配備する
  */
 void UrbanGeometry::allocateAll() {
-	people.clear();
 	offices.clear();
 	schools.clear();
 	stores.clear();
@@ -141,7 +139,6 @@ void UrbanGeometry::allocateAll() {
 	stations.clear();
 
 	// 予想される数を先に計算する
-	std::vector<float> numPeople(4, 0.0f);
 	std::vector<float> numCommercials(3, 0.0f);
 	std::vector<float> numManufacturings(2, 0.0f);
 	std::vector<float> numAmusements(3, 0.0f);
@@ -204,21 +201,7 @@ void UrbanGeometry::allocateAll() {
 		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
 			parks.push_back(Office(location, 1, 1));
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
-			// 住人の数を決定
-			int num = numParcels * Util::genRand(1, 5);
-			if (blocks[i].zone.level() == 2) {
-				num = blocks[i].blockContour.area() * 0.01f;
-			} else if (blocks[i].zone.level() == 3) {
-				num = blocks[i].blockContour.area() * 0.02f;
-			}
 
-			// 人の数を増やす
-			int offset = people.size();
-			people.resize(people.size() + num);
-			for (int pi = offset; pi < people.size(); ++pi) {
-				// 家の位置を、ランダムに決定
-				people[pi].homeLocation = QVector2D(Util::genRand(minBBox.x(), maxBBox.x()), Util::genRand(minBBox.y(), maxBBox.y()));
-			}
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
 			Office office(location, blocks[i].zone.level());
 			Office store(location, blocks[i].zone.level());
@@ -290,35 +273,13 @@ void UrbanGeometry::allocateAll() {
 		}
 	}
 
-	// 人の好みを割り当てる
-	{
-		numPeople[0] = people.size() * 0.2f;	// 学生
-		numPeople[1] = people.size() * 0.3f;	// 主婦
-		numPeople[2] = people.size() * 0.3f;	// サラリーマン
-		numPeople[3] = people.size() * 0.2f;	// 老人
-
-		for (int pi = 0; pi < people.size(); ++pi) {
-			int type = Util::sampleFromPdf(numPeople);
-			numPeople[type]--;
-
-			people[pi].setType(type);
-		}
-	}
-
-	// put a train station
-	{
-		stations.push_back(Office(QVector2D(-896, 1232), 1));
-	}
-
-	printf("AllocateAll: people=%d, schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", people.size(), schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
+	printf("AllocateAll: schools=%d, stores=%d, offices=%d, restaurants=%d, amusements=%d, parks=%d, libraries=%d, factories=%d\n", schools.size(), stores.size(), offices.size(), restaurants.size(), amusements.size(), parks.size(), libraries.size(), factories.size());
 }
 
 /**
  * 住民を配備する
  */
 void UrbanGeometry::allocatePeople() {
-	people.clear();
-
 	/*
 	for (int i = 0; i < blocks.size(); ++i) {
 		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
@@ -358,37 +319,6 @@ void UrbanGeometry::allocatePeople() {
 		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
 
 		if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
-			// 住人の数を決定
-			int num = numParcels * Util::genRand(1, 5);
-			if (blocks[i].zone.level() == 2) {
-				num = blocks[i].blockContour.area() * 0.01f;
-			} else if (blocks[i].zone.level() == 3) {
-				num = blocks[i].blockContour.area() * 0.02f;
-			}
-
-			// 人の数を増やす
-			int offset = people.size();
-			people.resize(people.size() + num);
-			for (int pi = offset; pi < people.size(); ++pi) {
-				// 家の位置を、ランダムに決定
-				people[pi].homeLocation = QVector2D(Util::genRand(minBBox.x(), maxBBox.x()), Util::genRand(minBBox.y(), maxBBox.y()));
-			}
-		}
-	}
-
-	// 人の好みを割り当てる
-	{
-		std::vector<float> numPeople(4, 0.0f);
-		numPeople[0] = people.size() * 0.2f;	// 学生
-		numPeople[1] = people.size() * 0.3f;	// 主婦
-		numPeople[2] = people.size() * 0.3f;	// サラリーマン
-		numPeople[3] = people.size() * 0.2f;	// 老人
-
-		for (int pi = 0; pi < people.size(); ++pi) {
-			int type = Util::sampleFromPdf(numPeople);
-			numPeople[type]--;
-
-			people[pi].setType(type);
 		}
 	}
 }
@@ -401,13 +331,7 @@ void UrbanGeometry::allocatePeople() {
  * なので、この関数は、findBest()からコールされるべきだ。
  */
 float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
-	float score_total = 0.0f;
-	for (int i = 0; i < people.size(); ++i) {
-		setFeatureForPerson(people[i], renderManager);
-		score_total += people[i].score;
-	}
-
-	return score_total / people.size();
+	return 0.0f;
 }
 
 /**
@@ -418,13 +342,7 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
  * なので、この関数は、loadZoning()からコールされるべきだ。
  */
 float UrbanGeometry::computeScore() {
-	float score_total = 0.0f;
-	for (int i = 0; i < people.size(); ++i) {
-		setFeatureForPerson(people[i]);
-		score_total += people[i].score;
-	}
-
-	return score_total / people.size();
+	return 0.0f;
 }
 
 /**
@@ -646,21 +564,6 @@ float UrbanGeometry::pollution(const QVector2D& pt) {
 	float Km = 800.0 - nearestFactory(pt).second;
 
 	return std::max(Km, 0.0f);
-}
-
-int UrbanGeometry::findNearestPerson(const QVector2D& pt) {
-	float min_dist = std::numeric_limits<float>::max();
-	int id = -1;
-
-	for (int i = 0; i < people.size(); ++i) {
-		float dist = (people[i].homeLocation - pt).lengthSquared();
-		if (dist < min_dist) {
-			min_dist = dist;
-			id = i;
-		}
-	}
-
-	return id;
 }
 
 void UrbanGeometry::updateLayer(int featureId, VBOLayer& layer) {

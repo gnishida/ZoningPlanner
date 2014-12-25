@@ -122,18 +122,14 @@ void MainWindow::onLoadZoning() {
 	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 	endTime = clock();
 	printf("Layers generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
-
-	// 人のモデルを生成
-	startTime = clock();
-	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
-	endTime = clock();
-	printf("People model generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
-
+	
 	// compute the feature vectors
+	/*
 	startTime = clock();
 	urbanGeometry->computeScore();
 	endTime = clock();
 	printf("Compute score: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
+	*/
 
 	glWidget->shadow.makeShadowMap(glWidget);
 
@@ -349,7 +345,6 @@ void MainWindow::onPropose() {
 
 	// generate 3D mesh
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
 
 	// レイヤー情報を更新する
 	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
@@ -395,12 +390,9 @@ void MainWindow::onBestPlan() {
 	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
 	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
 	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
-
-	// 人のモデルを生成
-	VBOPm::generatePeopleMesh(glWidget->vboRenderManager, urbanGeometry->people);
-
+	
 	// compute the feature vectors
-	urbanGeometry->computeScore();
+	//urbanGeometry->computeScore();
 
 	glWidget->shadow.makeShadowMap(glWidget);
 

@@ -20,7 +20,6 @@ public:
 	Zoning zones;
 	RoadGraph roads;
 	BlockSet blocks;
-	std::vector<Person> people;
 	std::vector<Office> offices;
 	std::vector<Office> schools;
 	std::vector<Office> stores;
@@ -32,7 +31,6 @@ public:
 	std::vector<Office> stations;
 	Layer noiseMap;
 
-	int selectedPerson;
 	int selectedStore;
 	int selectedSchool;
 	int selectedRestaurant;

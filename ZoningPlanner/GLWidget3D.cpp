@@ -51,12 +51,6 @@ void GLWidget3D::mousePressEvent(QMouseEvent *event) {
 	mouseTo2D(event->x(), event->y(), pos);
 
 	if (controlPressed) {
-		int selectedPerson = mainWin->urbanGeometry->findNearestPerson(pos);
-		if (selectedPerson >= 0) {
-			mainWin->controlWidget->showPersonInfo(mainWin->urbanGeometry->people[selectedPerson]);
-
-			VBOPm::generateSelecionMesh(vboRenderManager, mainWin->urbanGeometry->people[selectedPerson], *mainWin->urbanGeometry);
-		}
 	}
 }
 
