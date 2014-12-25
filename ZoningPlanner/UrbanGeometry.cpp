@@ -102,7 +102,7 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 /**
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
-void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, int numIterations) {
+void UrbanGeometry::findBestPlan(VBORenderManager& renderManager) {
 	/*
 	zone_plan plan;
 	zone_plan proposal;
@@ -125,41 +125,6 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, int numIterati
 	QString filename = QString("zoning/score_%1.xml").arg(bestPlan.score, 4, 'f', 6);
 	zones.save(filename);
 	*/
-}
-
-/**
- * ベストのゾーンプランを探す（CUDA版）
- */
-void UrbanGeometry::findBestPlanGPU(VBORenderManager& renderManager, int numIterations) {
-	printf("UrbanGeometry::findBestPlanGPU...\n");
-
-	zone_plan* plan;// = (zone_plan*)new zone_plan(sizeof(zone_plan) * ZONE_PLAN_MCMC_GRID_SIZE * ZONE_PLAN_MCMC_BLOCK_SIZE);
-	zonePlanMCMCGPUfunc2(&plan, numIterations);
-
-	printf("OK\n");
-	
-	this->zones.zones.resize(CITY_SIZE * CITY_SIZE);
-	for (int r = 0; r < CITY_SIZE; ++r) {
-		for (int c = 0; c < CITY_SIZE; ++c) {
-			Polygon2D polygon;
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * CITY_CELL_LEN, -renderManager.side * 0.5 + r * CITY_CELL_LEN));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * CITY_CELL_LEN, -renderManager.side * 0.5 + r * CITY_CELL_LEN));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * CITY_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * CITY_CELL_LEN));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * CITY_CELL_LEN, -renderManager.side * 0.5 + (r + 1) * CITY_CELL_LEN));
-
-			// to make level between [1,3]
-			if (plan->zones[r][c].level < 1 || plan->zones[r][c].level > 3) plan->zones[r][c].level = 1;
-
-			zones.zones[r * CITY_SIZE + c] = std::make_pair(polygon, ZoneType(plan->zones[r][c].type, plan->zones[r][c].level));
-		}
-	}
-
-	printf("OK\n");
-
-	QString filename = QString("zoning/best_score.xml");
-	zones.save(filename);
-
-	free(plan);
 }
 
 /**
