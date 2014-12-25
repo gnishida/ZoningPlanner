@@ -176,38 +176,8 @@ void GLWidget3D::drawScene(int drawMode) {
 		}
 	}
 
-	// 人を表示
-	if (mainWin->ui.actionViewPeople->isChecked()) {
-		vboRenderManager.renderStaticGeometry("people");
-
-		vboRenderManager.renderStaticGeometry("selection");
-		vboRenderManager.renderStaticGeometry("line");
-	}
-
-	// レイヤー表示
-	if (drawMode == 0) {
-		if (mainWin->ui.actionViewStore->isChecked()) {
-			vboRenderManager.vboStoreLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewSchool->isChecked()) {
-			vboRenderManager.vboSchoolLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewRestaurant->isChecked()) {
-			vboRenderManager.vboRestaurantLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewPark->isChecked()) {
-			vboRenderManager.vboParkLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewAmusement->isChecked()) {
-			vboRenderManager.vboAmusementLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewLibrary->isChecked()) {
-			vboRenderManager.vboLibraryLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewNoise->isChecked()) {
-			vboRenderManager.vboNoiseLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewPollution->isChecked()) {
-			vboRenderManager.vboPollutionLayer.render(vboRenderManager);
-		}
-	}
-
 	if (mainWin->ui.actionViewGeometry->isChecked()) {
 		vboRenderManager.renderStaticGeometry("3d_building");
-		vboRenderManager.renderStaticGeometry("3d_building_fac");
 
 		vboRenderManager.renderStaticGeometry("3d_trees");
 		vboRenderManager.renderAllStreetElementName("tree");

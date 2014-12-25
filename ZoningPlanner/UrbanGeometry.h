@@ -28,7 +28,6 @@ public:
 	std::vector<Office> amusements;
 	std::vector<Office> libraries;
 	std::vector<Office> factories;
-	Layer noiseMap;
 
 	int selectedStore;
 	int selectedSchool;
@@ -62,10 +61,7 @@ public:
 	void findBestPlan(VBORenderManager& renderManager);
 
 	void allocateAll();
-	void allocatePeople();
-	float computeScore(VBORenderManager& renderManager);
 	float computeScore();
-	void setFeatureForPerson(Person& person, VBORenderManager& renderManager);
 	void setFeatureForPerson(Person& person);
 
 	std::pair<int, float> nearestStore(const QVector2D& pt);
@@ -77,8 +73,4 @@ public:
 	std::pair<int, float> nearestFactory(const QVector2D& pt);
 	float noise(const QVector2D& pt);
 	float pollution(const QVector2D& pt);
-
-	int findNearestPerson(const QVector2D& pt);
-
-	void updateLayer(int featureId, VBOLayer& layer);
 };

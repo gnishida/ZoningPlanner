@@ -81,20 +81,11 @@
     </property>
     <addaction name="actionViewGeometry"/>
     <addaction name="actionViewZoning"/>
-    <addaction name="actionViewStore"/>
-    <addaction name="actionViewSchool"/>
-    <addaction name="actionViewRestaurant"/>
-    <addaction name="actionViewPark"/>
-    <addaction name="actionViewAmusement"/>
-    <addaction name="actionViewLibrary"/>
-    <addaction name="actionViewNoise"/>
-    <addaction name="actionViewPollution"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
      <string>Tool</string>
     </property>
-    <addaction name="actionPropose"/>
     <addaction name="actionBestPlan"/>
    </widget>
    <addaction name="menuFile"/>

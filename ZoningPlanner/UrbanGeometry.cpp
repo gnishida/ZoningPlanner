@@ -148,19 +148,7 @@ void UrbanGeometry::allocateAll() {
 
 		if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
-			/*
-			// 住人の数を決定
-			int num = numParcels * Util::genRand(1, 5);
-			if (blocks[i].zone.level() == 2) {
-				num = blocks[i].blockContour.area() * 0.01f;
-			} else if (blocks[i].zone.level() == 3) {
-				num = blocks[i].blockContour.area() * 0.02f;
-			}
-			numPeople[0] += num * 0.2f;
-			numPeople[1] += num * 0.3f;
-			numPeople[2] += num * 0.3f;
-			numPeople[3] += num * 0.2f;
-			*/
+
 		} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {
 			numCommercials[0] += numParcels * 0.6f; // office
 			numCommercials[1] += numParcels * 0.2f; // store
@@ -273,64 +261,6 @@ void UrbanGeometry::allocateAll() {
 }
 
 /**
- * 住民を配備する
- */
-void UrbanGeometry::allocatePeople() {
-	/*
-	for (int i = 0; i < blocks.size(); ++i) {
-		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
-
-		// 予測される区画数を計算
-		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
-
-		if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
-			// 住人の数を決定
-			int num = numParcels * Util::genRand(1, 5);
-			if (blocks[i].zone.level() == 2) {
-				num = blocks[i].blockContour.area() * 0.01f;
-			} else if (blocks[i].zone.level() == 3) {
-				num = blocks[i].blockContour.area() * 0.02f;
-			}
-			numPeople[0] += num * 0.2f;
-			numPeople[1] += num * 0.3f;
-			numPeople[2] += num * 0.3f;
-			numPeople[3] += num * 0.2f;
-		}
-	}
-	*/
-	
-	//Block::parcelGraphVertexIter vi, viEnd;
-	for (int i = 0; i < blocks.size(); ++i) {
-		QVector2D location = QVector2D(blocks.at(i).blockContour.getCentroid());
-		// BUG! To be fixed!
-		// In some cases, location has very large numbers.
-		if (location.x() > 1000000 || location.y() > 1000000) continue;
-
-		// Bounding Boxを取得
-		QVector3D minBBox;
-		QVector3D maxBBox;
-		Polygon3D::getLoopAABB(blocks[i].blockContour.contour, minBBox, maxBBox);
-
-		// 予測される区画数を計算
-		int numParcels = blocks[i].blockContour.area() / blocks[i].zone.parcel_area_mean;
-
-		if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {
-		}
-	}
-}
-
-/**
- * 各住人にとっての、都市のfeatureベクトルを計算する。結果は、各personのfeatureに格納される。
- * また、それに対する評価結果を、各personのscoreに格納する。
- * さらに、全住人によるscoreの平均を返却する。
- * この関数は、レイヤー情報を使うのでちょっと速い代わりに、直近の店IDなどが分からない。
- * なので、この関数は、findBest()からコールされるべきだ。
- */
-float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
-	return 0.0f;
-}
-
-/**
  * 各住人にとっての、都市のfeatureベクトルを計算する。結果は、各personのfeatureに格納される。
  * また、それに対する評価結果を、各personのscoreに格納する。
  * さらに、全住人によるscoreの平均を返却する。
@@ -339,34 +269,6 @@ float UrbanGeometry::computeScore(VBORenderManager& renderManager) {
  */
 float UrbanGeometry::computeScore() {
 	return 0.0f;
-}
-
-/**
- * 指定された人の家に最も近い店、学校、レストラン、公園などの距離を計算する。
- * レイヤー情報を使うので、ちょっと速いはず。
- * ただし、直近の店ID、学校ID、レストランIDなどは分からないので、-1としておく。
- * というわけで、この関数は、findBest()からコールされるべきだ。
- * loadZoning()からは、もう一方の関数をコールすべき。
- */
-void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& renderManager) {
-	person.feature.resize(9);
-
-	person.feature[0] = renderManager.vboStoreLayer.layer.getValue(person.homeLocation);
-	person.feature[1] = renderManager.vboSchoolLayer.layer.getValue(person.homeLocation);
-	person.feature[2] = renderManager.vboRestaurantLayer.layer.getValue(person.homeLocation);
-	person.feature[3] = renderManager.vboParkLayer.layer.getValue(person.homeLocation);
-	person.feature[4] = renderManager.vboAmusementLayer.layer.getValue(person.homeLocation);
-	person.feature[5] = renderManager.vboLibraryLayer.layer.getValue(person.homeLocation);
-	person.feature[6] = renderManager.vboNoiseLayer.layer.getValue(person.homeLocation);
-	person.feature[7] = renderManager.vboPollutionLayer.layer.getValue(person.homeLocation);
-	person.score = std::inner_product(std::begin(person.feature), std::end(person.feature), std::begin(person.preference), 0.0);
-
-	person.nearestStore = -1;
-	person.nearestSchool = -1;
-	person.nearestRestaurant = -1;
-	person.nearestPark = -1;
-	person.nearestAmusement = -1;
-	person.nearestLibrary = -1;
 }
 
 /**
@@ -538,44 +440,4 @@ float UrbanGeometry::pollution(const QVector2D& pt) {
 	float Km = 800.0 - nearestFactory(pt).second;
 
 	return std::max(Km, 0.0f);
-}
-
-void UrbanGeometry::updateLayer(int featureId, VBOLayer& layer) {
-	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001};
-
-	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
-		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
-		for (int c = 0; c < layer.layer.layerData.cols; ++c) {
-			float x = layer.layer.minPos.x() + (layer.layer.maxPos.x() - layer.layer.minPos.x()) / layer.layer.layerData.cols * c;
-
-			switch (featureId) {
-			case 0: // store
-				layer.layer.layerData.at<float>(r, c) = expf(-K[0] * nearestStore(QVector2D(x, y)).second);
-				break;
-			case 1: // school
-				layer.layer.layerData.at<float>(r, c) = expf(-K[1] * nearestSchool(QVector2D(x, y)).second);
-				break;
-			case 2: // restaurant
-				layer.layer.layerData.at<float>(r, c) = expf(-K[2] * nearestRestaurant(QVector2D(x, y)).second);
-				break;
-			case 3: // park
-				layer.layer.layerData.at<float>(r, c) = expf(-K[3] * nearestPark(QVector2D(x, y)).second);
-				break;
-			case 4: // amusement
-				layer.layer.layerData.at<float>(r, c) = expf(-K[4] * nearestAmusement(QVector2D(x, y)).second);
-				break;
-			case 5: // library
-				layer.layer.layerData.at<float>(r, c) = expf(-K[5] * nearestLibrary(QVector2D(x, y)).second);
-				break;
-			case 6: // noise
-				layer.layer.layerData.at<float>(r, c) = expf(-K[6] * noise(QVector2D(x, y)));
-				break;
-			case 7: // pollution
-				layer.layer.layerData.at<float>(r, c) = expf(-K[7] * pollution(QVector2D(x, y)));
-				break;
-			}
-		}
-	}
-
-	layer.layer.updateTexFromData(0, 1);
 }

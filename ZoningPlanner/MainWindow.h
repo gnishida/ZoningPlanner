@@ -39,15 +39,6 @@ public slots:
 	void onGenerateAll();
 	void onViewGeometry();
 	void onViewZoning();
-	void onViewStore();
-	void onViewSchool();
-	void onViewRestaurant();
-	void onViewPark();
-	void onViewAmusement();
-	void onViewLibrary();
-	void onViewNoise();
-	void onViewPollution();
-	void onPropose();
 	void onBestPlan();
 };
 

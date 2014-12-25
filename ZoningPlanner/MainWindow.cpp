@@ -41,16 +41,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 
 	connect(ui.actionViewGeometry, SIGNAL(triggered()), this, SLOT(onViewGeometry()));
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
-	connect(ui.actionViewStore, SIGNAL(triggered()), this, SLOT(onViewStore()));
-	connect(ui.actionViewSchool, SIGNAL(triggered()), this, SLOT(onViewSchool()));
-	connect(ui.actionViewRestaurant, SIGNAL(triggered()), this, SLOT(onViewRestaurant()));
-	connect(ui.actionViewPark, SIGNAL(triggered()), this, SLOT(onViewPark()));
-	connect(ui.actionViewAmusement, SIGNAL(triggered()), this, SLOT(onViewAmusement()));
-	connect(ui.actionViewLibrary, SIGNAL(triggered()), this, SLOT(onViewLibrary()));
-	connect(ui.actionViewNoise, SIGNAL(triggered()), this, SLOT(onViewNoise()));
-	connect(ui.actionViewPollution, SIGNAL(triggered()), this, SLOT(onViewPollution()));
 
-	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
 
 	// setup the GL widget
@@ -105,19 +96,6 @@ void MainWindow::onLoadZoning() {
 	printf("Parcels generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	urbanGeometry->allocateAll();
-
-	// レイヤー情報を更新する
-	startTime = clock();
-	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
-	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
-	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
-	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
-	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
-	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
-	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
-	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-	endTime = clock();
-	printf("Layers generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 	
 	// compute the feature vectors
 	/*
@@ -221,118 +199,6 @@ void MainWindow::onViewZoning() {
 	glWidget->updateGL();
 }
 
-void MainWindow::onViewStore() {
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewAmusement->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewSchool() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewAmusement->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewRestaurant() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewPark() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewAmusement->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewAmusement() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewLibrary() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewAmusement->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewNoise() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewAmusement->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewPollution() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewAmusement->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onPropose() {
-	// randomly assign zone types to the blocks
-	urbanGeometry->zones.randomlyAssignZoneType(urbanGeometry->blocks);
-
-	urbanGeometry->allocateAll();
-
-	// generate 3D mesh
-	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	// レイヤー情報を更新する
-	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
-	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
-	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
-	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
-	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
-	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
-	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
-	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-
-	float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
-	printf("score: %lf\n", score);
-
-	glWidget->updateGL();
-}
-
 /**
  * ランダムにプランを生成し、ランダムに人などを配備してそのスコアを決定する。
  * 一定回数繰り返して、ベスト３とワースト３のプランを保存する。
@@ -348,17 +214,7 @@ void MainWindow::onBestPlan() {
 	// re-generate parcels
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-	urbanGeometry->allocateAll();
-
-	// レイヤー情報を更新する
-	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
-	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
-	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
-	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
-	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
-	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
-	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
-	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
+	//urbanGeometry->allocateAll();
 	
 	// compute the feature vectors
 	//urbanGeometry->computeScore();

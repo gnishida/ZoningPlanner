@@ -210,7 +210,6 @@ void VBOPm::generateParcelModels(VBORenderManager& rendManager, BlockSet& blocks
 
 bool VBOPm::generateBuildings(VBORenderManager& rendManager, BlockSet& blocks, Zoning& zones) {
 	rendManager.removeStaticGeometry("3d_building");
-	rendManager.removeStaticGeometry("3d_building_fac");
 		
 	Block::parcelGraphVertexIter vi, viEnd;
 	for (int bN = 0; bN < blocks.size(); bN++) {
