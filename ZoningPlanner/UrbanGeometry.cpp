@@ -136,7 +136,6 @@ void UrbanGeometry::allocateAll() {
 	parks.clear();
 	libraries.clear();
 	factories.clear();
-	stations.clear();
 
 	// 予想される数を先に計算する
 	std::vector<float> numCommercials(3, 0.0f);
@@ -363,7 +362,6 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
 	person.feature[5] = renderManager.vboLibraryLayer.layer.getValue(person.homeLocation);
 	person.feature[6] = renderManager.vboNoiseLayer.layer.getValue(person.homeLocation);
 	person.feature[7] = renderManager.vboPollutionLayer.layer.getValue(person.homeLocation);
-	person.feature[8] = renderManager.vboStationLayer.layer.getValue(person.homeLocation);
 	person.score = std::inner_product(std::begin(person.feature), std::end(person.feature), std::begin(person.preference), 0.0);
 
 	person.nearestStore = -1;
@@ -372,7 +370,6 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
 	person.nearestPark = -1;
 	person.nearestAmusement = -1;
 	person.nearestLibrary = -1;
-	person.nearestStation = -1;
 }
 
 /**
@@ -383,9 +380,9 @@ void UrbanGeometry::setFeatureForPerson(Person& person, VBORenderManager& render
  * findBest()からは、もう一方の関数をコールすべき。そっちの方がちょっと速いから。
  */
 void UrbanGeometry::setFeatureForPerson(Person& person) {
-	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001, 0.001};
+	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001};
 
-	person.feature.resize(9);
+	person.feature.resize(8);
 
 	{ // nearest store
 		std::pair<int, float> n = nearestStore(person.homeLocation);
@@ -429,12 +426,6 @@ void UrbanGeometry::setFeatureForPerson(Person& person) {
 
 	{ // pollution
 		person.feature[7] = expf(-K[7] * pollution(person.homeLocation));
-	}
-
-	{ // nearest station
-		std::pair<int, float> n = nearestStation(person.homeLocation);
-		person.nearestStation = n.first;
-		person.feature[8] = expf(-K[8] * n.second);
 	}
 
 	person.score = std::inner_product(std::begin(person.feature), std::end(person.feature), std::begin(person.preference), 0.0);
@@ -538,20 +529,6 @@ std::pair<int, float> UrbanGeometry::nearestFactory(const QVector2D& pt) {
 	return std::make_pair(nearestFactory, sqrtf(min_dist2));
 }
 
-std::pair<int, float> UrbanGeometry::nearestStation(const QVector2D& pt) {
-	float min_dist2 = std::numeric_limits<float>::max();
-	int nearestStation = -1;
-	for (int i = 0; i < stations.size(); ++i) {
-		float dist2 = (stations[i].location - pt).lengthSquared();
-		if (dist2 < min_dist2) {
-			min_dist2 = dist2;
-			nearestStation = i;
-		}
-	}
-
-	return std::make_pair(nearestStation, sqrtf(min_dist2));
-}
-
 float UrbanGeometry::noise(const QVector2D& pt) {
 	float Km = 800.0 - nearestFactory(pt).second;
 	float Ka = 400.0 - nearestAmusement(pt).second;
@@ -567,7 +544,7 @@ float UrbanGeometry::pollution(const QVector2D& pt) {
 }
 
 void UrbanGeometry::updateLayer(int featureId, VBOLayer& layer) {
-	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001, 0.001};
+	float K[] = {0.002, 0.002, 0.001, 0.002, 0.001, 0.001, 0.001, 0.001};
 
 	for (int r = 0; r < layer.layer.layerData.rows; ++r) {
 		float y = layer.layer.minPos.y() + (layer.layer.maxPos.y() - layer.layer.minPos.y()) / layer.layer.layerData.rows * r;
@@ -598,9 +575,6 @@ void UrbanGeometry::updateLayer(int featureId, VBOLayer& layer) {
 				break;
 			case 7: // pollution
 				layer.layer.layerData.at<float>(r, c) = expf(-K[7] * pollution(QVector2D(x, y)));
-				break;
-			case 8: // station
-				layer.layer.layerData.at<float>(r, c) = expf(-K[8] * nearestStation(QVector2D(x, y)).second);
 				break;
 			}
 		}

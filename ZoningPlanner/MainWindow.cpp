@@ -41,7 +41,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 
 	connect(ui.actionViewGeometry, SIGNAL(triggered()), this, SLOT(onViewGeometry()));
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
-	connect(ui.actionViewPeople, SIGNAL(triggered()), this, SLOT(onViewPeople()));
 	connect(ui.actionViewStore, SIGNAL(triggered()), this, SLOT(onViewStore()));
 	connect(ui.actionViewSchool, SIGNAL(triggered()), this, SLOT(onViewSchool()));
 	connect(ui.actionViewRestaurant, SIGNAL(triggered()), this, SLOT(onViewRestaurant()));
@@ -50,11 +49,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionViewLibrary, SIGNAL(triggered()), this, SLOT(onViewLibrary()));
 	connect(ui.actionViewNoise, SIGNAL(triggered()), this, SLOT(onViewNoise()));
 	connect(ui.actionViewPollution, SIGNAL(triggered()), this, SLOT(onViewPollution()));
-	connect(ui.actionViewStation, SIGNAL(triggered()), this, SLOT(onViewStation()));
 
 	connect(ui.actionPropose, SIGNAL(triggered()), this, SLOT(onPropose()));
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
-	connect(ui.actionPeopleAllocation, SIGNAL(triggered()), this, SLOT(onPeopleAllocation()));
 
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
@@ -119,7 +116,6 @@ void MainWindow::onLoadZoning() {
 	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
 	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
 	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 	endTime = clock();
 	printf("Layers generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 	
@@ -225,11 +221,6 @@ void MainWindow::onViewZoning() {
 	glWidget->updateGL();
 }
 
-void MainWindow::onViewPeople() {
-	glWidget->shadow.makeShadowMap(glWidget);
-	glWidget->updateGL();
-}
-
 void MainWindow::onViewStore() {
 	ui.actionViewSchool->setChecked(false);
 	ui.actionViewRestaurant->setChecked(false);
@@ -238,7 +229,6 @@ void MainWindow::onViewStore() {
 	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
 	ui.actionViewPollution->setChecked(false);
-	ui.actionViewStation->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -250,7 +240,6 @@ void MainWindow::onViewSchool() {
 	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
 	ui.actionViewPollution->setChecked(false);
-	ui.actionViewStation->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -261,7 +250,6 @@ void MainWindow::onViewRestaurant() {
 	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
 	ui.actionViewPollution->setChecked(false);
-	ui.actionViewStation->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -273,7 +261,6 @@ void MainWindow::onViewPark() {
 	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
 	ui.actionViewPollution->setChecked(false);
-	ui.actionViewStation->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -285,7 +272,6 @@ void MainWindow::onViewAmusement() {
 	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
 	ui.actionViewPollution->setChecked(false);
-	ui.actionViewStation->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -297,7 +283,6 @@ void MainWindow::onViewLibrary() {
 	ui.actionViewAmusement->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
 	ui.actionViewPollution->setChecked(false);
-	ui.actionViewStation->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -309,7 +294,6 @@ void MainWindow::onViewNoise() {
 	ui.actionViewAmusement->setChecked(false);
 	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewPollution->setChecked(false);
-	ui.actionViewStation->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -321,19 +305,6 @@ void MainWindow::onViewPollution() {
 	ui.actionViewAmusement->setChecked(false);
 	ui.actionViewLibrary->setChecked(false);
 	ui.actionViewNoise->setChecked(false);
-	ui.actionViewStation->setChecked(false);
-	glWidget->updateGL();
-}
-
-void MainWindow::onViewStation() {
-	ui.actionViewStore->setChecked(false);
-	ui.actionViewSchool->setChecked(false);
-	ui.actionViewRestaurant->setChecked(false);
-	ui.actionViewPark->setChecked(false);
-	ui.actionViewAmusement->setChecked(false);
-	ui.actionViewLibrary->setChecked(false);
-	ui.actionViewNoise->setChecked(false);
-	ui.actionViewPollution->setChecked(false);
 	glWidget->updateGL();
 }
 
@@ -355,7 +326,6 @@ void MainWindow::onPropose() {
 	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
 	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
 	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 
 	float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
 	printf("score: %lf\n", score);
@@ -389,7 +359,6 @@ void MainWindow::onBestPlan() {
 	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
 	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
 	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
 	
 	// compute the feature vectors
 	//urbanGeometry->computeScore();
@@ -399,40 +368,4 @@ void MainWindow::onBestPlan() {
 	glWidget->updateGL();
 }
 
-
-/**
- * 現在のゾーンに対して、人をランダムに配置し、スコアを計算する。これをＮ回繰り返して、スコアリストをファイルに出力する。
- * Pythonプログラムなどでヒストグラム生成に使用できる。
- */
-void MainWindow::onPeopleAllocation() {
-	urbanGeometry->allocateAll();
-
-	// 各ブロックのゾーンタイプに基づき、レイヤー情報を更新する
-	urbanGeometry->updateLayer(0, glWidget->vboRenderManager.vboStoreLayer);
-	urbanGeometry->updateLayer(1, glWidget->vboRenderManager.vboSchoolLayer);
-	urbanGeometry->updateLayer(2, glWidget->vboRenderManager.vboRestaurantLayer);
-	urbanGeometry->updateLayer(3, glWidget->vboRenderManager.vboParkLayer);
-	urbanGeometry->updateLayer(4, glWidget->vboRenderManager.vboAmusementLayer);
-	urbanGeometry->updateLayer(5, glWidget->vboRenderManager.vboLibraryLayer);
-	urbanGeometry->updateLayer(6, glWidget->vboRenderManager.vboNoiseLayer);
-	urbanGeometry->updateLayer(7, glWidget->vboRenderManager.vboPollutionLayer);
-	urbanGeometry->updateLayer(8, glWidget->vboRenderManager.vboStationLayer);
-
-	std::vector<float> scores;
-	for (int iter = 0; iter < 1000; ++iter) {
-		// 人を動かす
-		urbanGeometry->allocatePeople();
-
-		float score = urbanGeometry->computeScore(glWidget->vboRenderManager);
-		scores.push_back(score);
-		printf("%d: score=%lf\n", iter, score);
-	}
-
-	// スコアリストをファイルに保存
-	std::ofstream out("score.txt");
-	for (int i = 0; i < scores.size(); ++i) {
-		out << scores[i] << std::endl;
-	}
-	out.close();
-}
 

@@ -202,8 +202,6 @@ void GLWidget3D::drawScene(int drawMode) {
 			vboRenderManager.vboNoiseLayer.render(vboRenderManager);
 		} else if (mainWin->ui.actionViewPollution->isChecked()) {
 			vboRenderManager.vboPollutionLayer.render(vboRenderManager);
-		} else if (mainWin->ui.actionViewStation->isChecked()) {
-			vboRenderManager.vboStationLayer.render(vboRenderManager);
 		}
 	}
 

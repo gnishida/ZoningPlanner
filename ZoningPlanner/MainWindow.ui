@@ -81,7 +81,6 @@
     </property>
     <addaction name="actionViewGeometry"/>
     <addaction name="actionViewZoning"/>
-    <addaction name="actionViewPeople"/>
     <addaction name="actionViewStore"/>
     <addaction name="actionViewSchool"/>
     <addaction name="actionViewRestaurant"/>
@@ -90,7 +89,6 @@
     <addaction name="actionViewLibrary"/>
     <addaction name="actionViewNoise"/>
     <addaction name="actionViewPollution"/>
-    <addaction name="actionViewStation"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
@@ -98,12 +96,6 @@
     </property>
     <addaction name="actionPropose"/>
     <addaction name="actionBestPlan"/>
-    <addaction name="actionBestPlanMT"/>
-    <addaction name="actionBestPlanGPU"/>
-    <addaction name="actionBestPlanAndPeople"/>
-    <addaction name="actionBestPlanAndPeopleMT"/>
-    <addaction name="actionBestPlanAndPeopleGPU"/>
-    <addaction name="actionPeopleAllocation"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>

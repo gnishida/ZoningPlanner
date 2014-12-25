@@ -39,7 +39,6 @@ public slots:
 	void onGenerateAll();
 	void onViewGeometry();
 	void onViewZoning();
-	void onViewPeople();
 	void onViewStore();
 	void onViewSchool();
 	void onViewRestaurant();
@@ -48,10 +47,8 @@ public slots:
 	void onViewLibrary();
 	void onViewNoise();
 	void onViewPollution();
-	void onViewStation();
 	void onPropose();
 	void onBestPlan();
-	void onPeopleAllocation();
 };
 
 #endif // MAINWINDOW_H
