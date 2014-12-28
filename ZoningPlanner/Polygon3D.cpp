@@ -478,7 +478,7 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 
 	Polygon_2 P;
 	for (int i = 0; i < this->contour.size(); ++i) {
-		if (i == this->contour.size() - 1 && (this->contour.back() - this->contour[this->contour.size() - 2]).lengthSquared() < 0.1f) break;
+		if (i == this->contour.size() - 1 && (this->contour.back() - this->contour[0]).lengthSquared() < 0.1f) break;
 		P.push_back(Point_2(this->contour[i].x(), this->contour[i].y()));
 	}
 

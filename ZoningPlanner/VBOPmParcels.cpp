@@ -11,7 +11,9 @@ void subdivideBlockIntoParcels(Block &block);
 bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin, float areaVar, float splitIrregularity, std::vector<Parcel> &outParcels); 
 
 bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks) {
+	srand(0);
 	for (int i = 0; i < blocks.size(); ++i) {
+		printf("%d\n", i);
 		subdivideBlockIntoParcels(blocks[i]);
 
 		blocks[i].adaptToTerrain(&rendManager);
@@ -21,7 +23,7 @@ bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< B
 }
 
 void subdivideBlockIntoParcels(Block &block) {
-	srand(block.randSeed);
+	//srand(block.randSeed);
 	std::vector<Parcel> tmpParcels;
 
 	//Empty parcels in block
