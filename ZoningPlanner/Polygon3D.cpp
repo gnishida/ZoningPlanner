@@ -2,7 +2,6 @@
 #include <QVector2D>
 #include <QMatrix4x4>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Boolean_set_operations_2.h>
 #include "Util.h"
 
@@ -455,7 +454,7 @@ bool Polygon3D::splitMeWithPolyline(std::vector<QVector3D> &pline, Loop3D &pgon1
 	return polylineIntersectsPolygon;
 }
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 typedef Kernel::Point_2 Point_2;
 typedef CGAL::Polygon_2<Kernel> Polygon_2;
 typedef CGAL::Polygon_with_holes_2<Kernel> Polygon_with_holes_2;
@@ -481,6 +480,13 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 		if (i == this->contour.size() - 1 && fabs(this->contour.back().x() - this->contour[0].x()) == 0.0f && fabs(this->contour.back().y() - this->contour[0].y()) == 0.0f) break;
 		P.push_back(Point_2(this->contour[i].x(), this->contour[i].y()));
 	}
+
+	// check if the polygon is self-intersecting.
+	if (!P.is_simple()) {
+		return false;
+	}
+
+	//if (Polygon3D::reorientFace(this->contour, true)) {
 	if (!P.is_counterclockwise_oriented()) {
 		std::reverse(P.vertices_begin(), P.vertices_end());
 	}
@@ -528,7 +534,7 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 		for (auto edge = it->outer_boundary().edges_begin(); edge != it->outer_boundary().edges_end(); ++edge) {
 			auto source = edge->source();
 
-			loop.push_back(QVector3D(source.x(), source.y(), 0));
+			loop.push_back(QVector3D(CGAL::to_double(source.x()), CGAL::to_double(source.y()), 0));
 		}
 		loop.push_back(loop.contour[0]);
 
@@ -539,7 +545,7 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 		for (auto edge = it->outer_boundary().edges_begin(); edge != it->outer_boundary().edges_end(); ++edge) {
 			auto source = edge->source();
 
-			loop.push_back(QVector3D(source.x(), source.y(), 0));
+			loop.push_back(QVector3D(CGAL::to_double(source.x()), CGAL::to_double(source.y()), 0));
 		}
 		loop.push_back(loop.contour[0]);
 
