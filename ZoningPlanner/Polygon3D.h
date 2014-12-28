@@ -145,6 +145,7 @@ public:
 
 	//Only works for polygons with no holes in them
 	bool splitMeWithPolyline(std::vector<QVector3D> &pline, Loop3D &pgon1, Loop3D &pgon2);
+	bool split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgons);
 
 	//Only works for polygons with no holes in them
 	float computeInset(float offsetDistance, Loop3D &pgonInset, bool computeArea = true);

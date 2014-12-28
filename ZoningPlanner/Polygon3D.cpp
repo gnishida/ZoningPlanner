@@ -1,6 +1,9 @@
 #include "Polygon3D.h"
 #include <QVector2D>
 #include <QMatrix4x4>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Boolean_set_operations_2.h>
 #include "Util.h"
 
 #include "clipper.hpp"
@@ -450,6 +453,78 @@ bool Polygon3D::splitMeWithPolyline(std::vector<QVector3D> &pline, Loop3D &pgon1
 	}
 
 	return polylineIntersectsPolygon;
+}
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+typedef Kernel::Point_2 Point_2;
+typedef CGAL::Polygon_2<Kernel> Polygon_2;
+typedef CGAL::Polygon_with_holes_2<Kernel> Polygon_with_holes_2;
+typedef std::list<Polygon_with_holes_2> Pwh_list_2;
+
+/**
+ * Split the polygon by a line.
+ * uses CGAL library and supports concave polygons.
+ */
+bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgons) {
+	bool polylineIntersectsPolygon = false;
+
+	int plineSz = pline.size();
+	int contourSz = this->contour.size();
+
+	if(plineSz < 2 || contourSz < 3){
+		//std::cout << "ERROR: Cannot split if polygon has fewer than three vertices of if polyline has fewer than two points\n.";
+		return false;
+	}
+
+	Polygon_2 P;
+	for (int i = 0; i < this->contour.size(); ++i) {
+		P.push_back(Point_2(this->contour[i].x(), this->contour[i].y()));
+	}
+
+	Polygon_2 Q1;
+	QVector3D dir1 = pline[0] - pline[1];
+	QVector3D pdir1(dir1.y(), -dir1.x(), 0);
+	QVector3D pt1 = pline[0] + pdir1.normalized() * 10000.0f;
+
+	QVector3D dir2 = pline.back() - pline[pline.size() - 2];
+	QVector3D pdir2(-dir2.y(), dir2.x(), 0);
+	QVector3D pt2 = pline.back() + pdir2.normalized() * 10000.0f;
+
+	Q1.push_back(Point_2(pt1.x(), pt1.y()));
+	for (int i = 0; i < pline.size(); ++i) {
+		Q1.push_back(Point_2(pline[i].x(), pline[i].y()));
+	}
+	Q1.push_back(Point_2(pt2.x(), pt2.y()));
+
+	Polygon_2 Q2;
+	pt1 = pline[0] - pdir1.normalized() * 10000.0f;
+	pt2 = pline.back() - pdir2.normalized() * 10000.0f;
+	Q2.push_back(Point_2(pt2.x(), pt2.y()));
+	for (int i = pline.size() - 1; i >= 0; --i) {
+		Q2.push_back(Point_2(pline[i].x(), pline[i].y()));
+	}
+	Q2.push_back(Point_2(pt1.x(), pt1.y()));
+
+	Pwh_list_2 intR1;
+	CGAL::intersection (P, Q1, std::back_inserter(intR1));
+
+	Pwh_list_2 intR2;
+	CGAL::intersection (P, Q2, std::back_inserter(intR2));
+
+	// set the resulting polygons
+	pgons.clear();
+	for (auto it = intR1.begin(); it != intR1.end(); ++it) {
+		Polygon3D loop;
+		for (auto edge = it->outer_boundary().edges_begin(); edge != it->outer_boundary().edges_end(); ++edge) {
+			auto source = edge->source();
+
+			loop.push_back(QVector3D(source.x(), source.y(), 0));
+		}
+
+		pgons.push_back(loop);
+	}
+
+	return true;
 }
 
 /**

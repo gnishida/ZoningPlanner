@@ -65,7 +65,7 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 		//boost::geometry::correct(parcel.bg_parcelContour);
 		//printf("a: %.3f %.3f", boost::geometry::area(parcel.bg_parcelContour));
 		outParcels.push_back(parcel);
-		return false;
+		return true;
 	}
 
 	//compute OBB
@@ -107,6 +107,16 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 
 	float kDistTol = 0.01f;
 
+	std::vector<Polygon3D> pgons;
+	if (parcel.parcelContour.split(splitLine, pgons)) {
+		for (int i = 0; i < pgons.size(); ++i) {
+			Parcel parcel;
+			parcel.setContour(pgons[i]);
+
+			subdivideParcel(block, parcel, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
+		}
+	}
+	/*
 	if (parcel.parcelContour.splitMeWithPolyline(splitLine, pgon1.contour, pgon2.contour)) {
 		Parcel parcel1;
 		Parcel parcel2;
@@ -120,6 +130,7 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 	} else {
 		return false;
 	}
+	*/
 
 	return true;
 }
