@@ -478,8 +478,11 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 
 	Polygon_2 P;
 	for (int i = 0; i < this->contour.size(); ++i) {
-		if (i == this->contour.size() - 1 && (this->contour.back() - this->contour[0]).lengthSquared() < 0.1f) break;
+		if (i == this->contour.size() - 1 && fabs(this->contour.back().x() - this->contour[0].x()) == 0.0f && fabs(this->contour.back().y() - this->contour[0].y()) == 0.0f) break;
 		P.push_back(Point_2(this->contour[i].x(), this->contour[i].y()));
+	}
+	if (!P.is_counterclockwise_oriented()) {
+		std::reverse(P.vertices_begin(), P.vertices_end());
 	}
 
 	Polygon_2 Q1;
@@ -496,6 +499,9 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 		Q1.push_back(Point_2(pline[i].x(), pline[i].y()));
 	}
 	Q1.push_back(Point_2(pt2.x(), pt2.y()));
+	if (!Q1.is_counterclockwise_oriented()) {
+		std::reverse(Q1.vertices_begin(), Q1.vertices_end());
+	}
 
 	Polygon_2 Q2;
 	pt1 = pline[0] - pdir1.normalized() * 10000.0f;
@@ -505,6 +511,9 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 		Q2.push_back(Point_2(pline[i].x(), pline[i].y()));
 	}
 	Q2.push_back(Point_2(pt1.x(), pt1.y()));
+	if (!Q2.is_counterclockwise_oriented()) {
+		std::reverse(Q2.vertices_begin(), Q2.vertices_end());
+	}
 
 	Pwh_list_2 intR1;
 	CGAL::intersection (P, Q1, std::back_inserter(intR1));
