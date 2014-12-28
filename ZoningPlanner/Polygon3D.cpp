@@ -478,6 +478,7 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 
 	Polygon_2 P;
 	for (int i = 0; i < this->contour.size(); ++i) {
+		if (i == this->contour.size() - 1 && (this->contour.back() - this->contour[this->contour.size() - 2]).lengthSquared() < 0.1f) break;
 		P.push_back(Point_2(this->contour[i].x(), this->contour[i].y()));
 	}
 
@@ -520,6 +521,18 @@ bool Polygon3D::split(std::vector<QVector3D> &pline, std::vector<Polygon3D>& pgo
 
 			loop.push_back(QVector3D(source.x(), source.y(), 0));
 		}
+		loop.push_back(loop.contour[0]);
+
+		pgons.push_back(loop);
+	}
+	for (auto it = intR2.begin(); it != intR2.end(); ++it) {
+		Polygon3D loop;
+		for (auto edge = it->outer_boundary().edges_begin(); edge != it->outer_boundary().edges_end(); ++edge) {
+			auto source = edge->source();
+
+			loop.push_back(QVector3D(source.x(), source.y(), 0));
+		}
+		loop.push_back(loop.contour[0]);
 
 		pgons.push_back(loop);
 	}
