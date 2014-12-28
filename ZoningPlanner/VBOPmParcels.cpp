@@ -13,7 +13,6 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks) {
 	srand(0);
 	for (int i = 0; i < blocks.size(); ++i) {
-		printf("%d\n", i);
 		subdivideBlockIntoParcels(blocks[i]);
 
 		blocks[i].adaptToTerrain(&rendManager);
