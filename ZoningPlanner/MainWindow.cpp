@@ -240,6 +240,7 @@ void MainWindow::onCameraDefault() {
 	glWidget->camera2D.setLookAt(pt.x(), pt.y(), 70);
 	glWidget->camera2D.setXRotation(-60);
 	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
+	glWidget->camera2D.updateCamMatrix();
 
 	glWidget->updateGL();
 }
