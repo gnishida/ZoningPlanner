@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
 
+	connect(ui.actionCameraDefault, SIGNAL(triggered()), this, SLOT(onCameraDefault()));
+
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -190,7 +192,26 @@ void MainWindow::onViewZoning() {
  * 一定回数繰り返して、ベスト３とワースト３のプランを保存する。
  */
 void MainWindow::onBestPlan() {
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager);
+	std::vector<std::vector<float> > preference;
+
+	preference.resize(10);
+	for (int i = 0; i < 10; ++i) preference[i].resize(9);
+
+	//preference[0][0] = 0; preference[0][1] = 0; preference[0][2] = 0; preference[0][3] = 0; preference[0][4] = 0; preference[0][5] = 0; preference[0][6] = 0; preference[0][7] = 1.0;
+	preference[0][0] = 0; preference[0][1] = 0; preference[0][2] = 0.2; preference[0][3] = 0.2; preference[0][4] = 0.2; preference[0][5] = 0; preference[0][6] = 0.1; preference[0][7] = 0.3;
+	preference[1][0] = 0; preference[1][1] = 0; preference[1][2] = 0.15; preference[1][3] = 0; preference[1][4] = 0.45; preference[1][5] = 0; preference[1][6] = 0.2; preference[1][7] = 0.2;
+	preference[2][0] = 0; preference[2][1] = 0; preference[2][2] = 0.1; preference[2][3] = 0; preference[2][4] = 0; preference[2][5] = 0; preference[2][6] = 0.4; preference[2][7] = 0.5;
+	preference[3][0] = 0.15; preference[3][1] = 0.13; preference[3][2] = 0; preference[3][3] = 0.14; preference[3][4] = 0; preference[3][5] = 0.08; preference[3][6] = 0.2; preference[3][7] = 0.3;
+	preference[4][0] = 0.3; preference[4][1] = 0; preference[4][2] = 0.3; preference[4][3] = 0.1; preference[4][4] = 0; preference[4][5] = 0; preference[4][6] = 0.1; preference[4][7] = 0.2;
+	preference[5][0] = 0.05; preference[5][1] = 0; preference[5][2] = 0.15; preference[5][3] = 0.2; preference[5][4] = 0.15; preference[5][5] = 0; preference[5][6] = 0.15; preference[5][7] = 0.3;
+	preference[6][0] = 0.2; preference[6][1] = 0.1; preference[6][2] = 0; preference[6][3] = 0.2; preference[6][4] = 0; preference[6][5] = 0.1; preference[6][6] = 0.1; preference[6][7] = 0.3;
+	preference[7][0] = 0.3; preference[7][1] = 0; preference[7][2] = 0.3; preference[7][3] = 0; preference[7][4] = 0.2; preference[7][5] = 0; preference[7][6] = 0.1; preference[7][7] = 0.1;
+	preference[8][0] = 0.25; preference[8][1] = 0; preference[8][2] = 0.1; preference[8][3] = 0.05; preference[8][4] = 0; preference[8][5] = 0; preference[8][6] = 0.25; preference[8][7] = 0.35;
+	preference[9][0] = 0.25; preference[9][1] = 0; preference[9][2] = 0.2; preference[9][3] = 0; preference[9][4] = 0; preference[9][5] = 0; preference[9][6] = 0.2; preference[9][7] = 0.35;
+
+
+
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference);
 
 	// generate blocks
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
@@ -205,4 +226,21 @@ void MainWindow::onBestPlan() {
 	glWidget->updateGL();
 }
 
+/**
+ * 当該ユーザのpreference vectorに基づいて、カメラ位置を決定する。
+ */
+void MainWindow::onCameraDefault() {
+	std::vector<float> preference;
+	preference.resize(9);
+	preference[0] = 0; preference[1] = 0; preference[2] = 0.2; preference[3] = 0.2; preference[4] = 0.2; preference[5] = 0; preference[6] = 0.1; preference[7] = 0.3;
+
+	QVector3D pt = QVector3D(urbanGeometry->findBestPlace(preference));
+
+	glWidget->camera2D.setTranslation(0, 0, 200.0f);
+	glWidget->camera2D.setLookAt(pt.x(), pt.y(), 70);
+	glWidget->camera2D.setXRotation(-60);
+	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
+
+	glWidget->updateGL();
+}
 

@@ -9,7 +9,6 @@
 #define MAX_DIST 99
 #define BF_CLEARED -1
 #define NUM_FEATURES 5
-#define NUM_PEOPLE_TYPE 10
 #define NUM_LAYERS 5
 
 struct Point2D {
@@ -25,8 +24,11 @@ struct BF_QueueElement {
 };
 
 class MCMC {
+private:
+	std::vector<std::vector<float> > preference;
+
 public:
-	MCMC() {}
+	MCMC(std::vector<std::vector<float> >& preference);
 
 public:
 	void findBestPlan(int** zone, int* city_size);

@@ -221,7 +221,7 @@
       <Filter>PMBuilding</Filter>
     </ClCompile>
     <ClCompile Include="MCMC.cpp">
-      <Filter>Generated Files</Filter>
+      <Filter>Main Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -417,7 +417,7 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="MCMC.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

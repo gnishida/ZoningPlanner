@@ -73,7 +73,6 @@
      <string>Camera</string>
     </property>
     <addaction name="actionCameraDefault"/>
-    <addaction name="actionCameraCar"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -92,8 +91,8 @@
    <addaction name="menuPM"/>
    <addaction name="menuView"/>
    <addaction name="menuTool"/>
-   <addaction name="menuCamera"/>
    <addaction name="menuWindow"/>
+   <addaction name="menuCamera"/>
   </widget>
   <widget class="QToolBar" name="fileToolBar">
    <attribute name="toolBarArea">

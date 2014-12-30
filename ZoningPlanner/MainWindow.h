@@ -40,6 +40,7 @@ public slots:
 	void onViewGeometry();
 	void onViewZoning();
 	void onBestPlan();
+	void onCameraDefault();
 };
 
 #endif // MAINWINDOW_H

@@ -100,8 +100,8 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 /**
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
-void UrbanGeometry::findBestPlan(VBORenderManager& renderManager) {
-	MCMC mcmc;
+void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference) {
+	MCMC mcmc(preference);
 	int* plan;
 	int size;
 	mcmc.findBestPlan(&plan, &size);
@@ -121,3 +121,6 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager) {
 	}
 }
 
+QVector2D UrbanGeometry::findBestPlace(std::vector<float>& preference) {
+	return QVector2D(300, -1000);
+}
