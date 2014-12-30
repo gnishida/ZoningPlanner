@@ -32,6 +32,7 @@ public:
 
 public:
 	void findBestPlan(int** zone, int* city_size);
+	void computeDistanceMap(int city_size, int* zone, int** dist);
 	void showZone(int city_size, int* zone, char* filename);
 	void loadZone(int city_size, int* zone, char* filename);
 	void saveZone(int city_size, int* zone, char* filename);

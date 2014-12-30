@@ -43,8 +43,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
 
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
-
 	connect(ui.actionCameraDefault, SIGNAL(triggered()), this, SLOT(onCameraDefault()));
+	connect(ui.actionQuestionnaireStart, SIGNAL(triggered()), this, SLOT(onQuestionnaireStart()));
 
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
@@ -234,7 +234,7 @@ void MainWindow::onCameraDefault() {
 	preference.resize(9);
 	preference[0] = 0; preference[1] = 0; preference[2] = 0.2; preference[3] = 0.2; preference[4] = 0.2; preference[5] = 0; preference[6] = 0.1; preference[7] = 0.3;
 
-	QVector3D pt = QVector3D(urbanGeometry->findBestPlace(preference));
+	QVector3D pt = QVector3D(urbanGeometry->findBestPlace(glWidget->vboRenderManager, preference));
 
 	glWidget->camera2D.setTranslation(0, 0, 200.0f);
 	glWidget->camera2D.setLookAt(pt.x(), pt.y(), 70);
@@ -245,3 +245,6 @@ void MainWindow::onCameraDefault() {
 	glWidget->updateGL();
 }
 
+void MainWindow::onQuestionnaireStart() {
+
+}

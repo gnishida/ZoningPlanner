@@ -59,5 +59,5 @@ public:
 	void saveBlocks(const QString& filename);
 
 	void findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference);
-	QVector2D findBestPlace(std::vector<float>& preference);
+	QVector2D findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference);
 };

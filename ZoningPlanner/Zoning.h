@@ -9,6 +9,8 @@
 class Zoning {
 public:
 	std::vector<std::pair<Polygon2D, ZoneType> > zones;
+	int* zones2;
+	int zone_size;
 
 	// 改善案
 	std::vector<float> zoneTypeDistribution;

@@ -56,6 +56,32 @@ void MCMC::findBestPlan(int** zone, int* city_size) {
 	//saveZone(city_size, zone, "zone_final.txt");
 }
 
+void MCMC::computeDistanceMap(int city_size, int* zone, int** dist) {
+	*dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	bool* toRaise = (bool*)malloc(city_size * city_size * NUM_FEATURES);
+
+
+	// キューのセットアップ
+	std::list<std::pair<int, int> > queue;
+	for (int i = 0; i < city_size * city_size; ++i) {
+		for (int k = 0; k < NUM_FEATURES; ++k) {
+			toRaise[i * NUM_FEATURES + k] = false;
+			if (zone[i] - 1 == k) {
+				setStore(queue, zone, *dist, obst, toRaise, i, k);
+			} else {
+				*dist[i * NUM_FEATURES + k] = MAX_DIST;
+				obst[i * NUM_FEATURES + k] = BF_CLEARED;
+			}
+		}
+	}
+
+	updateDistanceMap(city_size, queue, zone, *dist, obst, toRaise);
+
+	free(obst);
+	free(toRaise);
+}
+
 void MCMC::showZone(int city_size, int* zone, char* filename) {
 	cv::Mat m(city_size, city_size, CV_8UC3);
 	for (int r = 0; r < city_size; ++r) {
@@ -499,6 +525,15 @@ void MCMC::optimize(int city_size, int max_iterations, int* bestZone) {
 	sprintf(filename, "zone_%d.png", city_size);
 	showZone(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
+
+	free(tmpZone);
+	free(tmpDist);
+	free(tmpObst);
+
+	free(zone);
+	free(dist);
+	free(obst);
+	free(toRaise);
 }
 
 
@@ -623,4 +658,13 @@ void MCMC::optimize2(int city_size, int max_iterations, int* bestZone) {
 	sprintf(filename, "zone_%d.png", city_size);
 	showZone(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
+
+	free(tmpZone);
+	free(tmpDist);
+	free(tmpObst);
+
+	free(zone);
+	free(dist);
+	free(obst);
+	free(toRaise);
 }

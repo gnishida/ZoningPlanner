@@ -41,6 +41,7 @@ public slots:
 	void onViewZoning();
 	void onBestPlan();
 	void onCameraDefault();
+	void onQuestionnaireStart();
 };
 
 #endif // MAINWINDOW_H

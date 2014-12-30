@@ -87,12 +87,19 @@
     </property>
     <addaction name="actionBestPlan"/>
    </widget>
+   <widget class="QMenu" name="menuQuestionaire">
+    <property name="title">
+     <string>Questionnaire</string>
+    </property>
+    <addaction name="actionQuestionnaireStart"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
    <addaction name="menuView"/>
    <addaction name="menuTool"/>
    <addaction name="menuWindow"/>
    <addaction name="menuCamera"/>
+   <addaction name="menuQuestionaire"/>
   </widget>
   <widget class="QToolBar" name="fileToolBar">
    <attribute name="toolBarArea">
@@ -439,6 +446,11 @@
   <action name="actionBestPlanGPU">
    <property name="text">
     <string>Best Plan GPU</string>
+   </property>
+  </action>
+  <action name="actionQuestionnaireStart">
+   <property name="text">
+    <string>Start</string>
    </property>
   </action>
  </widget>
