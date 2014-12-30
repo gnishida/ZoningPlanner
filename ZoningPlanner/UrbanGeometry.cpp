@@ -213,11 +213,12 @@ void UrbanGeometry::questionnaire() {
 		printf("  Plan A\n");
 		for (int i = 0; i < 7; ++i) {
 			if (features[r1][i] == features[r2][i]) continue;
-			printf("    %s: %lf\n", msg[i], features[r1][i]);
+			printf("    %s: %.0lf [m]\n", msg[i], features[r1][i]);
 		}
+		printf("  Plan B\n");
 		for (int i = 0; i < 7; ++i) {
 			if (features[r1][i] == features[r2][i]) continue;
-			printf("    %s: %lf\n", msg[i], features[r2][i]);
+			printf("    %s: %.0lf [m]\n", msg[i], features[r2][i]);
 		}
 		printf("\n");
 	}

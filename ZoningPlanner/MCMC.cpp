@@ -77,7 +77,7 @@ void MCMC::computeDistanceMap(int city_size, int* zone, int** dist) {
 			if (zone[i] - 1 == k) {
 				setStore(queue, zone, *dist, obst, toRaise, i, k);
 			} else {
-				*dist[i * NUM_FEATURES + k] = MAX_DIST;
+				(*dist)[i * NUM_FEATURES + k] = MAX_DIST;
 				obst[i * NUM_FEATURES + k] = BF_CLEARED;
 			}
 		}
