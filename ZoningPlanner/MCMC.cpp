@@ -4,7 +4,7 @@ MCMC::MCMC() {
 }
 
 void MCMC::setPreferences(std::vector<std::vector<float> >& preference) {
-	this->preferences = preferences;
+	this->preferences = preference;
 }
 
 void MCMC::addPreference(std::vector<float>& preference) {
