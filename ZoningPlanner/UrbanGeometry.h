@@ -60,4 +60,5 @@ public:
 
 	void findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference);
 	QVector2D findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference);
+	void questionnaire();
 };

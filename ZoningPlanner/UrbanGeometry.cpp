@@ -100,8 +100,9 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 /**
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
-void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference) {
-	MCMC mcmc(preference);
+void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences) {
+	MCMC mcmc;
+	mcmc.setPreferences(preferences);
 	mcmc.findBestPlan(&zones.zones2, &zones.zone_size);
 
 	int cell_len = renderManager.side / zones.zone_size;
@@ -119,11 +120,12 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 	}
 }
 
+/**
+ * 指定されたpreferenceベクトルに対して、ベストの住宅ゾーンを探す。
+ * ゾーンプランは既に生成済みである必要がある。
+ */
 QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference) {
-	std::vector<std::vector<float> > preferences;
-	preferences.push_back(preference);
-
-	MCMC mcmc(preferences);
+	MCMC mcmc;
 	int* dist;
 	mcmc.computeDistanceMap(zones.zone_size, zones.zones2, &dist);
 
@@ -162,4 +164,61 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 	free(dist);
 
 	return ret;
+}
+
+/**
+ * アンケートを生成し、preferenceベクトルを計算する。
+ * ゾーンプランは既に生成済みである必要がある。
+ */
+void UrbanGeometry::questionnaire() {
+	MCMC mcmc;
+	int* dist;
+	mcmc.computeDistanceMap(zones.zone_size, zones.zones2, &dist);
+
+	std::vector<std::vector<float> > features;
+	for (int s = 0; s < zones.zone_size * zones.zone_size; ++s) {
+		if (zones.zones2[s] == 0) continue;
+
+		float score = 0.0f;
+		float feature[7];
+		mcmc.computeRawFeature(zones.zone_size, zones.zones2, dist, s, feature);
+		//mcmc.computeFeature(zones.zone_size, zones.zones2, dist, s, feature);
+
+		std::vector<float> f;
+		for (int i = 0; i < 7; ++i) f.push_back(feature[i]);
+		features.push_back(f);
+	}
+
+	free(dist);
+
+	const char msg[7][255] = {"Dist to store", "Dist to school", "Dist to restaurant", "Dist to park", "Dist to amusement facility", "Dist to library", "Dist to factory"};
+
+	for (int iter = 0; iter < 10; ++iter) {
+		int r1 = Util::genRand(0, features.size());
+		int r2;
+		while (true) {
+			r2 = Util::genRand(0, features.size());
+			if (r2 == r1) continue;
+
+			float len = 0.0f;
+			for (int i = 0; i < 7; ++i) {
+				len += SQR(features[r1][i] - features[r2][i]);
+			}
+			if (len < 100) continue;
+
+			break;
+		}
+
+		printf("Q%d:\n", iter);
+		printf("  Plan A\n");
+		for (int i = 0; i < 7; ++i) {
+			if (features[r1][i] == features[r2][i]) continue;
+			printf("    %s: %lf\n", msg[i], features[r1][i]);
+		}
+		for (int i = 0; i < 7; ++i) {
+			if (features[r1][i] == features[r2][i]) continue;
+			printf("    %s: %lf\n", msg[i], features[r2][i]);
+		}
+		printf("\n");
+	}
 }

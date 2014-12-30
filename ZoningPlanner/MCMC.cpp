@@ -1,7 +1,14 @@
 ﻿#include "MCMC.h"
 
-MCMC::MCMC(std::vector<std::vector<float> >& preference) {
-	this->preference = preference;
+MCMC::MCMC() {
+}
+
+void MCMC::setPreferences(std::vector<std::vector<float> >& preference) {
+	this->preferences = preferences;
+}
+
+void MCMC::addPreference(std::vector<float>& preference) {
+	this->preferences.push_back(preference);
 }
 
 void MCMC::findBestPlan(int** zone, int* city_size) {
@@ -315,11 +322,23 @@ void MCMC::computeFeature(int city_size, int* zone, int* dist, int s, float feat
 	feature[7] = 1.0f - exp(-K[7] * dist[s * NUM_FEATURES + 1] * cell_length); // 汚染
 }
 
+void MCMC::computeRawFeature(int city_size, int* zone, int* dist, int s, float feature[]) {
+	int cell_length = 10000 / city_size;
+
+	feature[0] = dist[s * NUM_FEATURES + 0] * cell_length; // 店
+	feature[1] = dist[s * NUM_FEATURES + 4] * cell_length; // 学校
+	feature[2] = dist[s * NUM_FEATURES + 0] * cell_length; // レストラン
+	feature[3] = dist[s * NUM_FEATURES + 2] * cell_length; // 公園
+	feature[4] = dist[s * NUM_FEATURES + 3] * cell_length; // アミューズメント
+	feature[5] = dist[s * NUM_FEATURES + 4] * cell_length; // 図書館
+	feature[6] = dist[s * NUM_FEATURES + 1] * cell_length; // 工場
+}
+
 /** 
  * ゾーンのスコアを計算する。
  */
 float MCMC::computeScore(int city_size, int* zone, int* dist) {
-	float ratioPeople = 1.0f / preference.size();
+	float ratioPeople = 1.0f / preferences.size();
 
 	float score = 0.0f;
 
@@ -331,15 +350,15 @@ float MCMC::computeScore(int city_size, int* zone, int* dist) {
 
 		float feature[8];
 		computeFeature(city_size, zone, dist, i, feature);
-		for (int peopleType = 0; peopleType < preference.size(); ++peopleType) {
-			score += feature[0] * preference[peopleType][0] * ratioPeople; // 店
-			score += feature[1] * preference[peopleType][1] * ratioPeople; // 学校
-			score += feature[2] * preference[peopleType][2] * ratioPeople; // レストラン
-			score += feature[3] * preference[peopleType][3] * ratioPeople; // 公園
-			score += feature[4] * preference[peopleType][4] * ratioPeople; // アミューズメント
-			score += feature[5] * preference[peopleType][5] * ratioPeople; // 図書館
-			score += feature[6] * preference[peopleType][6] * ratioPeople; // 騒音
-			score += feature[7] * preference[peopleType][7] * ratioPeople; // 汚染
+		for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
+			score += feature[0] * preferences[peopleType][0] * ratioPeople; // 店
+			score += feature[1] * preferences[peopleType][1] * ratioPeople; // 学校
+			score += feature[2] * preferences[peopleType][2] * ratioPeople; // レストラン
+			score += feature[3] * preferences[peopleType][3] * ratioPeople; // 公園
+			score += feature[4] * preferences[peopleType][4] * ratioPeople; // アミューズメント
+			score += feature[5] * preferences[peopleType][5] * ratioPeople; // 図書館
+			score += feature[6] * preferences[peopleType][6] * ratioPeople; // 騒音
+			score += feature[7] * preferences[peopleType][7] * ratioPeople; // 汚染
 		}
 	}
 

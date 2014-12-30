@@ -25,18 +25,21 @@ struct BF_QueueElement {
 
 class MCMC {
 private:
-	std::vector<std::vector<float> > preference;
+	std::vector<std::vector<float> > preferences;
 
 public:
-	MCMC(std::vector<std::vector<float> >& preference);
+	MCMC();
 
 public:
+	void setPreferences(std::vector<std::vector<float> >& preference);
+	void addPreference(std::vector<float>& preference);
 	void findBestPlan(int** zone, int* city_size);
 	void computeDistanceMap(int city_size, int* zone, int** dist);
 	void showZone(int city_size, int* zone, char* filename);
 	void loadZone(int city_size, int* zone, char* filename);
 	void saveZone(int city_size, int* zone, char* filename);
 	void computeFeature(int city_size, int* zone, int* dist, int s, float feature[]);
+	void computeRawFeature(int city_size, int* zone, int* dist, int s, float feature[]);
 	void dumpZone(int city_size, int* zone);
 	void dumpDist(int city_size, int* dist, int featureId);
 
