@@ -35,6 +35,7 @@ public:
 	void showZone(int city_size, int* zone, char* filename);
 	void loadZone(int city_size, int* zone, char* filename);
 	void saveZone(int city_size, int* zone, char* filename);
+	void computeFeature(int city_size, int* zone, int* dist, int s, float feature[]);
 	void dumpZone(int city_size, int* zone);
 	void dumpDist(int city_size, int* dist, int featureId);
 

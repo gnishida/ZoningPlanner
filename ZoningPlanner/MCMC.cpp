@@ -275,30 +275,25 @@ float MCMC::min3(float distToStore, float distToAmusement, float distToFactory) 
 	return std::min(std::min(distToStore, distToAmusement), distToFactory);
 }
 
+void MCMC::computeFeature(int city_size, int* zone, int* dist, int s, float feature[]) {
+	int cell_length = 10000 / city_size;
+	const float K[] = {0.002f, 0.002f, 0.001f, 0.002f, 0.001f, 0.001f, 0.001f, 0.001f};
+
+	feature[0] = exp(-K[0] * dist[s * NUM_FEATURES + 0] * cell_length); // 店
+	feature[1] = exp(-K[0] * dist[s * NUM_FEATURES + 4] * cell_length); // 学校
+	feature[2] = exp(-K[0] * dist[s * NUM_FEATURES + 0] * cell_length); // レストラン
+	feature[3] = exp(-K[0] * dist[s * NUM_FEATURES + 2] * cell_length); // 公園
+	feature[4] = exp(-K[0] * dist[s * NUM_FEATURES + 3] * cell_length); // アミューズメント
+	feature[5] = exp(-K[0] * dist[s * NUM_FEATURES + 4] * cell_length); // 図書館
+	feature[6] = 1.0f - exp(-K[6] * min3(dist[s * NUM_FEATURES + 1] * cell_length, dist[s * NUM_FEATURES + 3] * cell_length, dist[s * NUM_FEATURES + 0] * cell_length)); // 騒音
+	feature[7] = 1.0f - exp(-K[7] * dist[s * NUM_FEATURES + 1] * cell_length); // 汚染
+}
+
 /** 
  * ゾーンのスコアを計算する。
  */
 float MCMC::computeScore(int city_size, int* zone, int* dist) {
-	int cell_length = 10000 / city_size;
-
-	/*
-	// 好みベクトル
-	float preference[10][8];
-	//preference[0][0] = 0; preference[0][1] = 0; preference[0][2] = 0; preference[0][3] = 0; preference[0][4] = 0; preference[0][5] = 0; preference[0][6] = 0; preference[0][7] = 1.0;
-	preference[0][0] = 0; preference[0][1] = 0; preference[0][2] = 0.2; preference[0][3] = 0.2; preference[0][4] = 0.2; preference[0][5] = 0; preference[0][6] = 0.1; preference[0][7] = 0.3;
-	preference[1][0] = 0; preference[1][1] = 0; preference[1][2] = 0.15; preference[1][3] = 0; preference[1][4] = 0.45; preference[1][5] = 0; preference[1][6] = 0.2; preference[1][7] = 0.2;
-	preference[2][0] = 0; preference[2][1] = 0; preference[2][2] = 0.1; preference[2][3] = 0; preference[2][4] = 0; preference[2][5] = 0; preference[2][6] = 0.4; preference[2][7] = 0.5;
-	preference[3][0] = 0.15; preference[3][1] = 0.13; preference[3][2] = 0; preference[3][3] = 0.14; preference[3][4] = 0; preference[3][5] = 0.08; preference[3][6] = 0.2; preference[3][7] = 0.3;
-	preference[4][0] = 0.3; preference[4][1] = 0; preference[4][2] = 0.3; preference[4][3] = 0.1; preference[4][4] = 0; preference[4][5] = 0; preference[4][6] = 0.1; preference[4][7] = 0.2;
-	preference[5][0] = 0.05; preference[5][1] = 0; preference[5][2] = 0.15; preference[5][3] = 0.2; preference[5][4] = 0.15; preference[5][5] = 0; preference[5][6] = 0.15; preference[5][7] = 0.3;
-	preference[6][0] = 0.2; preference[6][1] = 0.1; preference[6][2] = 0; preference[6][3] = 0.2; preference[6][4] = 0; preference[6][5] = 0.1; preference[6][6] = 0.1; preference[6][7] = 0.3;
-	preference[7][0] = 0.3; preference[7][1] = 0; preference[7][2] = 0.3; preference[7][3] = 0; preference[7][4] = 0.2; preference[7][5] = 0; preference[7][6] = 0.1; preference[7][7] = 0.1;
-	preference[8][0] = 0.25; preference[8][1] = 0; preference[8][2] = 0.1; preference[8][3] = 0.05; preference[8][4] = 0; preference[8][5] = 0; preference[8][6] = 0.25; preference[8][7] = 0.35;
-	preference[9][0] = 0.25; preference[9][1] = 0; preference[9][2] = 0.2; preference[9][3] = 0; preference[9][4] = 0; preference[9][5] = 0; preference[9][6] = 0.2; preference[9][7] = 0.35;
-	*/
-
 	float ratioPeople = 1.0f / preference.size();
-	const float K[] = {0.002f, 0.002f, 0.001f, 0.002f, 0.001f, 0.001f, 0.001f, 0.001f};
 
 	float score = 0.0f;
 
@@ -308,17 +303,9 @@ float MCMC::computeScore(int city_size, int* zone, int* dist) {
 
 		num_zones++;
 
+		float feature[8];
+		computeFeature(city_size, zone, dist, i, feature);
 		for (int peopleType = 0; peopleType < preference.size(); ++peopleType) {
-			float feature[8];
-			feature[0] = exp(-K[0] * dist[i * NUM_FEATURES + 0] * cell_length);
-			feature[1] = exp(-K[0] * dist[i * NUM_FEATURES + 0] * cell_length);
-			feature[2] = exp(-K[0] * dist[i * NUM_FEATURES + 0] * cell_length);
-			feature[3] = exp(-K[0] * dist[i * NUM_FEATURES + 0] * cell_length);
-			feature[4] = exp(-K[0] * dist[i * NUM_FEATURES + 0] * cell_length);
-			feature[5] = exp(-K[0] * dist[i * NUM_FEATURES + 0] * cell_length);
-			feature[6] = 1.0f - exp(-K[6] * min3(dist[i * NUM_FEATURES + 1] * cell_length, dist[i * NUM_FEATURES + 3] * cell_length, dist[i * NUM_FEATURES + 0] * cell_length));
-			feature[7] = 1.0f - exp(-K[7] * dist[i * NUM_FEATURES + 1] * cell_length);
-			
 			score += feature[0] * preference[peopleType][0] * ratioPeople; // 店
 			score += feature[1] * preference[peopleType][1] * ratioPeople; // 学校
 			score += feature[2] * preference[peopleType][2] * ratioPeople; // レストラン

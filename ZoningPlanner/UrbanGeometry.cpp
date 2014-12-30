@@ -122,5 +122,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 }
 
 QVector2D UrbanGeometry::findBestPlace(std::vector<float>& preference) {
+
+
 	return QVector2D(300, -1000);
 }
