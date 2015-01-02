@@ -2,11 +2,6 @@
 if (!empty($_REQUEST["email"])) {
 	$_SESSION["email"] = $_REQUEST["email"];
 	
-	$mysql_host = "mysql4.000webhost.com";
-	$mysql_database = "a4249468_zp";
-	$mysql_user = "a4249468_gen";
-	$mysql_password = "karen99";
-	
 	$link = mysql_connect("mysql4.000webhost.com", "a4249468_gen", "karen99");
 	if (!$link) {
     	die('connection error: ' . mysql_error());
@@ -23,7 +18,15 @@ if (!empty($_REQUEST["email"])) {
     	die('insert error: ' . mysql_error());
 	}
 	
-	header("Location: http://gnishida.site90.com/?cmd=design&step=1&question=1");
+	$sql = "SELECT * FROM users WHERE email = '" . $_REQUEST["email"] . "'";
+	$result = mysql_query($sql);
+	if (!$result) {
+    	die('insert error: ' . mysql_error());
+	}
+	$row = mysql_fetch_assoc($result);
+	$_SESSION["user_id"] = $row["user_id"];
+	
+	header("Location: http://gnishida.site90.com/?cmd=design&round=1&step=1");
 	exit;
 }
 ?>
