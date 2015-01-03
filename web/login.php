@@ -26,7 +26,6 @@ if (!empty($_REQUEST["email"])) {
 		if ($row) {
 			$round = $row["round"];
 		}
-		$round = $round + 1;
 		
 		$sql = "DELETE FROM choices WHERE user_id = " . $user_id . " AND round > " . $round;
 		$result = mysql_query($sql);

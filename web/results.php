@@ -9,7 +9,6 @@ $round = 0;
 if ($row) {
 	$round = $row["round"];
 }
-$round = $round + 1;
 
 // get the choices
 $user_ids = array();
