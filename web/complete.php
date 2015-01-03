@@ -1,3 +1,7 @@
+<?
+$email = $_SESSION["email"];
+?>
+
 <html>
 <head>
 <title>Participatory Zone Planning</title>
@@ -6,6 +10,8 @@
 <body>
 
 <div id="task">
+<p class="right"><?=$email?></p>
+	
 <h1>All rounds have completed</h1>
 <form>
 <p>Thank you very much for your time!</p>

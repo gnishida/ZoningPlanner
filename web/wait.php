@@ -1,7 +1,14 @@
 <?
+$email = $_SESSION["email"];
+
 $round = $_REQUEST["round"];
 if (empty($_REQUEST["round"])) {
 	$round = 1;
+}
+
+if ($round >= 3) {
+	header("Location: http://gnishida.site90.com/?cmd=complete");
+	exit;
 }
 ?>
 
@@ -15,13 +22,11 @@ if (empty($_REQUEST["round"])) {
 <script type="text/javascript">
 $(document).ready(function() {
 
-$("#example1").smartupdater({
+$("#task").smartupdater({
 	url : 'check_done.php',
 	minTimeout: 5000 // 5 seconds
 	}, function (data) {
-		if (data < <?= $round ?>) {
-			$("#example1").val("wait!! " + data);
-		} else {
+		if (data >= <?= $round ?>) {
 			window.location.href = "http://gnishida.site90.com/?cmd=design&round=" + <?= $round + 1?> + "&step=1";
 		}
 	}
@@ -34,11 +39,13 @@ $("#example1").smartupdater({
 <body>
 
 <div id="task">
+<p class="right"><?=$email?></p>
+
 <h1>Please wait for a moment...</h1>
 <form>
 <p>Thank you for answering questions. Please wait for a moment while other designers are finishing their tasks.</p>
+<img src="loading.gif"/>
 </form>
 </div>
-<input id="example1" type="text" value="" />
 </body>
 </html>

@@ -7,6 +7,10 @@ p.error {
 	color: #f00;
 }
 
+p.right {
+	text-align: right;
+}
+
 table {
 	width: auto;
 	border-spacing: 0;

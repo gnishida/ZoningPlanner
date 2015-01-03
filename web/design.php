@@ -1,17 +1,10 @@
 <?
 $user_id = $_SESSION["user_id"];
+$email = $_SESSION["email"];
 $round = $_REQUEST["round"];
 $step = $_REQUEST["step"];
 
-$link = mysql_connect("mysql4.000webhost.com", "a4249468_gen", "karen99");
-if (!$link) {
-	die('DB connection error: ' . mysql_error());
-}
-
-$db = mysql_select_db("a4249468_zp", $link);
-if (!$db) {
-	die('DB select error: ' . mysql_error());
-}
+include("db_connect.php");
 
 if (!empty($_REQUEST["choice"])) {
 	$choice = $_REQUEST["choice"];
@@ -51,8 +44,8 @@ $feature2 = explode(",", $row["option2"]);
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-	
 <div id="task">
+<p class="right"><?=$email?></p>
 <h1>Round <?= $round ?> - Question <?= $step ?></h1>
 
 <form action="http://gnishida.site90.com/" method="GET">
