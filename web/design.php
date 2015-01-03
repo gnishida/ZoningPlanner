@@ -23,8 +23,13 @@ if (!empty($_REQUEST["choice"])) {
 	
 	$step = $step + 1;
 	if ($step > 3) {
-		header("Location: http://gnishida.site90.com/?cmd=wait");
-		exit;
+		if ($round >= 3) {
+			header("Location: http://gnishida.site90.com/?cmd=complete");
+			exit;
+		} else {
+			header("Location: http://gnishida.site90.com/?cmd=wait&round=" . $round);
+			exit;
+		}
 	}
 }
 

@@ -1,6 +1,10 @@
-body{
+body {
 	background: #fff;
 	font-family:'Open Sans',sans-serif;
+}
+
+p.error {
+	color: #f00;
 }
 
 table {
