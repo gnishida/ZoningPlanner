@@ -34,11 +34,16 @@ if (!empty($_REQUEST["email"])) {
 <html>
 <head>
 <title>Participatory Zone Planning</title>
+<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+
+<div id="login">
+<h1>Login</h1>
 <form action="http://gnishida.site90.com/?cmd=login" method="GET">
-Email: <input type="text" name="email" /><br/>
+<input type="email" name="email" placeholder="Email" /><br/>
 <input type="submit" value="Login"/><br/>
 </form>
+</div>
 </body>
 </html>

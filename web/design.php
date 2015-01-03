@@ -43,11 +43,12 @@ $feature2 = explode(",", $row["option2"]);
 <html>
 <head>
 <title>Participatory Zone Planning</title>
+<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 	
-<h2>Step <?= $step ?></h2>
-<h3>Question <?= $question ?></h3>
+<div id="task">
+<h1>Round <?= $round ?> - Question <?= $step ?></h1>
 
 <form action="http://gnishida.site90.com/" method="GET">
 <input type="hidden" name="cmd" value="design"/>
@@ -67,8 +68,9 @@ $feature2 = explode(",", $row["option2"]);
 <p>Which option do you prefer?
 <input type="radio" name="choice" value="1" id="choice1"/><label for="choice1">Option 1</label>
 <input type="radio" name="choice" value="2" id="choice2"/><label for="choice2">Option 2</label></p>
-<input type="submit" value="submit"/>
+<input type="submit" value="Submit"/>
 </form>
+</div>
 
 </body>
 </html>

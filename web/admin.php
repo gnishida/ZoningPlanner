@@ -2,7 +2,7 @@
 <head>
 <title>Participatory Zone Planning</title>
 <link rel="stylesheet" type="text/css" href="style.css">
-<meta http-equiv="refresh" content="5;URL=http://gnishida.site90.com/?cmd=admin">
+<meta http-equiv="refresh" content="10;URL=http://gnishida.site90.com/?cmd=admin">
 </head>
 <body>
 
