@@ -22,8 +22,14 @@ if (!$result) {
 
 // delete the old records
 $sql = "TRUNCATE choices";
+$result = mysql_query($sql);
 if (!$result) {
-    die('DB insert error: ' . mysql_error());
+    die('DB truncate error: ' . mysql_error());
+}
+$sql = "TRUNCATE tasks";
+$result = mysql_query($sql);
+if (!$result) {
+    die('DB truncate error: ' . mysql_error());
 }
 
 

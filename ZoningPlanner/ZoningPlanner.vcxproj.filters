@@ -223,6 +223,9 @@
     <ClCompile Include="MCMC.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
+    <ClCompile Include="HTTPClient.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -417,6 +420,9 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="MCMC.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPClient.h">
       <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>

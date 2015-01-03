@@ -12,6 +12,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <QEventLoop>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QMessageBox>
+#include "HTTPClient.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -44,7 +50,10 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
 	connect(ui.actionCameraDefault, SIGNAL(triggered()), this, SLOT(onCameraDefault()));
-	connect(ui.actionQuestionnaireStart, SIGNAL(triggered()), this, SLOT(onQuestionnaireStart()));
+
+	connect(ui.actionHCStart, SIGNAL(triggered()), this, SLOT(onHCStart()));
+	connect(ui.actionHCResults, SIGNAL(triggered()), this, SLOT(onHCResults()));
+	connect(ui.actionHCNext, SIGNAL(triggered()), this, SLOT(onHCNext()));
 
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
@@ -245,6 +254,89 @@ void MainWindow::onCameraDefault() {
 	glWidget->updateGL();
 }
 
-void MainWindow::onQuestionnaireStart() {
-	urbanGeometry->questionnaire();
+void MainWindow::onHCStart() {
+	HTTPClient client;
+	int max_round = 3;
+	int max_step = 3;
+	QString url = QString("http://gnishida.site90.com/config.php?current_round=0&max_round=%1&max_step=%1").arg(max_round).arg(max_step);
+	client.setUrl(url);
+	if (!client.request()) {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.error());
+		msgBox.exec();
+	}
+
+	// generate tasks
+	for (int step = 1; step <= max_step; ++step) {
+		QString option1 = "100,200,300,400,500,600";
+		QString option2 = "100,200,300,400,500,600";
+		QString url = QString("http://gnishida.site90.com/add_task.php?step=%1&option1=%2&option2=%3").arg(step).arg(option1).arg(option2);
+		client.setUrl(url);
+		if (!client.request()) {
+			QMessageBox msgBox(this);
+			msgBox.setText(client.error());
+			msgBox.exec();
+			break;
+		}
+	}
+
+	// next round (round = 1)
+	client.setUrl("http://gnishida.site90.com/next_round.php");
+	if (client.request()) {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.reply());
+		msgBox.exec();
+	} else {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.error());
+		msgBox.exec();
+	}
+}
+
+void MainWindow::onHCResults() {
+	HTTPClient client;
+	client.setUrl("http://gnishida.site90.com/results.php");
+	if (client.request()) {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.reply());
+		msgBox.exec();
+	} else {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.error());
+		msgBox.exec();
+	}
+
+	// compute preference vector using Gradient Descent
+}
+
+void MainWindow::onHCNext() {
+	int max_step = 3;
+
+	HTTPClient client;
+
+	// generate tasks
+	for (int step = 1; step <= max_step; ++step) {
+		QString option1 = "100,200,300,400,500,600";
+		QString option2 = "100,200,300,400,500,600";
+		QString url = QString("http://gnishida.site90.com/add_task.php?step=%1&option1=%2&option2=%3").arg(step).arg(option1).arg(option2);
+		client.setUrl(url);
+		if (!client.request()) {
+			QMessageBox msgBox(this);
+			msgBox.setText(client.error());
+			msgBox.exec();
+			break;
+		}
+	}
+
+	// next round
+	client.setUrl("http://gnishida.site90.com/next_round.php");
+	if (client.request()) {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.reply());
+		msgBox.exec();
+	} else {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.error());
+		msgBox.exec();
+	}
 }

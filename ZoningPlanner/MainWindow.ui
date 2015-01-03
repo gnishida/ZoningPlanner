@@ -89,9 +89,11 @@
    </widget>
    <widget class="QMenu" name="menuQuestionaire">
     <property name="title">
-     <string>Questionnaire</string>
+     <string>HC</string>
     </property>
-    <addaction name="actionQuestionnaireStart"/>
+    <addaction name="actionHCStart"/>
+    <addaction name="actionHCResults"/>
+    <addaction name="actionHCNext"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
@@ -448,9 +450,19 @@
     <string>Best Plan GPU</string>
    </property>
   </action>
-  <action name="actionQuestionnaireStart">
+  <action name="actionHCStart">
    <property name="text">
     <string>Start</string>
+   </property>
+  </action>
+  <action name="actionHCNext">
+   <property name="text">
+    <string>Next Round</string>
+   </property>
+  </action>
+  <action name="actionHCResults">
+   <property name="text">
+    <string>Get Results</string>
    </property>
   </action>
  </widget>
