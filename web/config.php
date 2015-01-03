@@ -16,8 +16,16 @@ if (!$result) {
 $sql = "INSERT INTO config(current_round, max_round, max_step) VALUES(" . $current_round . ", " . $max_round . ", " . $max_step . ")";
 $result = mysql_query($sql);
 if (!$result) {
-    print('DB insert error: ' . mysql_error());
-} else {
-	print("OK");
+    die('DB insert error: ' . mysql_error());
 }
+
+
+// delete the old records
+$sql = "TRUNCATE choices";
+if (!$result) {
+    die('DB insert error: ' . mysql_error());
+}
+
+
+print("OK");
 ?>
