@@ -1,4 +1,9 @@
 <?
+require("util.php");
+
+$db = connect_db();
+list($current_round, $max_round, $max_step) = get_config();
+
 $email = $_SESSION["email"];
 
 $round = $_REQUEST["round"];
@@ -6,7 +11,9 @@ if (empty($_REQUEST["round"])) {
 	$round = 1;
 }
 
-if ($round >= 3) {
+
+
+if ($round >= $max_round) {
 	header("Location: http://gnishida.site90.com/?cmd=complete");
 	exit;
 }

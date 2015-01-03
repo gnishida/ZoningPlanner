@@ -4,7 +4,10 @@ $email = $_SESSION["email"];
 $round = $_REQUEST["round"];
 $step = $_REQUEST["step"];
 
-include("db_connect.php");
+require("util.php");
+
+connect_db();
+list($current_round, $max_round, $max_step) = get_config();
 
 if (!empty($_REQUEST["choice"])) {
 	$choice = $_REQUEST["choice"];
@@ -15,8 +18,8 @@ if (!empty($_REQUEST["choice"])) {
 	}
 	
 	$step = $step + 1;
-	if ($step > 3) {
-		if ($round >= 3) {
+	if ($step > $max_step) {
+		if ($round >= $max_round) {
 			header("Location: http://gnishida.site90.com/?cmd=complete");
 			exit;
 		} else {

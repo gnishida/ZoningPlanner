@@ -1,5 +1,6 @@
 <?
-include("db_connect.php");
+require("util.php");
+connect_db();
 
 $step = $_REQUEST["step"];
 $option1 = $_REQUEST["option1"];

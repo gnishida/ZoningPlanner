@@ -1,14 +1,7 @@
 <?
-include("db_connect.php");
-
-// get the current round
-$sql = "SELECT * FROM round";
-$result = mysql_query($sql);
-$row = mysql_fetch_assoc($result);
-$round = 0;
-if ($row) {
-	$round = $row["round"];
-}
+require("util.php");
+connect_db();
+list($round, $max_round, $max_step) = get_config();
 
 // get the choices
 $user_ids = array();

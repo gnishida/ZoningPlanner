@@ -7,7 +7,8 @@
 <body>
 
 <?
-include("db_connect.php");
+require("util.php");
+connect_db();
 
 $sql = "SELECT u.user_id, u.email, IFNULL(MAX(c.round), 0) max_round, IFNULL(MAX(c.step), 0) max_step FROM users u LEFT OUTER JOIN choices c ON u.user_id = c.user_id GROUP BY u.user_id ORDER BY u.user_id";
 $result = mysql_query($sql);

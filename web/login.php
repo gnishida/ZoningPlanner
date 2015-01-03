@@ -4,7 +4,8 @@ $error_msg = "";
 if (!empty($_REQUEST["email"])) {
 	$_SESSION["email"] = $_REQUEST["email"];
 	
-	include("db_connect.php");
+	require("util.php");
+	connect_db();
 	
 	$sql = "SELECT * FROM users WHERE email = '" . $_REQUEST["email"] . "'";
 	$result = mysql_query($sql);
@@ -18,14 +19,8 @@ if (!empty($_REQUEST["email"])) {
 		$_SESSION["user_id"] = $row["user_id"];
 		$_SESSION["email"] = $row["email"];
 		
-		// get the current round
-		$sql = "SELECT * FROM round";
-		$result = mysql_query($sql);
-		$row = mysql_fetch_assoc($result);
-		$round = 0;
-		if ($row) {
-			$round = $row["round"];
-		}
+		// get the config
+		list($round, $max_round, $max_step) = get_config();
 		
 		$sql = "DELETE FROM choices WHERE user_id = " . $user_id . " AND round > " . $round;
 		$result = mysql_query($sql);
@@ -45,7 +40,7 @@ if (!empty($_REQUEST["email"])) {
 		}
 		$step = $step + 1;
 		
-		if ($step <= 3) {
+		if ($step <= $max_round) {
 			header("Location: http://gnishida.site90.com/?cmd=design&round=" . $round . "&step=" . $step);
 			exit;
 		} else {
