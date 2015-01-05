@@ -11,6 +11,14 @@ p.right {
 	text-align: right;
 }
 
+p.small {
+font-size: 70%;
+}
+
+div.center {
+	text-align: center;
+}
+
 table {
 	width: auto;
 	border-spacing: 0;
@@ -174,4 +182,25 @@ table tr:last-child td:last-child {
 
 #task input[type="submit"]:hover{
 	background:#2288bb;
+}
+
+#picture {
+	width: 800px;
+	margin: 0 auto;
+	margin-top: 8px;
+	margin-bottom: 16px;
+	background:#f0f0f0;
+	text-align: center;
+}
+
+#picture h2 {
+	background: #258;
+	background:-moz-linear-gradient(rgba(34,85,136,0.7), rgba(34,85,136,0.9) 50%);
+	background:-webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(34,85,136,0.7)), to(rgba(34,85,136,0.9)));
+	border-radius: 5px 5px 0 0;
+	padding:20px 0;
+	font-size:140%;
+	font-weight:300;
+	text-align:center;
+	color:#fff;
 }

@@ -44,9 +44,11 @@ public slots:
 	void onViewZoning();
 	void onBestPlan();
 	void onCameraDefault();
+	void onCameraTest();
 	void onHCStart();
 	void onHCResults();
 	void onHCNext();
+	void onFileUpload();
 };
 
 #endif // MAINWINDOW_H

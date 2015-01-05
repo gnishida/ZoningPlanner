@@ -54,10 +54,12 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
 	connect(ui.actionCameraDefault, SIGNAL(triggered()), this, SLOT(onCameraDefault()));
+	connect(ui.actionCameraTest, SIGNAL(triggered()), this, SLOT(onCameraTest()));
 
 	connect(ui.actionHCStart, SIGNAL(triggered()), this, SLOT(onHCStart()));
 	connect(ui.actionHCResults, SIGNAL(triggered()), this, SLOT(onHCResults()));
 	connect(ui.actionHCNext, SIGNAL(triggered()), this, SLOT(onHCNext()));
+	connect(ui.actionFileUpload, SIGNAL(triggered()), this, SLOT(onFileUpload()));
 
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
@@ -85,11 +87,12 @@ void MainWindow::keyReleaseEvent(QKeyEvent* e) {
 QImage MainWindow::generatePictureOfBestPlace(std::vector<float>& preference) {
 	QVector3D pt = QVector3D(urbanGeometry->findBestPlace(glWidget->vboRenderManager, preference));
 
+	ui.actionViewZoning->setChecked(true);
 	glWidget->camera2D.setTranslation(0, 0, 200.0f);
 	glWidget->camera2D.setLookAt(pt.x(), pt.y(), 70);
 	glWidget->camera2D.setXRotation(-60);
 	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
-	glWidget->camera2D.updateCamMatrix();
+	glWidget->updateCamera();
 
 	glWidget->updateGL();
 	return glWidget->grabFrameBuffer();
@@ -259,9 +262,22 @@ void MainWindow::onCameraDefault() {
 	glWidget->camera2D.setLookAt(pt.x(), pt.y(), 70);
 	glWidget->camera2D.setXRotation(-60);
 	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
-	glWidget->camera2D.updateCamMatrix();
+	glWidget->updateCamera();
 
 	glWidget->updateGL();
+}
+
+void MainWindow::onCameraTest() {
+	QVector2D pt(500, -500);
+
+	glWidget->camera2D.setTranslation(0, 0, 200.0f);
+	glWidget->camera2D.setLookAt(pt.x(), -pt.y(), 70);
+	glWidget->camera2D.setXRotation(-60);
+	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
+	glWidget->updateCamera();
+
+	glWidget->updateGL();
+	glWidget->grabFrameBuffer().save("camera_test.png");
 }
 
 void MainWindow::onHCStart() {
@@ -395,7 +411,7 @@ void MainWindow::onHCResults() {
 
 	for (int u = 0; u < results.size(); ++u) {
 		QImage img = generatePictureOfBestPlace(preferences[u]);
-		QString filename = QString("bestplace_%1.png").arg(results[u].first);
+		QString filename = QString("%1.png").arg(results[u].first);
 		img.save(filename);
 	}
 }
@@ -441,4 +457,9 @@ void MainWindow::onHCNext() {
 		msgBox.setText(client.error());
 		msgBox.exec();
 	}
+}
+
+void MainWindow::onFileUpload() {
+	HTTPClient client;
+	client.uploadFile("gnishida.site90.com", "./upload.php", "16.png");
 }

@@ -77,7 +77,20 @@ $feature2 = explode(",", $row["option2"]);
 <input type="radio" name="choice" value="2" id="choice2"/><label for="choice2">Option 2</label></p>
 <input type="submit" value="Submit"/>
 </form>
+
 </div>
+
+<?
+if (file_exists("images/" . $user_id . ".png")) {
+?>
+<div id="picture">
+<h2>The best place for you to live in according to your answers</h2>
+<p class="small">Red - Residential / Blue - Commercial / Gray - Industorial / Green - Park / Cyan - School and Library / Yellow - Amusement facilities</p>
+<img width="480" src="images/<?= $user_id ?>.png" />
+</div>
+<?
+}
+?>
 
 </body>
 </html>
