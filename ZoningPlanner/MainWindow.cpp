@@ -461,5 +461,10 @@ void MainWindow::onHCNext() {
 
 void MainWindow::onFileUpload() {
 	HTTPClient client;
-	client.uploadFile("gnishida.site90.com", "./upload.php", "16.png");
+	client.setUrl("http://gnishida.site90.com/upload.php");
+	if (client.uploadFile("gnishida.site90.com", "upload.php", "16.png")) {
+		QMessageBox msgBox(this);
+		msgBox.setText("Server response: " + client.reply());
+		msgBox.exec();
+	}
 }
