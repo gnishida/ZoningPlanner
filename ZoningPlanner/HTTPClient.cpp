@@ -25,6 +25,11 @@ bool HTTPClient::request() {
  
     if (re->error() == QNetworkReply::NoError) {
 		_reply = re->readAll();
+		int index = _reply.indexOf("\n");
+		if (index >= 0) {
+			_reply = _reply.mid(0, index);
+		}
+
 		delete re;
 		return true;
     } else {

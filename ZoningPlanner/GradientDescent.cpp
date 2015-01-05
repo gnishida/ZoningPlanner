@@ -13,15 +13,9 @@
  * @threshold		収束しきい値
  */
 void GradientDescent::run(std::vector<float>& w, std::vector<std::pair<std::vector<float>, std::vector<float> > >& features, std::vector<int> choices, int maxIterations, bool l1, float lambda, float eta, float threshold) {
-	FILE* fp = fopen("gd_curve.txt", "w");
-
 	int numFeatures = features[0].first.size();
-	/*
-	w.resize(numFeatures);
-	for (int k = 0; k < numFeatures; ++k) {
-		w[k] = 1.0f / numFeatures;
-	}
-	*/
+
+	FILE* fp = fopen("gd_curve.txt", "w");
 
 	float curE = negativeLogLikelihood(features, choices, w, l1, lambda);
 	for (int iter = 0; iter < maxIterations; ++iter) {

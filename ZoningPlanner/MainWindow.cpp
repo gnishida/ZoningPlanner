@@ -268,8 +268,8 @@ void MainWindow::onHCStart() {
 
 	// HC初期化
 	HTTPClient client;
-	max_round = dlg.max_round;
-	max_step = dlg.max_step;
+	int max_round = dlg.max_round;
+	int max_step = dlg.max_step;
 	QString url = QString("http://gnishida.site90.com/config.php?current_round=0&max_round=%1&max_step=%1").arg(max_round).arg(max_step);
 	client.setUrl(url);
 	if (!client.request()) {
@@ -299,7 +299,7 @@ void MainWindow::onHCStart() {
 	client.setUrl("http://gnishida.site90.com/next_round.php");
 	if (client.request()) {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.reply());
+		msgBox.setText("Server response: " + client.reply());
 		msgBox.exec();
 	} else {
 		QMessageBox msgBox(this);
@@ -319,11 +319,7 @@ void MainWindow::onHCResults() {
 		return;
 	}
 
-	QString reply = client.reply();
-	reply = reply.mid(0, reply.indexOf("\n"));
-	printf("%s\n", reply.toUtf8().data());
-
-	std::vector<std::pair<QString, QString> > tasks = JSON::parse(reply, "tasks", "option1", "option2");
+	std::vector<std::pair<QString, QString> > tasks = JSON::parse(client.reply(), "tasks", "option1", "option2");
 
 	// HC結果を取得
 	client.setUrl("http://gnishida.site90.com/results.php");
@@ -334,13 +330,10 @@ void MainWindow::onHCResults() {
 		return;
 	}
 
-	reply = client.reply();
-	reply = reply.mid(0, reply.indexOf("\n"));
-	printf("%s\n", reply.toUtf8().data());
-
-	std::vector<std::pair<QString, QString> > results = JSON::parse(reply, "results", "user_id", "choices");
+	std::vector<std::pair<QString, QString> > results = JSON::parse(client.reply(), "results", "user_id", "choices");
 
 	// compute preference vector using Gradient Descent
+	std::vector<std::vector<float> > preferences;
 	for (int u = 0; u < results.size(); ++u) {
 		printf("%s : %s\n", results[u].first.toUtf8().data(), results[u].second.toUtf8().data());
 
@@ -367,12 +360,12 @@ void MainWindow::onHCResults() {
 
 		std::vector<float> w(7);
 		w[0] = 0.3f; w[1] = 0.3f; w[2] = 0.3f; w[3] = 0.3f; w[4] = 0.3f; w[5] = 0.3f; w[6] = -0.3f;
-		gd.run(w, features, choices, 10000, false, 0.0, 0.0001, 0.0001);
+		gd.run(w, features, choices, 10000, false, 0.0, 0.001, 0.0001);
 		preferences.push_back(w);
 
 		printf("User: %s: ", results[u].first.toUtf8().data());
 		for (int k = 0; k < w.size(); ++k) {
-			printf("%d,", w[k]);
+			printf("%lf,", w[k]);
 		}
 		printf("\n");
 	}
@@ -383,13 +376,23 @@ void MainWindow::onHCResults() {
 	// 3D更新
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
 
 void MainWindow::onHCNext() {
 	HTTPClient client;
+
+	// max_stepを取得
+	client.setUrl("http://gnishida.site90.com/get_max_step.php");
+	if (!client.request()) {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.error());
+		msgBox.exec();
+		return;
+	}
+	int max_step = client.reply().toInt();
 
 	// HCタスク生成
 	std::vector<std::pair<std::vector<float>, std::vector<float> > > tasks = urbanGeometry->generateTasks(max_step);
@@ -412,7 +415,7 @@ void MainWindow::onHCNext() {
 	client.setUrl("http://gnishida.site90.com/next_round.php");
 	if (client.request()) {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.reply());
+		msgBox.setText("Server response: " + client.reply());
 		msgBox.exec();
 	} else {
 		QMessageBox msgBox(this);

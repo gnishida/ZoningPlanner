@@ -4,6 +4,11 @@ $email = $_SESSION["email"];
 $round = $_REQUEST["round"];
 $step = $_REQUEST["step"];
 
+if (empty($_SESSION["user_id"])) {
+	header("Location: http://gnishida.site90.com/?cmd=login");
+	exit;
+}
+
 require("util.php");
 
 connect_db();
