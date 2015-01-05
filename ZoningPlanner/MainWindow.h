@@ -20,6 +20,9 @@ public:
 	ControlWidget* controlWidget;
 	GLWidget3D* glWidget;
 	UrbanGeometry* urbanGeometry;
+	int max_round;
+	int max_step;
+	std::vector<std::vector<float> > preferences;
 
 protected:
 	void keyPressEvent(QKeyEvent* e);

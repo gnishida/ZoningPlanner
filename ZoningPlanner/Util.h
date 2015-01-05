@@ -61,4 +61,6 @@ public:
 	static QVector2D projectTo2D(const QVector3D &pt);
 
 	static bool getIrregularBisector(const QVector3D& p0, const QVector3D& p1, const QVector3D& p2, float d01, float d12, QVector3D& intPt);
+
+	static QString join(std::vector<float>& v, const QString& delimiter);
 };

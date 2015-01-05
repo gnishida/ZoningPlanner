@@ -42,6 +42,7 @@ public:
 	void computeRawFeature(int city_size, int* zone, int* dist, int s, float feature[]);
 	void dumpZone(int city_size, int* zone);
 	void dumpDist(int city_size, int* dist, int featureId);
+	static float distToFeature(float dist);
 
 private:
 	float randf();

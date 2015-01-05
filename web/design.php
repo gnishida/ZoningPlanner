@@ -64,6 +64,7 @@ $feature2 = explode(",", $row["option2"]);
 <tr><td>To the nearest park</td><td><?= $feature1[3] ?> [m]</td><td><?= $feature2[3] ?> [m]</td></tr>
 <tr><td>To the nearest amusement facility</td><td><?= $feature1[4] ?> [m]</td><td><?= $feature2[4] ?> [m]</td></tr>
 <tr><td>To the nearest library</td><td><?= $feature1[5] ?> [m]</td><td><?= $feature2[5] ?> [m]</td></tr>
+<tr><td>To the nearest factory</td><td><?= $feature1[6] ?> [m]</td><td><?= $feature2[6] ?> [m]</td></tr>
 </table>
 
 <p>Which option do you prefer?

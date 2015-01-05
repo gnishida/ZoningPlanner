@@ -1,7 +1,6 @@
 ﻿#include "Util.h"
 #include <random>
 
-
 const float Util::MTC_FLOAT_TOL = 1e-6f;
 
 QVector3D Util::calculateNormal(const QVector3D& p0, const QVector3D& p1, const QVector3D& p2) {
@@ -478,3 +477,15 @@ bool Util::getIrregularBisector(const QVector3D& p0, const QVector3D& p1, const 
 	return true;
 }
 
+QString Util::join(std::vector<float>& v, const QString& delimiter) {
+	QString ret;
+
+	for (int i = 0; i < v.size(); ++i) {
+		if (i > 0) {
+			ret += delimiter;
+		}
+		ret += QString::number(v[i]);
+	}
+
+	return ret;
+}

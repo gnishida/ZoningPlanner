@@ -226,6 +226,21 @@
     <ClCompile Include="HTTPClient.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
+    <ClCompile Include="HCStartWidget.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_HCStartWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_HCStartWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="JSON.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GradientDescent.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -241,6 +256,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="ControlWidget.h">
+      <Filter>Main Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="HCStartWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="HCStartWidget.h">
       <Filter>Main Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -423,6 +444,15 @@
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="HTTPClient.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_HCStartWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JSON.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GradientDescent.h">
       <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>

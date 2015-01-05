@@ -140,7 +140,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 			if (zones.zones2[s] == 0) continue;
 
 			float score = 0.0f;
-			float feature[8];
+			float feature[7];
 			mcmc.computeFeature(zones.zone_size, zones.zones2, dist, s, feature);
 			for (int peopleType = 0; peopleType < preference.size(); ++peopleType) {
 				score += feature[0] * preference[0]; // 店
@@ -149,8 +149,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 				score += feature[3] * preference[3]; // 公園
 				score += feature[4] * preference[4]; // アミューズメント
 				score += feature[5] * preference[5]; // 図書館
-				score += feature[6] * preference[6]; // 騒音
-				score += feature[7] * preference[7]; // 汚染
+				score += feature[6] * preference[6]; // 工場
 			}
 
 			if (score > best_score) {
@@ -170,7 +169,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
  * アンケートを生成し、preferenceベクトルを計算する。
  * ゾーンプランは既に生成済みである必要がある。
  */
-void UrbanGeometry::questionnaire() {
+std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::generateTasks(int num) {
 	MCMC mcmc;
 	int* dist;
 	mcmc.computeDistanceMap(zones.zone_size, zones.zones2, &dist);
@@ -192,8 +191,9 @@ void UrbanGeometry::questionnaire() {
 	free(dist);
 
 	const char msg[7][255] = {"Dist to store", "Dist to school", "Dist to restaurant", "Dist to park", "Dist to amusement facility", "Dist to library", "Dist to factory"};
+	std::vector<std::pair<std::vector<float>, std::vector<float> > > ret;
 
-	for (int iter = 0; iter < 10; ++iter) {
+	for (int iter = 0; iter < num; ++iter) {
 		int r1 = Util::genRand(0, features.size());
 		int r2;
 		while (true) {
@@ -209,6 +209,9 @@ void UrbanGeometry::questionnaire() {
 			break;
 		}
 
+		ret.push_back(std::make_pair(features[r1], features[r2]));
+
+		/*
 		printf("Q%d:\n", iter);
 		printf("  Plan A\n");
 		for (int i = 0; i < 7; ++i) {
@@ -221,5 +224,8 @@ void UrbanGeometry::questionnaire() {
 			printf("    %s: %.0lf [m]\n", msg[i], features[r2][i]);
 		}
 		printf("\n");
+		*/
 	}
+
+	return ret;
 }

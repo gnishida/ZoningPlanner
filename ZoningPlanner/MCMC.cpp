@@ -164,7 +164,9 @@ void MCMC::dumpDist(int city_size, int* dist, int featureId) {
 	printf("\n");
 }
 
-
+float MCMC::distToFeature(float dist) {
+	return exp(-0.001f * dist);
+}
 
 
 
@@ -312,14 +314,13 @@ void MCMC::computeFeature(int city_size, int* zone, int* dist, int s, float feat
 	int cell_length = 10000 / city_size;
 	const float K[] = {0.002f, 0.002f, 0.001f, 0.002f, 0.001f, 0.001f, 0.001f, 0.001f};
 
-	feature[0] = exp(-K[0] * dist[s * NUM_FEATURES + 0] * cell_length); // 店
-	feature[1] = exp(-K[0] * dist[s * NUM_FEATURES + 4] * cell_length); // 学校
-	feature[2] = exp(-K[0] * dist[s * NUM_FEATURES + 0] * cell_length); // レストラン
-	feature[3] = exp(-K[0] * dist[s * NUM_FEATURES + 2] * cell_length); // 公園
-	feature[4] = exp(-K[0] * dist[s * NUM_FEATURES + 3] * cell_length); // アミューズメント
-	feature[5] = exp(-K[0] * dist[s * NUM_FEATURES + 4] * cell_length); // 図書館
-	feature[6] = 1.0f - exp(-K[6] * min3(dist[s * NUM_FEATURES + 1] * cell_length, dist[s * NUM_FEATURES + 3] * cell_length, dist[s * NUM_FEATURES + 0] * cell_length)); // 騒音
-	feature[7] = 1.0f - exp(-K[7] * dist[s * NUM_FEATURES + 1] * cell_length); // 汚染
+	feature[0] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // 店
+	feature[1] = distToFeature(dist[s * NUM_FEATURES + 4] * cell_length); // 学校
+	feature[2] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // レストラン
+	feature[3] = distToFeature(dist[s * NUM_FEATURES + 2] * cell_length); // 公園
+	feature[4] = distToFeature(dist[s * NUM_FEATURES + 3] * cell_length); // アミューズメント
+	feature[5] = distToFeature(dist[s * NUM_FEATURES + 4] * cell_length); // 図書館
+	feature[6] = distToFeature(dist[s * NUM_FEATURES + 1] * cell_length); // 工場
 }
 
 void MCMC::computeRawFeature(int city_size, int* zone, int* dist, int s, float feature[]) {
@@ -348,7 +349,7 @@ float MCMC::computeScore(int city_size, int* zone, int* dist) {
 
 		num_zones++;
 
-		float feature[8];
+		float feature[7];
 		computeFeature(city_size, zone, dist, i, feature);
 		for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
 			score += feature[0] * preferences[peopleType][0] * ratioPeople; // 店
@@ -357,8 +358,7 @@ float MCMC::computeScore(int city_size, int* zone, int* dist) {
 			score += feature[3] * preferences[peopleType][3] * ratioPeople; // 公園
 			score += feature[4] * preferences[peopleType][4] * ratioPeople; // アミューズメント
 			score += feature[5] * preferences[peopleType][5] * ratioPeople; // 図書館
-			score += feature[6] * preferences[peopleType][6] * ratioPeople; // 騒音
-			score += feature[7] * preferences[peopleType][7] * ratioPeople; // 汚染
+			score += feature[6] * preferences[peopleType][6] * ratioPeople; // 工場
 		}
 	}
 

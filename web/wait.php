@@ -33,7 +33,7 @@ $("#task").smartupdater({
 	url : 'check_done.php',
 	minTimeout: 5000 // 5 seconds
 	}, function (data) {
-		if (data > <?= $round ?>) {
+		if (data == <?= $round + 1 ?>) {
 			window.location.href = "http://gnishida.site90.com/?cmd=design&round=" + <?= $round + 1?> + "&step=1";
 		}
 	}

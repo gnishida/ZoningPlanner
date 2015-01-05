@@ -18,6 +18,10 @@
 #include <QNetworkReply>
 #include <QMessageBox>
 #include "HTTPClient.h"
+#include "HCStartWidget.h"
+#include "JSON.h"
+#include "GradientDescent.h"
+#include "MCMC.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -217,21 +221,14 @@ void MainWindow::onBestPlan() {
 	preference[7][0] = 0.3; preference[7][1] = 0; preference[7][2] = 0.3; preference[7][3] = 0; preference[7][4] = 0.2; preference[7][5] = 0; preference[7][6] = 0.1; preference[7][7] = 0.1;
 	preference[8][0] = 0.25; preference[8][1] = 0; preference[8][2] = 0.1; preference[8][3] = 0.05; preference[8][4] = 0; preference[8][5] = 0; preference[8][6] = 0.25; preference[8][7] = 0.35;
 	preference[9][0] = 0.25; preference[9][1] = 0; preference[9][2] = 0.2; preference[9][3] = 0; preference[9][4] = 0; preference[9][5] = 0; preference[9][6] = 0.2; preference[9][7] = 0.35;
-
-
-
+	
 	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference);
 
-	// generate blocks
+	// 3D更新
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	// re-generate parcels
 	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-
 	glWidget->shadow.makeShadowMap(glWidget);
-
 	glWidget->updateGL();
 }
 
@@ -255,9 +252,24 @@ void MainWindow::onCameraDefault() {
 }
 
 void MainWindow::onHCStart() {
+	HCStartWidget dlg(this);
+	if (dlg.exec() != QDialog::Accepted) {
+		return;
+	}
+
+	// 適当なpreference vectorを作成
+	std::vector<std::vector<float> > preference;
+	preference.resize(1);
+	for (int i = 0; i < 1; ++i) preference[i].resize(7);
+	preference[0][0] = 0.378; preference[0][1] = 0.378; preference[0][2] = 0.378; preference[0][3] = 0.378; preference[0][4] = 0.378; preference[0][5] = 0.378; preference[0][6] = -0.378;
+
+	// ゾーンプランを作成する
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference);
+
+	// HC初期化
 	HTTPClient client;
-	int max_round = 3;
-	int max_step = 3;
+	max_round = dlg.max_round;
+	max_step = dlg.max_step;
 	QString url = QString("http://gnishida.site90.com/config.php?current_round=0&max_round=%1&max_step=%1").arg(max_round).arg(max_step);
 	client.setUrl(url);
 	if (!client.request()) {
@@ -266,11 +278,14 @@ void MainWindow::onHCStart() {
 		msgBox.exec();
 	}
 
-	// generate tasks
-	for (int step = 1; step <= max_step; ++step) {
-		QString option1 = "100,200,300,400,500,600";
-		QString option2 = "100,200,300,400,500,600";
-		QString url = QString("http://gnishida.site90.com/add_task.php?step=%1&option1=%2&option2=%3").arg(step).arg(option1).arg(option2);
+	// HCタスク生成
+	std::vector<std::pair<std::vector<float>, std::vector<float> > > tasks = urbanGeometry->generateTasks(max_step);
+
+	// HCタスクをアップロード
+	for (int step = 0; step < max_step; ++step) {
+		QString option1 = Util::join(tasks[step].first, ",");
+		QString option2 = Util::join(tasks[step].second, ",");
+		QString url = QString("http://gnishida.site90.com/add_task.php?step=%1&option1=%2&option2=%3").arg(step + 1).arg(option1).arg(option2);
 		client.setUrl(url);
 		if (!client.request()) {
 			QMessageBox msgBox(this);
@@ -280,7 +295,7 @@ void MainWindow::onHCStart() {
 		}
 	}
 
-	// next round (round = 1)
+	// HCラウンドを1にセット
 	client.setUrl("http://gnishida.site90.com/next_round.php");
 	if (client.request()) {
 		QMessageBox msgBox(this);
@@ -294,31 +309,96 @@ void MainWindow::onHCStart() {
 }
 
 void MainWindow::onHCResults() {
+	// feature一覧を取得
 	HTTPClient client;
-	client.setUrl("http://gnishida.site90.com/results.php");
-	if (client.request()) {
-		QMessageBox msgBox(this);
-		msgBox.setText(client.reply());
-		msgBox.exec();
-	} else {
+	client.setUrl("http://gnishida.site90.com/tasks.php");
+	if (!client.request()) {
 		QMessageBox msgBox(this);
 		msgBox.setText(client.error());
 		msgBox.exec();
+		return;
 	}
 
+	QString reply = client.reply();
+	reply = reply.mid(0, reply.indexOf("\n"));
+	printf("%s\n", reply.toUtf8().data());
+
+	std::vector<std::pair<QString, QString> > tasks = JSON::parse(reply, "tasks", "option1", "option2");
+
+	// HC結果を取得
+	client.setUrl("http://gnishida.site90.com/results.php");
+	if (!client.request()) {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.error());
+		msgBox.exec();
+		return;
+	}
+
+	reply = client.reply();
+	reply = reply.mid(0, reply.indexOf("\n"));
+	printf("%s\n", reply.toUtf8().data());
+
+	std::vector<std::pair<QString, QString> > results = JSON::parse(reply, "results", "user_id", "choices");
+
 	// compute preference vector using Gradient Descent
+	for (int u = 0; u < results.size(); ++u) {
+		printf("%s : %s\n", results[u].first.toUtf8().data(), results[u].second.toUtf8().data());
+
+		QStringList chioces_list = results[u].second.split(",");
+
+		GradientDescent gd;
+		std::vector<std::pair<std::vector<float>, std::vector<float> > > features;
+		std::vector<int> choices;
+
+		for (int step = 0; step < tasks.size(); ++step) {
+			std::vector<float> f1;
+			std::vector<float> f2;
+			QStringList feature1_list = tasks[step].first.split(",");
+			QStringList feature2_list = tasks[step].second.split(",");
+			for (int k = 0; k < 7; ++k) {
+				f1.push_back(MCMC::distToFeature(feature1_list[k].toFloat()));
+				f2.push_back(MCMC::distToFeature(feature2_list[k].toFloat()));
+			}
+
+			features.push_back(std::make_pair(f1, f2));
+
+			choices.push_back(chioces_list[step].toInt() == 1 ? 1 : 0);
+		}
+
+		std::vector<float> w(7);
+		w[0] = 0.3f; w[1] = 0.3f; w[2] = 0.3f; w[3] = 0.3f; w[4] = 0.3f; w[5] = 0.3f; w[6] = -0.3f;
+		gd.run(w, features, choices, 10000, false, 0.0, 0.0001, 0.0001);
+		preferences.push_back(w);
+
+		printf("User: %s: ", results[u].first.toUtf8().data());
+		for (int k = 0; k < w.size(); ++k) {
+			printf("%d,", w[k]);
+		}
+		printf("\n");
+	}
+
+	// ベストプランを計算する
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences);
+
+	// 3D更新
+	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	glWidget->shadow.makeShadowMap(glWidget);
+	glWidget->updateGL();
 }
 
 void MainWindow::onHCNext() {
-	int max_step = 3;
-
 	HTTPClient client;
 
-	// generate tasks
-	for (int step = 1; step <= max_step; ++step) {
-		QString option1 = "100,200,300,400,500,600";
-		QString option2 = "100,200,300,400,500,600";
-		QString url = QString("http://gnishida.site90.com/add_task.php?step=%1&option1=%2&option2=%3").arg(step).arg(option1).arg(option2);
+	// HCタスク生成
+	std::vector<std::pair<std::vector<float>, std::vector<float> > > tasks = urbanGeometry->generateTasks(max_step);
+
+	// HCタスクをアップロード
+	for (int step = 0; step < max_step; ++step) {
+		QString option1 = Util::join(tasks[step].first, ",");
+		QString option2 = Util::join(tasks[step].second, ",");
+		QString url = QString("http://gnishida.site90.com/add_task.php?step=%1&option1=%2&option2=%3").arg(step + 1).arg(option1).arg(option2);
 		client.setUrl(url);
 		if (!client.request()) {
 			QMessageBox msgBox(this);
@@ -328,7 +408,7 @@ void MainWindow::onHCNext() {
 		}
 	}
 
-	// next round
+	// HCラウンドをインクリメント
 	client.setUrl("http://gnishida.site90.com/next_round.php");
 	if (client.request()) {
 		QMessageBox msgBox(this);
