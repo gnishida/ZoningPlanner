@@ -25,6 +25,9 @@ protected:
 	void keyPressEvent(QKeyEvent* e);
 	void keyReleaseEvent(QKeyEvent* e);
 
+public:
+	QImage generatePictureOfBestPlace(std::vector<float>& preference);
+
 public slots:
 	void onLoadZoning();
 	void onLoadRoads();

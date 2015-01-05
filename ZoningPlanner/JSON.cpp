@@ -18,12 +18,7 @@ std::vector<std::pair<QString, QString> > JSON::parse(const QString& json_data, 
  
 	boost::property_tree::ptree pt;
 	boost::property_tree::read_json(ss, pt);
- 
-	for (auto child = pt.begin(); child != pt.end(); ++child) {
-		std::cout << child->first.data() << std::endl;
-		std::cout << child->second.data() << std::endl;
-	}
-	
+ 	
 	std::vector<std::pair<QString, QString> > ret;
 	BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child(path.toUtf8().data())) {
 		ret.push_back(std::make_pair(QString::fromStdString(v.second.get<std::string>(node1.toUtf8().data())), QString::fromStdString(v.second.get<std::string>(node2.toUtf8().data()))));

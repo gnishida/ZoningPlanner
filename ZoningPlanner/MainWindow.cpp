@@ -82,6 +82,19 @@ void MainWindow::keyReleaseEvent(QKeyEvent* e) {
 	glWidget->keyReleaseEvent(e);
 }
 
+QImage MainWindow::generatePictureOfBestPlace(std::vector<float>& preference) {
+	QVector3D pt = QVector3D(urbanGeometry->findBestPlace(glWidget->vboRenderManager, preference));
+
+	glWidget->camera2D.setTranslation(0, 0, 200.0f);
+	glWidget->camera2D.setLookAt(pt.x(), pt.y(), 70);
+	glWidget->camera2D.setXRotation(-60);
+	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
+	glWidget->camera2D.updateCamMatrix();
+
+	glWidget->updateGL();
+	return glWidget->grabFrameBuffer();
+}
+
 void MainWindow::onLoadZoning() {
 	clock_t startTime, endTime;
 
@@ -376,9 +389,15 @@ void MainWindow::onHCResults() {
 	// 3D更新
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
+
+	for (int u = 0; u < results.size(); ++u) {
+		QImage img = generatePictureOfBestPlace(preferences[u]);
+		QString filename = QString("bestplace_%1.png").arg(results[u].first);
+		img.save(filename);
+	}
 }
 
 void MainWindow::onHCNext() {
