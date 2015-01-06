@@ -303,8 +303,9 @@ void MainWindow::onHCStart() {
 	client.setUrl(url);
 	if (!client.request()) {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.error());
+		msgBox.setText(client.reply());
 		msgBox.exec();
+		return;
 	}
 
 	// HCタスク生成
@@ -318,9 +319,9 @@ void MainWindow::onHCStart() {
 		client.setUrl(url);
 		if (!client.request()) {
 			QMessageBox msgBox(this);
-			msgBox.setText(client.error());
+			msgBox.setText(client.reply());
 			msgBox.exec();
-			break;
+			return;
 		}
 	}
 
@@ -332,8 +333,9 @@ void MainWindow::onHCStart() {
 		msgBox.exec();
 	} else {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.error());
+		msgBox.setText(client.reply());
 		msgBox.exec();
+		return;
 	}
 }
 
@@ -343,7 +345,7 @@ void MainWindow::onHCResults() {
 	client.setUrl("http://gnishida.site90.com/tasks.php");
 	if (!client.request()) {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.error());
+		msgBox.setText(client.reply());
 		msgBox.exec();
 		return;
 	}
@@ -354,7 +356,7 @@ void MainWindow::onHCResults() {
 	client.setUrl("http://gnishida.site90.com/results.php");
 	if (!client.request()) {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.error());
+		msgBox.setText(client.reply());
 		msgBox.exec();
 		return;
 	}
@@ -413,6 +415,13 @@ void MainWindow::onHCResults() {
 		QImage img = generatePictureOfBestPlace(preferences[u]);
 		QString filename = QString("%1.png").arg(results[u].first);
 		img.save(filename);
+
+		client.setUrl("http://gnishida.site90.com/upload.php");
+		if (!client.uploadFile("upload.php", "file", "16.png", "image/png")) {
+			QMessageBox msgBox(this);
+			msgBox.setText(client.reply());
+			msgBox.exec();
+		}
 	}
 }
 
@@ -423,7 +432,7 @@ void MainWindow::onHCNext() {
 	client.setUrl("http://gnishida.site90.com/get_max_step.php");
 	if (!client.request()) {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.error());
+		msgBox.setText(client.reply());
 		msgBox.exec();
 		return;
 	}
@@ -440,9 +449,9 @@ void MainWindow::onHCNext() {
 		client.setUrl(url);
 		if (!client.request()) {
 			QMessageBox msgBox(this);
-			msgBox.setText(client.error());
+			msgBox.setText(client.reply());
 			msgBox.exec();
-			break;
+			return;
 		}
 	}
 
@@ -454,15 +463,16 @@ void MainWindow::onHCNext() {
 		msgBox.exec();
 	} else {
 		QMessageBox msgBox(this);
-		msgBox.setText(client.error());
+		msgBox.setText(client.reply());
 		msgBox.exec();
+		return;
 	}
 }
 
 void MainWindow::onFileUpload() {
 	HTTPClient client;
 	client.setUrl("http://gnishida.site90.com/upload.php");
-	if (client.uploadFile("gnishida.site90.com", "upload.php", "16.png")) {
+	if (client.uploadFile("upload.php", "file", "16.png", "image/png")) {
 		QMessageBox msgBox(this);
 		msgBox.setText("Server response: " + client.reply());
 		msgBox.exec();

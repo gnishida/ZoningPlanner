@@ -6,14 +6,12 @@ class HTTPClient {
 private:
 	QString _url;
 	QString _reply;
-	QString _error;
 
 public:
 	HTTPClient();
 	void setUrl(const QString& url);
 	bool request();
-	bool uploadFile(const QString& hostname, const QString& action, const QString& filename);
+	bool uploadFile(const QString& action, const QString& form_name, const QString& filename, const QString& filetype);
 	QString reply();
-	QString error();
 };
 
