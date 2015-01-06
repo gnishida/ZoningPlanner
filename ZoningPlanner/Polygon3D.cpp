@@ -1,4 +1,4 @@
-#include "Polygon3D.h"
+﻿#include "Polygon3D.h"
 #include <QVector2D>
 #include <QMatrix4x4>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -1017,4 +1017,19 @@ void Polygon3D::dump() {
 		printf("%lf, %lf, %lf\n", contour[i].x(), contour[i].y(), contour[i].z());
 	}
 	printf("Polygon3D::dump() done.\n");
+}
+
+/**
+ * GEN
+ * このポリゴンが細すぎるかどうかチェックする。
+ * OBBを計算し、縦横比がratioより大きく、且つ、最小エッジがmin_side未満なら、細すぎると判定する。
+ */
+bool Polygon3D::isTooNarrow(float ratio, float min_side) {
+	Loop3D pin;
+	QVector3D size;
+	QMatrix4x4 xformMat;
+	getLoopOBB(pin, size, xformMat);
+	
+	if ((std::max)(size.x() / size.y(), size.y() / size.x()) > ratio && (std::min)(size.x(), size.y()) < min_side)  return true;
+	else return false;
 }

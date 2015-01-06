@@ -200,6 +200,7 @@ public:
 
 	Loop3D inscribedOBB();
 	void dump();
+	bool isTooNarrow(float ratio, float min_side);
 };	
 
 class BBox3D{

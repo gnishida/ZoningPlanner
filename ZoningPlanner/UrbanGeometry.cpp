@@ -172,7 +172,8 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 }
 
 /**
- * アンケートを生成し、preferenceベクトルを計算する。
+ * 指定された数のcomparison tasksを生成する。
+ * 生成済みのゾーンプランから、ランダムに２つのセルを選択し、それぞれのfeatureを取得してcomparison taskとする。
  * ゾーンプランは既に生成済みである必要がある。
  */
 std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::generateTasks(int num) {
@@ -182,9 +183,8 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 
 	std::vector<std::vector<float> > features;
 	for (int s = 0; s < zones.zone_size * zones.zone_size; ++s) {
-		if (zones.zones2[s] == 0) continue;
+		if (zones.zones2[s] != ZoneType::TYPE_RESIDENTIAL) continue;
 
-		float score = 0.0f;
 		float feature[7];
 		mcmc.computeRawFeature(zones.zone_size, zones.zones2, dist, s, feature);
 		//mcmc.computeFeature(zones.zone_size, zones.zones2, dist, s, feature);
@@ -192,6 +192,9 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 		std::vector<float> f;
 		for (int i = 0; i < 7; ++i) f.push_back(feature[i]);
 		features.push_back(f);
+
+		///////////////////////
+		//printf("[%.0lf,%.0lf,%.0lf,%.0lf,%.0lf,%.0lf,%.0lf]\n", f[0], f[1], f[2], f[3], f[4], f[5], f[6]);
 	}
 
 	free(dist);
@@ -216,21 +219,6 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 		}
 
 		ret.push_back(std::make_pair(features[r1], features[r2]));
-
-		/*
-		printf("Q%d:\n", iter);
-		printf("  Plan A\n");
-		for (int i = 0; i < 7; ++i) {
-			if (features[r1][i] == features[r2][i]) continue;
-			printf("    %s: %.0lf [m]\n", msg[i], features[r1][i]);
-		}
-		printf("  Plan B\n");
-		for (int i = 0; i < 7; ++i) {
-			if (features[r1][i] == features[r2][i]) continue;
-			printf("    %s: %.0lf [m]\n", msg[i], features[r2][i]);
-		}
-		printf("\n");
-		*/
 	}
 
 	return ret;
