@@ -528,7 +528,7 @@ void MCMC::optimize(int city_size, int max_iterations, int* bestZone) {
 
 		//printf("%lf -> %lf (best: %lf)\n", curScore, proposedScore, bestScore);
 
-		if (proposedScore > curScore || randf() < proposedScore / curScore) { // accept
+		if (proposedScore > curScore || randf() < expf(proposedScore) / expf(curScore)) { // accept
 			curScore = proposedScore;
 		} else { // reject
 			// rollback

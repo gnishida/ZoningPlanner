@@ -136,7 +136,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 	zones.city_size = renderManager.side;
 	int cell_len = renderManager.side / zones.zone_size;
 
-	float best_score = 0.0f;
+	float best_score = -std::numeric_limits<float>::max();
 	QVector2D ret;
 	for (int bi = 0; bi < blocks.size(); ++bi) {
 		if (blocks[bi].zone.type() != ZoneType::TYPE_RESIDENTIAL) continue;
