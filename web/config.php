@@ -32,6 +32,15 @@ if (!$result) {
     die('DB truncate error: ' . mysql_error());
 }
 
+// delete the old pictures
+if ($dir = opendir("images/")) {
+	while (($file = readdir($dir)) !== false) {
+		if ($file != "." && $file != "..") {
+			unlink("images/" . $file);
+		}
+	}
+	closedir($dir);
+}
 
 print("OK");
 ?>
