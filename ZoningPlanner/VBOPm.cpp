@@ -258,6 +258,8 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 	rendManager.removeStaticGeometry("zoning");
 	for (int i = 0; i < blocks.size(); ++i) {
 		blocks[i].adaptToTerrain(&rendManager);
+		
+		if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) continue;
 
 		// Blockの3Dモデルを生成（Block表示モードの時にのみ、表示される）
 		{
@@ -279,8 +281,6 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 				color = QColor(255, 255, 0, opacity);
 			} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {		// 公共施設は水色ベース
 				color = QColor(0, 255, 255, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) {		// 使用不可ゾーンは黒
-				color = QColor(10, 10, 10, opacity);
 			} else {
 				color = QColor(128, 128, 128, opacity);
 			}
