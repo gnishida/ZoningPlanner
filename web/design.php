@@ -81,12 +81,12 @@ $feature2 = explode(",", $row["option2"]);
 </div>
 
 <?
-if (file_exists("images/" . $user_id . ".png")) {
+if (file_exists("images/" . $user_id . "_" . ($round - 1) . ".png")) {
 ?>
 <div id="picture">
 <h2>The best place for you to live in according to your answers</h2>
 <p class="small">Red - Residential / Blue - Commercial / Gray - Industorial / Green - Park / Cyan - School and Library / Yellow - Amusement facilities</p>
-<img width="480" src="images/<?= $user_id ?>.png" />
+<img width="480" src="images/<?= $user_id ?>_<?= $round-1 ?>.png" />
 </div>
 <?
 }

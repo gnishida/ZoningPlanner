@@ -22,6 +22,7 @@
 #include "JSON.h"
 #include "GradientDescent.h"
 #include "MCMC.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -91,6 +92,28 @@ QImage MainWindow::generatePictureOfBestPlace(std::vector<float>& preference) {
 	ui.actionViewZoning->setChecked(true);
 
 	return glWidget->generatePictureOfPointInterest(pt);
+}
+
+bool MainWindow::savePreferences(std::vector<int>& user_ids, std::vector<std::vector<float> >& preferences, const QString& filename) {
+	QFile file(filename);
+ 
+	if (!file.open(QIODevice::WriteOnly)) return false;
+	
+	QTextStream out(&file);
+	for (int i = 0; i < user_ids.size(); ++i) {
+		out << user_ids[i] << "\t";
+		for (int k = 0; k < preferences[i].size(); ++k) {
+			if (k > 0) {
+				out << ",";
+			}
+			out << preferences[i][k];
+		}
+		out << "\n";
+	}
+
+	file.close();
+
+	return true;
 }
 
 void MainWindow::onLoadZoning() {
@@ -352,10 +375,10 @@ void MainWindow::onHCResults() {
 	std::vector<std::pair<QString, QString> > results = JSON::parse(client.reply(), "results", "user_id", "choices");
 
 	// compute preference vector using Gradient Descent
+	std::vector<int> user_ids;
 	std::vector<std::vector<float> > preferences;
 	for (int u = 0; u < results.size(); ++u) {
-		printf("%s : %s\n", results[u].first.toUtf8().data(), results[u].second.toUtf8().data());
-
+		user_ids.push_back(results[u].first.toInt());
 		QStringList chioces_list = results[u].second.split(",");
 
 		GradientDescent gd;
@@ -382,12 +405,24 @@ void MainWindow::onHCResults() {
 		gd.run(w, features, choices, 10000, false, 0.0, 0.001, 0.0001);
 		preferences.push_back(w);
 
-		printf("User: %s: ", results[u].first.toUtf8().data());
+		printf("User: %d: ", user_ids[u]);
 		for (int k = 0; k < w.size(); ++k) {
 			printf("%lf,", w[k]);
 		}
 		printf("\n");
 	}
+
+	// current_roundを取得
+	client.setUrl("http://gnishida.site90.com/get_current_round.php");
+	if (!client.request()) {
+		QMessageBox msgBox(this);
+		msgBox.setText(client.reply());
+		msgBox.exec();
+		return;
+	}
+	int current_round = client.reply().toInt();
+	QString filename = QString("preferences_%1.txt").arg(current_round);
+	savePreferences(user_ids, preferences, filename);
 
 	// ベストプランを計算する
 	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences);
@@ -401,7 +436,7 @@ void MainWindow::onHCResults() {
 
 	for (int u = 0; u < results.size(); ++u) {
 		QImage img = generatePictureOfBestPlace(preferences[u]);
-		QString filename = QString("%1.png").arg(results[u].first);
+		QString filename = QString("%1_%2.png").arg(user_ids[u]).arg(current_round);
 		img.save(filename);
 
 		client.setUrl("http://gnishida.site90.com/upload.php");
