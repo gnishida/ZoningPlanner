@@ -362,7 +362,7 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 			blocks[i].sidewalkContour.getBBox3D(bbox.minPt, bbox.maxPt);
 
 			// ブロックが細すぎる場合は、使用不可ブロックとする
-			if (blocks[i].sidewalkContour.isTooNarrow(10.0f, 5.0f)) {
+			if (blocks[i].sidewalkContour.isTooNarrow(8.0f, 18.0f) || blocks[i].sidewalkContour.isTooNarrow(5.0f, 5.0f)) {
 				blocks[i].zone = ZoneType(ZoneType::TYPE_UNUSED, 1);
 				continue;
 			}
@@ -382,7 +382,7 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 
 	// 歩道の分を確保するため、ブロックを縮小する。
 	for (int i = 0; i < blocks.size(); ++i) {
-		if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) continue;
+		//if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) continue;
 
 		Loop3D blockContourInset;
 		float sidewalk_width = blocks[i].zone.sidewalk_width;
