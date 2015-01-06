@@ -448,6 +448,7 @@ void MainWindow::onHCResults() {
 			QMessageBox msgBox(this);
 			msgBox.setText(client.reply());
 			msgBox.exec();
+			return;
 		}
 	}
 }
