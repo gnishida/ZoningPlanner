@@ -1,5 +1,4 @@
 ﻿#include "MCMC.h"
-#include "ZoneType.h"
 
 MCMC::MCMC() {
 }
@@ -12,50 +11,59 @@ void MCMC::addPreference(std::vector<float>& preference) {
 	this->preferences.push_back(preference);
 }
 
-void MCMC::findBestPlan(int** zone, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers) {
+/**
+ * MCMCで、ベストプランを計算する。
+ *
+ * @param zones [OUT]			ベストプランが返却される
+ * @param city_size	[OUT]		返却されるプランのグリッドの一辺の長さ
+ * @param zoneTypeDistribution	各ゾーンタイプの割合
+ * @param start_size			初期時のグリッドの一辺の長さ
+ * @param num_layers			MCMCの繰り返し数
+ * @param init_zones			ユーザ指定のゾーン
+ */
+void MCMC::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones) {
 	srand(10);
 	*city_size = start_size;
 
-	*zone = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
+	*zones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 	
 	// 初期プランを生成
-	generateZoningPlan(*city_size, *zone, zoneTypeDistribution);
-	//loadZone(zone, "zone2.txt");
+	generateZoningPlan(*city_size, *zones, zoneTypeDistribution);
 
 	int max_iterations = 10000;
 
 	for (int layer = 0; layer < num_layers; ++layer) {
 		if (layer == 0) {
-			optimize(*city_size, max_iterations, *zone);
+			optimize(*city_size, max_iterations, *zones);
 		} else {
-			optimize2(*city_size, max_iterations, *zone);
+			optimize2(*city_size, max_iterations, *zones);
 		}
-		int* tmpZone = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
-		memcpy(tmpZone, *zone, sizeof(int) * (*city_size) * (*city_size));
+		int* tmpZones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
+		memcpy(tmpZones, *zones, sizeof(int) * (*city_size) * (*city_size));
 
-		free(*zone);
+		free(*zones);
 
 		// ゾーンマップを、たて、よこ、２倍ずつに増やす
 		*city_size *= 2;
-		*zone = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
+		*zones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 		for (int r = 0; r < *city_size; ++r) {
 			for (int c = 0; c < *city_size; ++c) {
 				int oldR = r / 2;
 				int oldC = c / 2;
-				(*zone)[r * (*city_size) + c] = tmpZone[(int)(oldR * (*city_size) * 0.5 + oldC)];
+				(*zones)[r * (*city_size) + c] = tmpZones[(int)(oldR * (*city_size) * 0.5 + oldC)];
 			}
 		}
 
 		max_iterations *= 0.5;
 
-		free(tmpZone);
+		free(tmpZones);
 	}
 	
 	//showZone(city_size, zone, "zone_final.png");
 	//saveZone(city_size, zone, "zone_final.txt");
 }
 
-void MCMC::computeDistanceMap(int city_size, int* zone, int** dist) {
+void MCMC::computeDistanceMap(int city_size, int* zones, int** dist) {
 	*dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	bool* toRaise = (bool*)malloc(city_size * city_size * NUM_FEATURES);
@@ -66,8 +74,8 @@ void MCMC::computeDistanceMap(int city_size, int* zone, int** dist) {
 	for (int i = 0; i < city_size * city_size; ++i) {
 		for (int k = 0; k < NUM_FEATURES; ++k) {
 			toRaise[i * NUM_FEATURES + k] = false;
-			if (zone[i] - 1 == k) {
-				setStore(queue, zone, *dist, obst, toRaise, i, k);
+			if (zones[i] - 1 == k) {
+				setStore(queue, zones, *dist, obst, toRaise, i, k);
 			} else {
 				(*dist)[i * NUM_FEATURES + k] = MAX_DIST;
 				obst[i * NUM_FEATURES + k] = BF_CLEARED;
@@ -75,28 +83,28 @@ void MCMC::computeDistanceMap(int city_size, int* zone, int** dist) {
 		}
 	}
 
-	updateDistanceMap(city_size, queue, zone, *dist, obst, toRaise);
+	updateDistanceMap(city_size, queue, zones, *dist, obst, toRaise);
 
 	free(obst);
 	free(toRaise);
 }
 
-void MCMC::showZone(int city_size, int* zone, char* filename) {
+void MCMC::showZone(int city_size, int* zones, char* filename) {
 	cv::Mat m(city_size, city_size, CV_8UC3);
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
 			cv::Vec3b p;
-			if (zone[r * city_size + c] == 0) {
+			if (zones[r * city_size + c] == 0) {
 				p = cv::Vec3b(0, 0, 255);
-			} else if (zone[r * city_size + c] == 1) {
+			} else if (zones[r * city_size + c] == 1) {
 				p = cv::Vec3b(255, 0, 0);
-			} else if (zone[r * city_size + c] == 2) {
+			} else if (zones[r * city_size + c] == 2) {
 				p = cv::Vec3b(64, 64, 64);
-			} else if (zone[r * city_size + c] == 3) {
+			} else if (zones[r * city_size + c] == 3) {
 				p = cv::Vec3b(0, 255, 0);
-			} else if (zone[r * city_size + c] == 4) {
+			} else if (zones[r * city_size + c] == 4) {
 				p = cv::Vec3b(255, 0, 255);
-			} else if (zone[r * city_size + c] == 5) {
+			} else if (zones[r * city_size + c] == 5) {
 				p = cv::Vec3b(0, 255, 255);
 			} else {
 				p = cv::Vec3b(255, 255, 255);
@@ -108,24 +116,24 @@ void MCMC::showZone(int city_size, int* zone, char* filename) {
 	cv::imwrite(filename, m);
 }
 
-void MCMC::loadZone(int city_size, int* zone, char* filename) {
+void MCMC::loadZone(int city_size, int* zones, char* filename) {
 	FILE* fp = fopen(filename, "r");
 
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
-			fscanf(fp, "%d,", &zone[r * city_size + c]);
+			fscanf(fp, "%d,", &zones[r * city_size + c]);
 		}
 	}
 
 	fclose(fp);
 }
 
-void MCMC::saveZone(int city_size, int* zone, char* filename) {
+void MCMC::saveZone(int city_size, int* zones, char* filename) {
 	FILE* fp = fopen(filename, "w");
 
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
-			fprintf(fp, "%d,", zone[r * city_size + c]);
+			fprintf(fp, "%d,", zones[r * city_size + c]);
 		}
 		fprintf(fp, "\n");
 	}
@@ -134,11 +142,11 @@ void MCMC::saveZone(int city_size, int* zone, char* filename) {
 	fclose(fp);
 }
 
-void MCMC::dumpZone(int city_size, int* zone) {
+void MCMC::dumpZone(int city_size, int* zones) {
 	printf("<<< Zone Map >>>\n");
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
-			printf("%d ", zone[r * city_size + c]);
+			printf("%d ", zones[r * city_size + c]);
 		}
 		printf("\n");
 	}
@@ -270,7 +278,7 @@ void MCMC::lower(int city_size, std::list<std::pair<int, int> >& queue, int* dis
 	}
 }
 
-void MCMC::updateDistanceMap(int city_size, std::list<std::pair<int, int> >& queue, int* zone, int* dist, int* obst, bool* toRaise) {
+void MCMC::updateDistanceMap(int city_size, std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise) {
 	while (!queue.empty()) {
 		std::pair<int, int> s = queue.front();
 		queue.pop_front();
@@ -283,7 +291,7 @@ void MCMC::updateDistanceMap(int city_size, std::list<std::pair<int, int> >& que
 	}
 }
 
-void MCMC::setStore(std::list<std::pair<int, int> >& queue, int* zone, int* dist, int* obst, bool* toRaise, int s, int featureId) {
+void MCMC::setStore(std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise, int s, int featureId) {
 	// put stores
 	obst[s * NUM_FEATURES + featureId] = s;
 	dist[s * NUM_FEATURES + featureId] = 0;
@@ -291,7 +299,7 @@ void MCMC::setStore(std::list<std::pair<int, int> >& queue, int* zone, int* dist
 	queue.push_back(std::make_pair(s, featureId));
 }
 
-void MCMC::removeStore(std::list<std::pair<int, int> >& queue, int* zone, int* dist, int* obst, bool* toRaise, int s, int featureId) {
+void MCMC::removeStore(std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise, int s, int featureId) {
 	clearCell(dist, obst, s, featureId);
 
 	toRaise[s * NUM_FEATURES + featureId] = true;
@@ -303,7 +311,7 @@ float MCMC::min3(float distToStore, float distToAmusement, float distToFactory) 
 	return std::min(std::min(distToStore, distToAmusement), distToFactory);
 }
 
-void MCMC::computeFeature(int city_size, int* zone, int* dist, int s, float feature[]) {
+void MCMC::computeFeature(int city_size, int* zones, int* dist, int s, float feature[]) {
 	int cell_length = 10000 / city_size;
 
 	feature[0] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // 店
@@ -315,7 +323,7 @@ void MCMC::computeFeature(int city_size, int* zone, int* dist, int s, float feat
 	feature[6] = distToFeature(dist[s * NUM_FEATURES + 1] * cell_length); // 工場
 }
 
-void MCMC::computeRawFeature(int city_size, int* zone, int* dist, int s, float feature[]) {
+void MCMC::computeRawFeature(int city_size, int* zones, int* dist, int s, float feature[]) {
 	int cell_length = 10000 / city_size;
 
 	feature[0] = dist[s * NUM_FEATURES + 0] * cell_length; // 店
@@ -330,19 +338,19 @@ void MCMC::computeRawFeature(int city_size, int* zone, int* dist, int s, float f
 /** 
  * ゾーンのスコアを計算する。
  */
-float MCMC::computeScore(int city_size, int* zone, int* dist) {
+float MCMC::computeScore(int city_size, int* zones, int* dist) {
 	float ratioPeople = 1.0f / preferences.size();
 
 	float score = 0.0f;
 
 	int num_zones = 0;
 	for (int i = 0; i < city_size * city_size; ++i) {
-		if (zone[i] != ZoneType::TYPE_RESIDENTIAL) continue;
+		if (zones[i] != ZoneType::TYPE_RESIDENTIAL) continue;
 
 		num_zones++;
 
 		float feature[7];
-		computeFeature(city_size, zone, dist, i, feature);
+		computeFeature(city_size, zones, dist, i, feature);
 		for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
 			score += feature[0] * preferences[peopleType][0] * ratioPeople; // 店
 			score += feature[1] * preferences[peopleType][1] * ratioPeople; // 学校
@@ -360,7 +368,7 @@ float MCMC::computeScore(int city_size, int* zone, int* dist) {
 /**
  * 計算したdistance mapが正しいか、チェックする。
  */
-int MCMC::check(int city_size, int* zone, int* dist) {
+int MCMC::check(int city_size, int* zones, int* dist) {
 	int count = 0;
 
 	for (int r = 0; r < city_size; ++r) {
@@ -369,7 +377,7 @@ int MCMC::check(int city_size, int* zone, int* dist) {
 				int min_dist = MAX_DIST;
 				for (int r2 = 0; r2 < city_size; ++r2) {
 					for (int c2 = 0; c2 < city_size; ++c2) {
-						if (zone[r2 * city_size + c2] - 1 == k) {
+						if (zones[r2 * city_size + c2] - 1 == k) {
 							int d = distance(city_size, r2 * city_size + c2, r * city_size + c);
 							if (d < min_dist) {
 								min_dist = d;
@@ -398,7 +406,7 @@ int MCMC::check(int city_size, int* zone, int* dist) {
 /**
  * ゾーンプランを生成する。
  */
-void MCMC::generateZoningPlan(int city_size, int* zone, std::vector<float> zoneTypeDistribution) {
+void MCMC::generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution) {
 	std::vector<float> numRemainings(NUM_FEATURES + 1);
 	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
 		numRemainings[i] = city_size * city_size * zoneTypeDistribution[i];
@@ -407,32 +415,8 @@ void MCMC::generateZoningPlan(int city_size, int* zone, std::vector<float> zoneT
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
 			int type = sampleFromPdf(numRemainings.data(), numRemainings.size());
-			zone[r * city_size + c] = type;
+			zones[r * city_size + c] = type;
 			numRemainings[type] -= 1;
-		}
-	}
-
-	return;
-
-	// デバッグ用
-	// 工場を一番上に持っていく
-	// そうすれば、良いゾーンプランになるはず。。。
-	for (int r = 2; r < city_size; ++r) {
-		for (int c = 0; c < city_size; ++c) {
-			if (zone[r * city_size + c] != 2) continue;
-
-			bool done = false;
-			for (int r2 = 0; r2 < 2 && !done; ++r2) {
-				for (int c2 = 0; c2 < city_size && !done; ++c2) {
-					if (zone[r2 * city_size + c2] == 2) continue;
-
-					// 交換する
-					int type = zone[r2 * city_size + c2];
-					zone[r2 * city_size + c2] = zone[r * city_size + c];
-					zone[r * city_size + c] = type;
-					done = true;
-				}
-			}
 		}
 	}
 }

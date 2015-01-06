@@ -117,7 +117,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 
 	MCMC mcmc;
 	mcmc.setPreferences(preferences);
-	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"));
+	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"), zones.init_zones);
 }
 
 /**
