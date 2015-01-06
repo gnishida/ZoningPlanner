@@ -165,7 +165,8 @@ void MCMC::dumpDist(int city_size, int* dist, int featureId) {
 }
 
 float MCMC::distToFeature(float dist) {
-	return exp(-0.001f * dist);
+	//return exp(-0.001f * dist);
+	return exp(-0.0005f * dist);
 }
 
 
@@ -312,7 +313,6 @@ float MCMC::min3(float distToStore, float distToAmusement, float distToFactory) 
 
 void MCMC::computeFeature(int city_size, int* zone, int* dist, int s, float feature[]) {
 	int cell_length = 10000 / city_size;
-	const float K[] = {0.002f, 0.002f, 0.001f, 0.002f, 0.001f, 0.001f, 0.001f, 0.001f};
 
 	feature[0] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // 店
 	feature[1] = distToFeature(dist[s * NUM_FEATURES + 4] * cell_length); // 学校
