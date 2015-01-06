@@ -21,14 +21,14 @@
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
 
-	zones.load("zoning.xml");
-
 	selectedStore = -1;
 	selectedSchool = -1;
 	selectedRestaurant = -1;
 	selectedPark = -1;
 	selectedAmusement = -1;
 	selectedLibrary = -1;
+
+	zones.city_length = mainWin->glWidget->vboRenderManager.side;
 }
 
 UrbanGeometry::~UrbanGeometry() {
@@ -130,22 +130,7 @@ void UrbanGeometry::loadZones(const QString& filename) {
 void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences) {
 	MCMC mcmc;
 	mcmc.setPreferences(preferences);
-	mcmc.findBestPlan(&zones.zones2, &zones.zone_size, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"));
-
-	int cell_len = renderManager.side / zones.zone_size;
-
-	zones.city_size = renderManager.side;
-	zones.zones.resize(zones.zone_size * zones.zone_size);
-	for (int r = 0; r < zones.zone_size; ++r) {
-		for (int c = 0; c < zones.zone_size; ++c) {
-			Polygon2D polygon;
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * cell_len, -renderManager.side * 0.5 + r * cell_len));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * cell_len, -renderManager.side * 0.5 + r * cell_len));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + (c + 1) * cell_len, -renderManager.side * 0.5 + (r + 1) * cell_len));
-			polygon.push_back(QVector2D(-renderManager.side * 0.5 + c * cell_len, -renderManager.side * 0.5 + (r + 1) * cell_len));
-			zones.zones[r * zones.zone_size + c] = std::make_pair(polygon, ZoneType(zones.zones2[r * zones.zone_size + c], 1));
-		}
-	}
+	mcmc.findBestPlan(&zones.zones, &zones.zone_size, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"));
 }
 
 /**
@@ -158,9 +143,8 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 
 	// 距離マップを生成する
 	int* dist;
-	mcmc.computeDistanceMap(zones.zone_size, zones.zones2, &dist);
+	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);
 
-	zones.city_size = renderManager.side;
 	int cell_len = renderManager.side / zones.zone_size;
 
 	float best_score = -std::numeric_limits<float>::max();
@@ -174,8 +158,8 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 
 		// 当該ブロックのfeatureを取得
 		float feature[7];
-		int s = zones.positionToIndex(renderManager.side, QVector2D(pt.x(), pt.y()));
-		mcmc.computeFeature(zones.zone_size, zones.zones2, dist, s, feature);
+		int s = zones.positionToIndex(QVector2D(pt.x(), pt.y()));
+		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
 
 		float score = 0.0f;
 		score += feature[0] * preference[0]; // 店
@@ -206,27 +190,22 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::generateTasks(int num) {
 	MCMC mcmc;
 	int* dist;
-	mcmc.computeDistanceMap(zones.zone_size, zones.zones2, &dist);
+	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);
 
 	std::vector<std::vector<float> > features;
 	for (int s = 0; s < zones.zone_size * zones.zone_size; ++s) {
-		if (zones.zones2[s] != ZoneType::TYPE_RESIDENTIAL) continue;
+		if (zones.zones[s] != ZoneType::TYPE_RESIDENTIAL) continue;
 
 		float feature[7];
-		mcmc.computeRawFeature(zones.zone_size, zones.zones2, dist, s, feature);
-		//mcmc.computeFeature(zones.zone_size, zones.zones2, dist, s, feature);
+		mcmc.computeRawFeature(zones.zone_size, zones.zones, dist, s, feature);
 
 		std::vector<float> f;
 		for (int i = 0; i < 7; ++i) f.push_back(feature[i]);
 		features.push_back(f);
-
-		///////////////////////
-		//printf("[%.0lf,%.0lf,%.0lf,%.0lf,%.0lf,%.0lf,%.0lf]\n", f[0], f[1], f[2], f[3], f[4], f[5], f[6]);
 	}
 
 	free(dist);
 
-	const char msg[7][255] = {"Dist to store", "Dist to school", "Dist to restaurant", "Dist to park", "Dist to amusement facility", "Dist to library", "Dist to factory"};
 	std::vector<std::pair<std::vector<float>, std::vector<float> > > ret;
 
 	for (int iter = 0; iter < num; ++iter) {

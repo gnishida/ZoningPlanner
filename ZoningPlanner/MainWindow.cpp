@@ -114,6 +114,7 @@ bool MainWindow::savePreferences(std::vector<int>& user_ids, std::vector<std::ve
 }
 
 void MainWindow::onLoadZoning() {
+	/*
 	clock_t startTime, endTime;
 
 	QString filename = QFileDialog::getOpenFileName(this, tr("Open zoning file..."), "", tr("Zoning Files (*.xml)"));
@@ -144,6 +145,7 @@ void MainWindow::onLoadZoning() {
 	glWidget->shadow.makeShadowMap(glWidget);
 
 	glWidget->updateGL();
+	*/
 }
 
 void MainWindow::onLoadRoads() {

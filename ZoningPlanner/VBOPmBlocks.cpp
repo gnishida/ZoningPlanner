@@ -367,16 +367,8 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 				continue;
 			}
 
-			int zoneId = zoning.getZone(QVector2D(bbox.midPt()));
-			if (zoneId >= 0) {
-				blocks[i].zone = zoning.zones[zoneId].second;
-			} else {
-				printf("ERROR: no zone is assigned to this block.\n");
-				printf("  %d\n", blocks[i].sidewalkContour.contour.size());
-				for (int k = 0; k < blocks[i].sidewalkContour.contour.size(); ++k) {
-					printf("  %lf, %lf\n", blocks[i].sidewalkContour.contour[k].x(), blocks[i].sidewalkContour.contour[k].y());
-				}
-			}
+			int s = zoning.positionToIndex(QVector2D(bbox.midPt()));
+			blocks[i].zone = ZoneType(zoning.zones[s], 1);
 		}
 	}
 

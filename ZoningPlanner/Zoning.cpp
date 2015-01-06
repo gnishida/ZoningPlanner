@@ -5,62 +5,14 @@
 #include "BlockSet.h"
 
 Zoning::Zoning() {
-	// residential
-	zoneTypeDistribution.push_back(0.2f);
-	zoneTypeDistribution.push_back(0.38f);
-	zoneTypeDistribution.push_back(0.2f);
-
-	// commercial
-	zoneTypeDistribution.push_back(0.06f);
-	zoneTypeDistribution.push_back(0.05f);
-	zoneTypeDistribution.push_back(0.03f);
-
-	// manufacturing
-	zoneTypeDistribution.push_back(0.02f);
-	zoneTypeDistribution.push_back(0.01f);
-	zoneTypeDistribution.push_back(0.01f);
-
-	// park
-	zoneTypeDistribution.push_back(0.02f);
-	zoneTypeDistribution.push_back(0);
-	zoneTypeDistribution.push_back(0);
-
-	// amusement
-	zoneTypeDistribution.push_back(0.01f);
-	zoneTypeDistribution.push_back(0);
-	zoneTypeDistribution.push_back(0);
-
-	// public
-	zoneTypeDistribution.push_back(0.01f);
-	zoneTypeDistribution.push_back(0);
-	zoneTypeDistribution.push_back(0);
 }
 
 int Zoning::getZone(const QVector2D& pt) const {
-	int zoneId = -1;
-
-	for (int i = 0; i < zones.size(); ++i) {
-		if (zones[i].first.contains(QVector2D(pt))) {
-			zoneId = i;
-		}
-	}
-
-	return zoneId;
+	int s = positionToIndex(pt);
+	return zones[s];
 }
 
-/*int Zoning::getZone(const QVector2D& pt) const {
-	int zoneId = -1;
-
-	int cell_len = city_size / zone_size;
-
-	int c = (pt.x() + cell_len * 0.5) / cell_len;
-	int r = (pt.y() + cell_len * 0.5) / cell_len;
-	int s = r * zone_size + c;
-
-	return zones2[s];
-}*/
-
-void Zoning::load(const QString& filename) {
+/*void Zoning::load(const QString& filename) {
 	zones.clear();
 
 	QFile file(filename);
@@ -94,9 +46,22 @@ void Zoning::load(const QString& filename) {
 
 		node = node.nextSibling();
 	}
+}*/
+
+void Zoning::load(QDomNode& node) {
+	int startSize = node.toElement().attribute("startSize").toInt();
+	int numLayers = node.toElement().attribute("numLayers").toInt();
+
+	QDomNode nodeZone = node.firstChild();
+	while (!nodeZone.isNull()) {
+		int type = nodeZone.toElement().attribute("type").toInt();
+		int level = nodeZone.toElement().attribute("level").toInt();
+
+		nodeZone = nodeZone.nextSibling();
+	}
 }
 
-void Zoning::save(const QString& filename) {
+/*void Zoning::save(const QString& filename) {
 	QFile file(filename);
      
     if (!file.open(QFile::WriteOnly| QFile::Truncate)) return;
@@ -125,6 +90,7 @@ void Zoning::save(const QString& filename) {
 	QTextStream out(&file);
 	doc.save(out, 4);
 }
+*/
 
 /**
  * 座標を、zones2のインデックス番号に変換する。
@@ -133,7 +99,7 @@ void Zoning::save(const QString& filename) {
  * @param pt				座標
  * @return					インデックス番号
  */
-int Zoning::positionToIndex(int city_length, const QVector2D& pt) const {
+int Zoning::positionToIndex(const QVector2D& pt) const {
 	int cell_len = city_length / zone_size;
 
 	int c = (pt.x() + city_length * 0.5 + cell_len * 0.5) / cell_len;
