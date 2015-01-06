@@ -417,7 +417,7 @@ void MainWindow::onHCResults() {
 		img.save(filename);
 
 		client.setUrl("http://gnishida.site90.com/upload.php");
-		if (!client.uploadFile("upload.php", "file", "16.png", "image/png")) {
+		if (!client.uploadFile("upload.php", "file", filename, "image/png")) {
 			QMessageBox msgBox(this);
 			msgBox.setText(client.reply());
 			msgBox.exec();
