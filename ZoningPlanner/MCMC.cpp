@@ -12,9 +12,9 @@ void MCMC::addPreference(std::vector<float>& preference) {
 	this->preferences.push_back(preference);
 }
 
-void MCMC::findBestPlan(int** zone, int* city_size) {
+void MCMC::findBestPlan(int** zone, int* city_size, int start_size, int num_layers) {
 	srand(10);
-	*city_size = 5;
+	*city_size = start_size;
 
 	*zone = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 	
@@ -33,7 +33,7 @@ void MCMC::findBestPlan(int** zone, int* city_size) {
 
 	int max_iterations = 10000;
 
-	for (int layer = 0; layer < NUM_LAYERS; ++layer) {
+	for (int layer = 0; layer < num_layers; ++layer) {
 		if (layer == 0) {
 			optimize(*city_size, max_iterations, *zone);
 		} else {

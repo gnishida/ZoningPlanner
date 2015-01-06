@@ -9,7 +9,6 @@
 #define MAX_DIST 99
 #define BF_CLEARED -1
 #define NUM_FEATURES 5
-#define NUM_LAYERS 5
 
 struct Point2D {
 	int x;
@@ -33,7 +32,7 @@ public:
 public:
 	void setPreferences(std::vector<std::vector<float> >& preference);
 	void addPreference(std::vector<float>& preference);
-	void findBestPlan(int** zone, int* city_size);
+	void findBestPlan(int** zone, int* city_size, int start_size, int num_layers);
 	void computeDistanceMap(int city_size, int* zone, int** dist);
 	void showZone(int city_size, int* zone, char* filename);
 	void loadZone(int city_size, int* zone, char* filename);
