@@ -12,10 +12,12 @@ public:
 	int* zones;
 	int zone_size;
 
+	std::vector<std::pair<Polygon2D, ZoneType> > init_zones;
+
 public:
 	Zoning();
 	int getZone(const QVector2D& pt) const;
-	//void load(const QString& filename);
+	void loadInitZones(const QString& filename);
 	void load(QDomNode& node);
 	//void save(const QString& filename);
 	int positionToIndex(const QVector2D& pt) const;

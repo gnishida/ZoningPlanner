@@ -31,7 +31,7 @@ $(document).ready(function() {
 
 $("#task").smartupdater({
 	url : 'check_done.php',
-	minTimeout: 5000 // 5 seconds
+	minTimeout: 10000 // 10 seconds
 	}, function (data) {
 		if (data == <?= $round + 1 ?>) {
 			window.location.href = "http://gnishida.site90.com/?cmd=design&round=" + <?= $round + 1?> + "&step=1";

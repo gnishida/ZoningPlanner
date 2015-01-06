@@ -12,41 +12,39 @@ int Zoning::getZone(const QVector2D& pt) const {
 	return zones[s];
 }
 
-/*void Zoning::load(const QString& filename) {
-	zones.clear();
+void Zoning::loadInitZones(const QString& filename) {
+	init_zones.clear();
 
 	QFile file(filename);
 
 	QDomDocument doc;
 	doc.setContent(&file, true);
 	QDomElement root = doc.documentElement();
-
-	QDomNode node = root.firstChild();
+ 
+    QDomNode node = root.firstChild();
 	while (!node.isNull()) {
-		if (node.toElement().tagName() == "zone") {
-			int type = node.toElement().attribute("type").toInt();
-			int level = node.toElement().attribute("level").toInt();
+		int type = node.toElement().attribute("type").toInt();
+		int level = node.toElement().attribute("level").toInt();
+		if (level < 1) level = 1;
+		if (level > 3) level = 3;
 
-			// to make level between [1,3]
-			if (level < 1 || level > 3) level = 1;
+		ZoneType zone(type, level);
 
-			ZoneType zone(type, level);
+		Polygon2D polygon;
+		QDomNode nodePoint = node.firstChild();
+		while (!nodePoint.isNull()) {
+			float x = nodePoint.toElement().attribute("x").toFloat();
+			float y = nodePoint.toElement().attribute("x").toFloat();
+			polygon.push_back(QVector2D(x, y));
 
-			Polygon2D polygon;
-			QDomNode polygonNode = node.childNodes().at(0);
-			for (int i = 0; i < polygonNode.childNodes().size(); ++i) {
-				QDomNode pointNode = polygonNode.childNodes().at(i);
-				float x = pointNode.toElement().attribute("x").toFloat();
-				float y = pointNode.toElement().attribute("y").toFloat();
-				polygon.push_back(QVector2D(x, y));
-			}
-
-			zones.push_back(std::make_pair(polygon, zone));
+			nodePoint = nodePoint.nextSibling();
 		}
+
+		init_zones.push_back(std::make_pair(polygon, zone));
 
 		node = node.nextSibling();
 	}
-}*/
+}
 
 void Zoning::load(QDomNode& node) {
 	int startSize = node.toElement().attribute("startSize").toInt();

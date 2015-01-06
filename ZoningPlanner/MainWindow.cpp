@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	setCentralWidget(glWidget);
 
 	urbanGeometry = new UrbanGeometry(this);
-	urbanGeometry->loadZones("init_zones.xml");
+	urbanGeometry->loadInitZones("init_zones.xml");
 
 	controlWidget->show();
 	addDockWidget(Qt::LeftDockWidgetArea, controlWidget);

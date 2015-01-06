@@ -98,30 +98,8 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 	blocks.save(filename);
 }
 
-void UrbanGeometry::loadZones(const QString& filename) {
-	QFile file(filename);
-
-	QDomDocument doc;
-	doc.setContent(&file, true);
-	QDomElement root = doc.documentElement();
- 
-    QDomNode node = root.firstChild();
-	while (!node.isNull()) {
-		int type = node.toElement().attribute("type").toInt();
-		int level = node.toElement().attribute("level").toInt();
-
-		QDomNode nodePoint = node.firstChild();
-		while (!nodePoint.isNull()) {
-			float x = nodePoint.toElement().attribute("x").toFloat();
-			float y = nodePoint.toElement().attribute("x").toFloat();
-
-			// ポリゴンを生成
-
-			nodePoint = nodePoint.nextSibling();
-		}
-
-		node = node.nextSibling();
-	}
+void UrbanGeometry::loadInitZones(const QString& filename) {
+	zones.loadInitZones(filename);
 }
 
 /**
