@@ -16,6 +16,7 @@
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>
 #include "MCMC.h"
+#include "global.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -97,13 +98,39 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 	blocks.save(filename);
 }
 
+void UrbanGeometry::loadZones(const QString& filename) {
+	QFile file(filename);
+
+	QDomDocument doc;
+	doc.setContent(&file, true);
+	QDomElement root = doc.documentElement();
+ 
+    QDomNode node = root.firstChild();
+	while (!node.isNull()) {
+		int type = node.toElement().attribute("type").toInt();
+		int level = node.toElement().attribute("level").toInt();
+
+		QDomNode nodePoint = node.firstChild();
+		while (!nodePoint.isNull()) {
+			float x = nodePoint.toElement().attribute("x").toFloat();
+			float y = nodePoint.toElement().attribute("x").toFloat();
+
+			// ポリゴンを生成
+
+			nodePoint = nodePoint.nextSibling();
+		}
+
+		node = node.nextSibling();
+	}
+}
+
 /**
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
 void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences) {
 	MCMC mcmc;
 	mcmc.setPreferences(preferences);
-	mcmc.findBestPlan(&zones.zones2, &zones.zone_size);
+	mcmc.findBestPlan(&zones.zones2, &zones.zone_size, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"));
 
 	int cell_len = renderManager.side / zones.zone_size;
 

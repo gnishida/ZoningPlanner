@@ -24,9 +24,7 @@
 #include "MCMC.h"
 #include <iostream>
 
-MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
-	: QMainWindow(parent, flags)
-{
+MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
 	ui.setupUi(this);
 
 	// setup the docking widgets
@@ -67,14 +65,13 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	setCentralWidget(glWidget);
 
 	urbanGeometry = new UrbanGeometry(this);
+	urbanGeometry->loadZones("init_zones.xml");
 
 	controlWidget->show();
 	addDockWidget(Qt::LeftDockWidgetArea, controlWidget);
 }
 
-MainWindow::~MainWindow()
-{
-
+MainWindow::~MainWindow() {
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* e) {

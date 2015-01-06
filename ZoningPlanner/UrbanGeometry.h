@@ -57,6 +57,8 @@ public:
 
 	void loadBlocks(const QString& filename);
 	void saveBlocks(const QString& filename);
+	
+	void loadZones(const QString& filename);
 
 	void findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference);
 	QVector2D findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference);
