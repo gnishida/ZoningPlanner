@@ -1,4 +1,5 @@
 ﻿#include "MCMC.h"
+#include "ZoneType.h"
 
 MCMC::MCMC() {
 }
@@ -345,7 +346,7 @@ float MCMC::computeScore(int city_size, int* zone, int* dist) {
 
 	int num_zones = 0;
 	for (int i = 0; i < city_size * city_size; ++i) {
-		if (zone[i] == 0) continue;
+		if (zone[i] != ZoneType::TYPE_RESIDENTIAL) continue;
 
 		num_zones++;
 

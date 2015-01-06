@@ -362,7 +362,7 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 			blocks[i].sidewalkContour.getBBox3D(bbox.minPt, bbox.maxPt);
 
 			// ブロックが細すぎる場合は、使用不可ブロックとする
-			if (blocks[i].sidewalkContour.isTooNarrow(8.0f, 18.0f) || blocks[i].sidewalkContour.isTooNarrow(5.0f, 5.0f)) {
+			if (blocks[i].sidewalkContour.isTooNarrow(8.0f, 18.0f) || blocks[i].sidewalkContour.isTooNarrow(1.0f, 3.0f)) {
 				blocks[i].zone = ZoneType(ZoneType::TYPE_UNUSED, 1);
 				continue;
 			}

@@ -264,7 +264,7 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 			std::vector<Vertex> vert;
 
 			QColor color;
-			int opacity = 224;
+			int opacity = 192;
 			if (i == blocks.selectedBlockIndex) {
 				color = QColor(255, 255, 255, opacity);
 			} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {	// 住宅街は赤色ベース
@@ -285,7 +285,7 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 				color = QColor(128, 128, 128, opacity);
 			}
 
-			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 3, false, "", GL_QUADS, 1, QVector3D(1, 1, 1), color);
+			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 1, false, "", GL_QUADS, 1, QVector3D(1, 1, 1), color);
 		}
 	}
 }
