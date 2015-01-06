@@ -128,9 +128,18 @@ void UrbanGeometry::loadZones(const QString& filename) {
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
 void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences) {
+	QStringList distribution = G::g["zoning_type_distribution"].toString().split(",");
+	std::vector<float> zoneTypeDistribution(6);
+	zoneTypeDistribution[0] = distribution[0].toFloat(); // 住宅
+	zoneTypeDistribution[1] = distribution[1].toFloat(); // 商業
+	zoneTypeDistribution[2] = distribution[2].toFloat(); // 工場
+	zoneTypeDistribution[3] = distribution[3].toFloat(); // 公園
+	zoneTypeDistribution[4] = distribution[4].toFloat(); // アミューズメント
+	zoneTypeDistribution[5] = distribution[5].toFloat(); // 学校・図書館
+
 	MCMC mcmc;
 	mcmc.setPreferences(preferences);
-	mcmc.findBestPlan(&zones.zones, &zones.zone_size, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"));
+	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"));
 }
 
 /**

@@ -32,7 +32,7 @@ public:
 public:
 	void setPreferences(std::vector<std::vector<float> >& preference);
 	void addPreference(std::vector<float>& preference);
-	void findBestPlan(int** zone, int* city_size, int start_size, int num_layers);
+	void findBestPlan(int** zone, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers);
 	void computeDistanceMap(int city_size, int* zone, int** dist);
 	void showZone(int city_size, int* zone, char* filename);
 	void loadZone(int city_size, int* zone, char* filename);

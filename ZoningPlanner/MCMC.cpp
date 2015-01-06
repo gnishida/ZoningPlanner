@@ -12,21 +12,12 @@ void MCMC::addPreference(std::vector<float>& preference) {
 	this->preferences.push_back(preference);
 }
 
-void MCMC::findBestPlan(int** zone, int* city_size, int start_size, int num_layers) {
+void MCMC::findBestPlan(int** zone, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers) {
 	srand(10);
 	*city_size = start_size;
 
 	*zone = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 	
-	// initialize the zone
-	std::vector<float> zoneTypeDistribution(6);
-	zoneTypeDistribution[0] = 0.5f; // 住宅
-	zoneTypeDistribution[1] = 0.2f; // 商業
-	zoneTypeDistribution[2] = 0.1f; // 工場
-	zoneTypeDistribution[3] = 0.1f; // 公園
-	zoneTypeDistribution[4] = 0.05f; // アミューズメント
-	zoneTypeDistribution[5] = 0.05f; // 学校・図書館
-
 	// 初期プランを生成
 	generateZoningPlan(*city_size, *zone, zoneTypeDistribution);
 	//loadZone(zone, "zone2.txt");

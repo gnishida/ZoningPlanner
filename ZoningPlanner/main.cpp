@@ -6,6 +6,7 @@
 
 int main(int argc, char *argv[])
 {
+	G::g["zoning_type_distribution"] = "0.5,0.2,0.1,0.1,0.05,0.05";
 	G::g["zoning_start_size"] = 5;
 	G::g["zoning_num_layers"] = 5;
 
