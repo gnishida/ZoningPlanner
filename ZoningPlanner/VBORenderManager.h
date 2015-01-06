@@ -123,7 +123,7 @@ public:
 	void addTriangle(const QString& geoName, Loop3D& polygon, Loop3D& texCoord, const QString& textureName);
 	void addTriangle(const QString& geoName, Loop3D& baseLine, float baseHeight, float topHeight, const QString& textureName);
 	void addQuad(const QString& geoName, Loop3D& polygon, const QString& textureName);
-	void addSphere(const QString& geoName, const QVector3D& center, float radius, const QColor& color);
+	void addSphere(const QString& geoName, const QVector3D& center, float radius, const QColor& color, int slice = 16, int stack = 4);
 	void addBox(const QString& geoName, const QVector3D& center, const QVector3D& size, const QColor& color);
 	void addBox(const QString& geoName, const QVector3D& offset, const QVector3D& vec1, const QVector3D& vec2, float height, const QString& textureName, int faceNo = 0, float s0 = 0.0, float t0 = 0.0, float s1 = 1.0, float t1 = 1.0);
 	void addLine(const QString& geoName, const QVector3D& pt1, const QVector3D& pt2, const QColor& color);

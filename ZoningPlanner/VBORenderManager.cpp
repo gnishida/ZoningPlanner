@@ -253,10 +253,7 @@ void VBORenderManager::addQuad(const QString& geoName, Loop3D& polygon, const QS
 	addStaticGeometry(geoName, verts, textureName, GL_QUADS, 2|mode_Lighting);
 }
 
-void VBORenderManager::addSphere(const QString& geoName, const QVector3D& center, float radius, const QColor& color) {
-	int slice = 8;
-	int stack = 2;
-
+void VBORenderManager::addSphere(const QString& geoName, const QVector3D& center, float radius, const QColor& color, int slice, int stack) {
 	std::vector<Vertex> vert;
 
 	for (int si = 0; si < slice; ++si) {
