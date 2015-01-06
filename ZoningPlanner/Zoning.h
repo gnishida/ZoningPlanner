@@ -8,6 +8,7 @@
 
 class Zoning {
 public:
+	int city_size;
 	std::vector<std::pair<Polygon2D, ZoneType> > zones;
 	int* zones2;
 	int zone_size;
@@ -21,13 +22,7 @@ public:
 	int getZone(const QVector2D& pt) const;
 	void load(const QString& filename);
 	void save(const QString& filename);
-	void generate(Polygon2D& targetArea);
-	
-	// 改善案
-	void randomlyAssignZoneType(BlockSet& blocks);
-
-private:
-	std::pair<Polygon2D, ZoneType> defaultZone();
+	int positionToIndex(int city_length, const QVector2D& pt) const;
 };
 
 class CompareZoning

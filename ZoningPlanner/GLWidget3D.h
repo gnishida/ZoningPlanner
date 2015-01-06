@@ -64,7 +64,8 @@ public:
 	void drawScene(int drawMode);
 
 	void updateCamera();
-	//void generate3DGeometry(bool justRoads=false);
+	QImage generatePictureOfPointInterest(const QVector2D& pt);
+	void setPointInterest(const QVector2D& pt);
 
 protected:
 	void initializeGL();

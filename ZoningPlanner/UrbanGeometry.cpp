@@ -107,6 +107,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 
 	int cell_len = renderManager.side / zones.zone_size;
 
+	zones.city_size = renderManager.side;
 	zones.zones.resize(zones.zone_size * zones.zone_size);
 	for (int r = 0; r < zones.zone_size; ++r) {
 		for (int c = 0; c < zones.zone_size; ++c) {
@@ -123,40 +124,45 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 /**
  * 指定されたpreferenceベクトルに対して、ベストの住宅ゾーンを探す。
  * ゾーンプランは既に生成済みである必要がある。
+ * ブロックも生成済みである必要がある。
  */
 QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference) {
 	MCMC mcmc;
+
+	// 距離マップを生成する
 	int* dist;
 	mcmc.computeDistanceMap(zones.zone_size, zones.zones2, &dist);
 
+	zones.city_size = renderManager.side;
 	int cell_len = renderManager.side / zones.zone_size;
 
 	float best_score = 0.0f;
 	QVector2D ret;
-	for (int r = 0; r < zones.zone_size; ++r) {
-		for (int c = 0; c < zones.zone_size; ++c) {
-			int s = r * zones.zone_size + c;
+	for (int bi = 0; bi < blocks.size(); ++bi) {
+		if (blocks[bi].zone.type() != ZoneType::TYPE_RESIDENTIAL) continue;
 
-			if (zones.zones2[s] == 0) continue;
+		BBox3D bbox;
+		blocks[bi].sidewalkContour.getBBox3D(bbox.minPt, bbox.maxPt);
+		QVector3D pt = bbox.midPt();
 
-			float score = 0.0f;
-			float feature[7];
-			mcmc.computeFeature(zones.zone_size, zones.zones2, dist, s, feature);
-			for (int peopleType = 0; peopleType < preference.size(); ++peopleType) {
-				score += feature[0] * preference[0]; // 店
-				score += feature[1] * preference[1]; // 学校
-				score += feature[2] * preference[2]; // レストラン
-				score += feature[3] * preference[3]; // 公園
-				score += feature[4] * preference[4]; // アミューズメント
-				score += feature[5] * preference[5]; // 図書館
-				score += feature[6] * preference[6]; // 工場
-			}
+		// 当該ブロックのfeatureを取得
+		float feature[7];
+		int s = zones.positionToIndex(renderManager.side, QVector2D(pt.x(), pt.y()));
+		mcmc.computeFeature(zones.zone_size, zones.zones2, dist, s, feature);
 
-			if (score > best_score) {
-				best_score = score;
-				ret.setX(-renderManager.side * 0.5 + (c + 0.5) * cell_len);
-				ret.setY(-renderManager.side * 0.5 + (r + 0.5) * cell_len);
-			}
+		float score = 0.0f;
+		score += feature[0] * preference[0]; // 店
+		score += feature[1] * preference[1]; // 学校
+		score += feature[2] * preference[2]; // レストラン
+		score += feature[3] * preference[3]; // 公園
+		score += feature[4] * preference[4]; // アミューズメント
+		score += feature[5] * preference[5]; // 図書館
+		score += feature[6] * preference[6]; // 工場
+
+		if (score > best_score) {
+			best_score = score;
+			ret.setX(pt.x());
+			ret.setY(pt.y());
 		}
 	}
 

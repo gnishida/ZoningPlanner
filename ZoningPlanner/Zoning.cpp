@@ -48,6 +48,18 @@ int Zoning::getZone(const QVector2D& pt) const {
 	return zoneId;
 }
 
+/*int Zoning::getZone(const QVector2D& pt) const {
+	int zoneId = -1;
+
+	int cell_len = city_size / zone_size;
+
+	int c = (pt.x() + cell_len * 0.5) / cell_len;
+	int r = (pt.y() + cell_len * 0.5) / cell_len;
+	int s = r * zone_size + c;
+
+	return zones2[s];
+}*/
+
 void Zoning::load(const QString& filename) {
 	zones.clear();
 
@@ -115,145 +127,23 @@ void Zoning::save(const QString& filename) {
 }
 
 /**
- * Randomly generate zoning plan.
- * Each type of zone is assigned to at least one block.
+ * 座標を、zones2のインデックス番号に変換する。
+ *
+ * @param city_length		cityの一辺の長さ
+ * @param pt				座標
+ * @return					インデックス番号
  */
-void Zoning::generate(Polygon2D& targetArea) {
-	BBox bbox = targetArea.envelope();
+int Zoning::positionToIndex(int city_length, const QVector2D& pt) const {
+	int cell_len = city_length / zone_size;
 
-	while (true) {
-		zones.clear();
+	int c = (pt.x() + city_length * 0.5 + cell_len * 0.5) / cell_len;
+	if (c < 0) c = 0;
+	if (c >= zone_size) c = zone_size;
 
-		int histogram[7] = {};
+	int r = (pt.y() + city_length * 0.5 + cell_len * 0.5) / cell_len;
+	if (r < 0) r = 0;
+	if (r >= zone_size) r = zone_size;
 
-		zones.push_back(std::make_pair(targetArea, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
-
-		float step = 200.0f;
-		for (int u = 0; u < bbox.dx()  / step; ++u) {
-			float x = (float)u * step + bbox.minPt.x();
-			for (int v = 0; v < bbox.dy() / step; ++v) {
-				float y = (float)v * step + bbox.minPt.y();
-
-				if (!targetArea.contains(QVector2D(x, y))) continue;
-
-				Polygon2D polygon;
-				polygon.push_back(QVector2D(x, y));
-				polygon.push_back(QVector2D(x + step, y));
-				polygon.push_back(QVector2D(x + step, y + step));
-				polygon.push_back(QVector2D(x, y + step));
-
-				ZoneType zone;
-				float r = Util::genRand(0, 100);
-				if (r <= 20) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 1)));
-					histogram[ZoneType::TYPE_RESIDENTIAL]++;
-				} else if (r <= 58) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 2)));
-					histogram[ZoneType::TYPE_RESIDENTIAL]++;
-				} else if (r <= 78) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_RESIDENTIAL, 3)));
-					histogram[ZoneType::TYPE_RESIDENTIAL]++;
-				} else if (r <= 84) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 1)));
-					histogram[ZoneType::TYPE_COMMERCIAL]++;
-				} else if (r <= 89) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 2)));
-					histogram[ZoneType::TYPE_COMMERCIAL]++;
-				} else if (r <= 92) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_COMMERCIAL, 3)));
-					histogram[ZoneType::TYPE_COMMERCIAL]++;
-				} else if (r <= 94) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 1)));
-					histogram[ZoneType::TYPE_MANUFACTURING]++;
-				} else if (r <= 95) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 2)));
-					histogram[ZoneType::TYPE_MANUFACTURING]++;
-				} else if (r <= 96) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_MANUFACTURING, 3)));
-					histogram[ZoneType::TYPE_MANUFACTURING]++;
-				} else if (r <= 98) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PARK, 1)));
-					histogram[ZoneType::TYPE_PARK]++;
-				} else if (r <= 99) {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_AMUSEMENT, 1)));
-					histogram[ZoneType::TYPE_AMUSEMENT]++;
-				} else {
-					zones.push_back(std::make_pair(polygon, ZoneType(ZoneType::TYPE_PUBLIC, 1)));
-					histogram[ZoneType::TYPE_PUBLIC]++;
-				}			
-			}
-		}
-
-		// check if there is at least one block for each zone type
-		bool valid = true;
-		for (int i = 1; i < 7; ++i) {
-			if (histogram[i] == 0) valid = false;
-		}
-		if (valid) break;
-	}
+	return r * zone_size + c;
 }
 
-/**
- * 指定されたdistributionに従い、ブロックにゾーンタイプを割り当てる。
- */
-void Zoning::randomlyAssignZoneType(BlockSet& blocks) {
-	zones.clear();
-	zones.push_back(defaultZone());
-
-	float totalArea = 0.0f;
-
-	QVector3D size;
-	QMatrix4x4 xformMat;
-	for (int i = 0; i < blocks.size(); ++i) {
-		totalArea += blocks[i].blockContour.area();
-	}
-
-	float Z = 0.0f;
-	for (int i = 0; i < zoneTypeDistribution.size(); ++i) {
-		Z += zoneTypeDistribution[i];
-	}
-
-	std::vector<float> remainedArea;
-	for (int i = 0; i < zoneTypeDistribution.size(); ++i) {
-		remainedArea.push_back(zoneTypeDistribution[i] / Z * totalArea);
-	}
-
-	for (int i = 0; i < blocks.size(); ++i) {
-		Z = 0.0f;
-		for (int type = 0; type < zoneTypeDistribution.size(); ++type) {
-			if (remainedArea[type] < 0) continue;
-			Z += remainedArea[type];
-		}
-
-		float r = Util::genRand(0, Z);
-		Z = 0.0f;
-		for (int type = 0; type < zoneTypeDistribution.size(); ++type) {
-			if (remainedArea[type] < 0) continue;
-
-			Z += remainedArea[type];
-			if (r < Z) {
-				blocks[i].zone = ZoneType(type / 3, (type % 3) + 1);
-				remainedArea[type] -= blocks[i].blockContour.area();
-				Polygon2D polygon;
-				for (int k = 0; k < blocks[i].blockContour.contour.size(); ++k) {
-					polygon.push_back(QVector2D(blocks[i].blockContour.contour[k]));
-				}
-				zones.push_back(std::make_pair(polygon, blocks[i].zone));
-				break;
-			}
-		}
-	}
-}
-
-std::pair<Polygon2D, ZoneType> Zoning::defaultZone() {
-	Polygon2D polygon;
-	polygon.push_back(QVector2D(-100000, -100000));
-	polygon.push_back(QVector2D(100000, -100000));
-	polygon.push_back(QVector2D(100000, 100000));
-	polygon.push_back(QVector2D(-100000, 100000));
-
-	ZoneType zone(ZoneType::TYPE_RESIDENTIAL, 1);
-	zone.init();
-
-	return std::make_pair(polygon, zone);
-}

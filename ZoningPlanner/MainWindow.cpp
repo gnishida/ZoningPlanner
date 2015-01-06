@@ -85,17 +85,12 @@ void MainWindow::keyReleaseEvent(QKeyEvent* e) {
 }
 
 QImage MainWindow::generatePictureOfBestPlace(std::vector<float>& preference) {
-	QVector3D pt = QVector3D(urbanGeometry->findBestPlace(glWidget->vboRenderManager, preference));
+	QVector2D pt = urbanGeometry->findBestPlace(glWidget->vboRenderManager, preference);
+	std::cout << pt.x() << "," << pt.y() << std::endl;
 
 	ui.actionViewZoning->setChecked(true);
-	glWidget->camera2D.setTranslation(0, 0, 200.0f);
-	glWidget->camera2D.setLookAt(pt.x(), pt.y(), 70);
-	glWidget->camera2D.setXRotation(-60);
-	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
-	glWidget->updateCamera();
 
-	glWidget->updateGL();
-	return glWidget->grabFrameBuffer();
+	return glWidget->generatePictureOfPointInterest(pt);
 }
 
 void MainWindow::onLoadZoning() {
@@ -270,14 +265,7 @@ void MainWindow::onCameraDefault() {
 void MainWindow::onCameraTest() {
 	QVector2D pt(500, -500);
 
-	glWidget->camera2D.setTranslation(0, 0, 200.0f);
-	glWidget->camera2D.setLookAt(pt.x(), -pt.y(), 70);
-	glWidget->camera2D.setXRotation(-60);
-	glWidget->camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
-	glWidget->updateCamera();
-
-	glWidget->updateGL();
-	glWidget->grabFrameBuffer().save("camera_test.png");
+	QImage img = glWidget->generatePictureOfPointInterest(pt);
 }
 
 void MainWindow::onHCStart() {
@@ -407,7 +395,7 @@ void MainWindow::onHCResults() {
 	// 3D更新
 	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
 	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 

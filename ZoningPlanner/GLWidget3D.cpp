@@ -183,6 +183,8 @@ void GLWidget3D::drawScene(int drawMode) {
 		vboRenderManager.renderAllStreetElementName("tree");
 		vboRenderManager.renderAllStreetElementName("streetLamp");
 	}
+
+	vboRenderManager.renderStaticGeometry("PointInterest");
 }
 
 void GLWidget3D::keyPressEvent( QKeyEvent *e ){
@@ -305,3 +307,20 @@ void GLWidget3D::updateCamera(){
 	QVector3D light_dir(-0.40f,0.81f,-0.51f);//camera3D.light_dir.toVector3D();
 	glUniform3f(glGetUniformLocation(vboRenderManager.program, "lightDir"),light_dir.x(),light_dir.y(),light_dir.z());
 }//
+
+QImage GLWidget3D::generatePictureOfPointInterest(const QVector2D& pt) {
+	setPointInterest(pt);
+	camera2D.setTranslation(0, 0, 200.0f);
+	camera2D.setLookAt(pt.x(), pt.y(), 70);
+	camera2D.setXRotation(-60);
+	camera2D.setZRotation(-Util::rad2deg(atan2f(pt.x(), -pt.y())));
+	updateCamera();
+
+	updateGL();
+	vboRenderManager.removeStaticGeometry("PointInterest");
+	return grabFrameBuffer();
+}
+
+void GLWidget3D::setPointInterest(const QVector2D& pt) {
+	vboRenderManager.addSphere("PointInterest", QVector3D(pt.x(), pt.y(), 80), 10, QColor(255, 255, 255));
+}
