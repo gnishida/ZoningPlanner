@@ -1025,10 +1025,9 @@ void Polygon3D::dump() {
  * OBBを計算し、縦横比がratioより大きく、且つ、最小エッジがmin_side未満なら、細すぎると判定する。
  */
 bool Polygon3D::isTooNarrow(float ratio, float min_side) {
-	Loop3D pin;
 	QVector3D size;
 	QMatrix4x4 xformMat;
-	getLoopOBB(pin, size, xformMat);
+	getLoopOBB(contour, size, xformMat);
 	
 	if ((std::max)(size.x() / size.y(), size.y() / size.x()) > ratio && (std::min)(size.x(), size.y()) < min_side)  return true;
 	else return false;
