@@ -314,7 +314,7 @@ void MainWindow::onHCStart() {
 	HTTPClient client;
 	int max_round = dlg.max_round;
 	int max_step = dlg.max_step;
-	QString url = QString("http://gnishida.site90.com/config.php?current_round=0&max_round=%1&max_step=%1").arg(max_round).arg(max_step);
+	QString url = QString("http://gnishida.site90.com/config.php?current_round=0&max_round=%1&max_step=%2").arg(max_round).arg(max_step);
 	client.setUrl(url);
 	if (!client.request()) {
 		QMessageBox msgBox(this);

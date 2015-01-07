@@ -54,7 +54,7 @@ $feature2 = explode(",", $row["option2"]);
 <body>
 <div id="task">
 <p class="right"><?=$email?></p>
-<h1>Round <?= $round ?> - Question <?= $step ?></h1>
+<h1>Round <?= $round ?> - Question <?= $step ?> / <?= $max_step ?></h1>
 
 <form action="http://gnishida.site90.com/" method="GET">
 <input type="hidden" name="cmd" value="design"/>
