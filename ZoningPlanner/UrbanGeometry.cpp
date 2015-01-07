@@ -196,22 +196,32 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 	std::vector<std::pair<std::vector<float>, std::vector<float> > > ret;
 
 	for (int iter = 0; iter < num; ++iter) {
+		int com1 = Util::genRand(0, 7);
+		int com2 = Util::genRand(0, 7);
+
 		int r1 = Util::genRand(0, features.size());
 		int r2;
+
+		std::vector<float> f2(7);
+
 		while (true) {
 			r2 = Util::genRand(0, features.size());
 			if (r2 == r1) continue;
 
+			f2 = features[r2];
+			f2[com1] = features[r1][com1];
+			f2[com2] = features[r1][com2];
+
 			float len = 0.0f;
 			for (int i = 0; i < 7; ++i) {
-				len += SQR(features[r1][i] - features[r2][i]);
+				len += SQR(features[r1][i] - f2[i]);
 			}
 			if (len < 100) continue;
 
 			break;
 		}
 
-		ret.push_back(std::make_pair(features[r1], features[r2]));
+		ret.push_back(std::make_pair(features[r1], f2));
 	}
 
 	return ret;
