@@ -1,5 +1,7 @@
 ﻿#include "MCMC.h"
 
+namespace mcmc {
+
 MCMC::MCMC() {
 }
 
@@ -169,7 +171,15 @@ float MCMC::distToFeature(float dist) {
 	return exp(-0.0005f * dist);
 }
 
+float MCMC::dot(std::vector<float> v1, std::vector<float> v2) {
+	float ret = 0.0f;
 
+	for (int i = 0; i < v1.size(); ++i) {
+		ret += v1[i] * v2[i];
+	}
+
+	return ret;
+}
 
 
 
@@ -311,9 +321,19 @@ float MCMC::min3(float distToStore, float distToAmusement, float distToFactory) 
 	return std::min(std::min(distToStore, distToAmusement), distToFactory);
 }
 
-void MCMC::computeFeature(int city_size, int* zones, int* dist, int s, float feature[]) {
+/**
+ * 指定されたインデックスのセルのfeatureを計算し、返却する。
+ *
+ * @param city_size			グリッドの一辺の長さ
+ * @param zones				ゾーンを格納した配列
+ * @param dist				距離マップを格納した配列
+ * @param s					セルのインデックス
+ * @param feature [OUT]		計算されたfeature
+ */
+void MCMC::computeFeature(int city_size, int* zones, int* dist, int s, std::vector<float>& feature) {
 	int cell_length = 10000 / city_size;
 
+	feature.resize(7);
 	feature[0] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // 店
 	feature[1] = distToFeature(dist[s * NUM_FEATURES + 4] * cell_length); // 学校
 	feature[2] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // レストラン
@@ -349,16 +369,10 @@ float MCMC::computeScore(int city_size, int* zones, int* dist) {
 
 		num_zones++;
 
-		float feature[7];
+		std::vector<float> feature;
 		computeFeature(city_size, zones, dist, i, feature);
 		for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
-			score += feature[0] * preferences[peopleType][0] * ratioPeople; // 店
-			score += feature[1] * preferences[peopleType][1] * ratioPeople; // 学校
-			score += feature[2] * preferences[peopleType][2] * ratioPeople; // レストラン
-			score += feature[3] * preferences[peopleType][3] * ratioPeople; // 公園
-			score += feature[4] * preferences[peopleType][4] * ratioPeople; // アミューズメント
-			score += feature[5] * preferences[peopleType][5] * ratioPeople; // 図書館
-			score += feature[6] * preferences[peopleType][6] * ratioPeople; // 工場
+			score += dot(feature, preferences[peopleType]) * ratioPeople;
 		}
 	}
 
@@ -663,3 +677,5 @@ void MCMC::optimize2(int city_size, int max_iterations, int* bestZone) {
 	free(obst);
 	free(toRaise);
 }
+
+};

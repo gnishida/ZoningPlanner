@@ -8,6 +8,8 @@
 #include "Polygon2D.h"
 #include "ZoneType.h"
 
+namespace mcmc {
+
 #define MAX_DIST 99
 #define BF_CLEARED -1
 #define NUM_FEATURES 5
@@ -39,11 +41,12 @@ public:
 	void showZone(int city_size, int* zones, char* filename);
 	void loadZone(int city_size, int* zones, char* filename);
 	void saveZone(int city_size, int* zones, char* filename);
-	void computeFeature(int city_size, int* zones, int* dist, int s, float feature[]);
+	void computeFeature(int city_size, int* zones, int* dist, int s, std::vector<float>& feature);
 	void computeRawFeature(int city_size, int* zones, int* dist, int s, float feature[]);
 	void dumpZone(int city_size, int* zones);
 	void dumpDist(int city_size, int* dist, int featureId);
 	static float distToFeature(float dist);
+	static float dot(std::vector<float> v1, std::vector<float> v2);
 
 private:
 	float randf();
@@ -67,3 +70,4 @@ private:
 	
 };
 
+};

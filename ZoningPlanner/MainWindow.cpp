@@ -21,7 +21,7 @@
 #include "HCStartWidget.h"
 #include "JSON.h"
 #include "GradientDescent.h"
-#include "MCMC.h"
+#include "MCMC2.h"
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
@@ -395,8 +395,8 @@ void MainWindow::onHCResults() {
 			QStringList feature1_list = tasks[step].first.split(",");
 			QStringList feature2_list = tasks[step].second.split(",");
 			for (int k = 0; k < 7; ++k) {
-				f1.push_back(MCMC::distToFeature(feature1_list[k].toFloat()));
-				f2.push_back(MCMC::distToFeature(feature2_list[k].toFloat()));
+				f1.push_back(mcmc2::MCMC2::distToFeature(feature1_list[k].toFloat()));
+				f2.push_back(mcmc2::MCMC2::distToFeature(feature2_list[k].toFloat()));
 			}
 
 			features.push_back(std::make_pair(f1, f2));

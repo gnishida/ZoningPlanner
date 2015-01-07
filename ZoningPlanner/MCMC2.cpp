@@ -1,13 +1,15 @@
-﻿#include "MCMC.h"
+﻿#include "MCMC2.h"
 
-MCMC::MCMC() {
+namespace mcmc2 {
+
+MCMC2::MCMC2() {
 }
 
-void MCMC::setPreferences(std::vector<std::vector<float> >& preference) {
+void MCMC2::setPreferences(std::vector<std::vector<float> >& preference) {
 	this->preferences = preference;
 }
 
-void MCMC::addPreference(std::vector<float>& preference) {
+void MCMC2::addPreference(std::vector<float>& preference) {
 	this->preferences.push_back(preference);
 }
 
@@ -21,7 +23,7 @@ void MCMC::addPreference(std::vector<float>& preference) {
  * @param num_layers			MCMCの繰り返し数
  * @param init_zones			ユーザ指定のゾーン
  */
-void MCMC::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones) {
+void MCMC2::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones) {
 	srand(10);
 	*city_size = start_size;
 
@@ -63,7 +65,7 @@ void MCMC::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTyp
 	//saveZone(city_size, zone, "zone_final.txt");
 }
 
-void MCMC::computeDistanceMap(int city_size, int* zones, int** dist) {
+void MCMC2::computeDistanceMap(int city_size, int* zones, int** dist) {
 	*dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	bool* toRaise = (bool*)malloc(city_size * city_size * NUM_FEATURES);
@@ -89,7 +91,7 @@ void MCMC::computeDistanceMap(int city_size, int* zones, int** dist) {
 	free(toRaise);
 }
 
-void MCMC::showZone(int city_size, int* zones, char* filename) {
+void MCMC2::showZone(int city_size, int* zones, char* filename) {
 	cv::Mat m(city_size, city_size, CV_8UC3);
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
@@ -116,7 +118,7 @@ void MCMC::showZone(int city_size, int* zones, char* filename) {
 	cv::imwrite(filename, m);
 }
 
-void MCMC::loadZone(int city_size, int* zones, char* filename) {
+void MCMC2::loadZone(int city_size, int* zones, char* filename) {
 	FILE* fp = fopen(filename, "r");
 
 	for (int r = 0; r < city_size; ++r) {
@@ -128,7 +130,7 @@ void MCMC::loadZone(int city_size, int* zones, char* filename) {
 	fclose(fp);
 }
 
-void MCMC::saveZone(int city_size, int* zones, char* filename) {
+void MCMC2::saveZone(int city_size, int* zones, char* filename) {
 	FILE* fp = fopen(filename, "w");
 
 	for (int r = 0; r < city_size; ++r) {
@@ -142,7 +144,7 @@ void MCMC::saveZone(int city_size, int* zones, char* filename) {
 	fclose(fp);
 }
 
-void MCMC::dumpZone(int city_size, int* zones) {
+void MCMC2::dumpZone(int city_size, int* zones) {
 	printf("<<< Zone Map >>>\n");
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
@@ -153,7 +155,7 @@ void MCMC::dumpZone(int city_size, int* zones) {
 	printf("\n");
 }
 
-void MCMC::dumpDist(int city_size, int* dist, int featureId) {
+void MCMC2::dumpDist(int city_size, int* dist, int featureId) {
 	printf("<<< Distance Map (featureId = %d) >>>\n", featureId);
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
@@ -164,11 +166,20 @@ void MCMC::dumpDist(int city_size, int* dist, int featureId) {
 	printf("\n");
 }
 
-float MCMC::distToFeature(float dist) {
+float MCMC2::distToFeature(float dist) {
 	//return exp(-0.001f * dist);
 	return exp(-0.0005f * dist);
 }
 
+float MCMC2::dot(std::vector<float> v1, std::vector<float> v2) {
+	float ret = 0.0f;
+
+	for (int i = 0; i < v1.size(); ++i) {
+		ret += v1[i] * v2[i];
+	}
+
+	return ret;
+}
 
 
 
@@ -176,16 +187,15 @@ float MCMC::distToFeature(float dist) {
 
 
 
-
-float MCMC::randf() {
+float MCMC2::randf() {
 	return (float)rand() / RAND_MAX;
 }
 
-float MCMC::randf(float a, float b) {
+float MCMC2::randf(float a, float b) {
 	return randf() * (b - a) + a;
 }
 
-int MCMC::sampleFromCdf(float* cdf, int num) {
+int MCMC2::sampleFromCdf(float* cdf, int num) {
 	float rnd = randf(0, cdf[num-1]);
 
 	for (int i = 0; i < num; ++i) {
@@ -195,7 +205,7 @@ int MCMC::sampleFromCdf(float* cdf, int num) {
 	return num - 1;
 }
 
-int MCMC::sampleFromPdf(float* pdf, int num) {
+int MCMC2::sampleFromPdf(float* pdf, int num) {
 	if (num == 0) return 0;
 
 	float cdf[40];
@@ -211,11 +221,11 @@ int MCMC::sampleFromPdf(float* pdf, int num) {
 	return sampleFromCdf(cdf, num);
 }
 
-inline bool MCMC::isOcc(int* obst, int s, int featureId) {
+inline bool MCMC2::isOcc(int* obst, int s, int featureId) {
 	return obst[s * NUM_FEATURES + featureId] == s;
 }
 
-inline int MCMC::distance(int city_size, int pos1, int pos2) {
+inline int MCMC2::distance(int city_size, int pos1, int pos2) {
 	int x1 = pos1 % city_size;
 	int y1 = pos1 / city_size;
 	int x2 = pos2 % city_size;
@@ -224,12 +234,12 @@ inline int MCMC::distance(int city_size, int pos1, int pos2) {
 	return abs(x1 - x2) + abs(y1 - y2);
 }
 
-void MCMC::clearCell(int* dist, int* obst, int s, int featureId) {
+void MCMC2::clearCell(int* dist, int* obst, int s, int featureId) {
 	dist[s * NUM_FEATURES + featureId] = MAX_DIST;
 	obst[s * NUM_FEATURES + featureId] = BF_CLEARED;
 }
 
-void MCMC::raise(int city_size, std::list<std::pair<int, int> >& queue, int* dist, int* obst, bool* toRaise, int s, int featureId) {
+void MCMC2::raise(int city_size, std::list<std::pair<int, int> >& queue, int* dist, int* obst, bool* toRaise, int s, int featureId) {
 	Point2D adj[] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
 	int x = s % city_size;
@@ -254,7 +264,7 @@ void MCMC::raise(int city_size, std::list<std::pair<int, int> >& queue, int* dis
 	toRaise[s * NUM_FEATURES + featureId] = false;
 }
 
-void MCMC::lower(int city_size, std::list<std::pair<int, int> >& queue, int* dist, int* obst, bool* toRaise, int s, int featureId) {
+void MCMC2::lower(int city_size, std::list<std::pair<int, int> >& queue, int* dist, int* obst, bool* toRaise, int s, int featureId) {
 	Point2D adj[] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
 	int x = s % city_size;
@@ -278,7 +288,7 @@ void MCMC::lower(int city_size, std::list<std::pair<int, int> >& queue, int* dis
 	}
 }
 
-void MCMC::updateDistanceMap(int city_size, std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise) {
+void MCMC2::updateDistanceMap(int city_size, std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise) {
 	while (!queue.empty()) {
 		std::pair<int, int> s = queue.front();
 		queue.pop_front();
@@ -291,7 +301,7 @@ void MCMC::updateDistanceMap(int city_size, std::list<std::pair<int, int> >& que
 	}
 }
 
-void MCMC::setStore(std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise, int s, int featureId) {
+void MCMC2::setStore(std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise, int s, int featureId) {
 	// put stores
 	obst[s * NUM_FEATURES + featureId] = s;
 	dist[s * NUM_FEATURES + featureId] = 0;
@@ -299,7 +309,7 @@ void MCMC::setStore(std::list<std::pair<int, int> >& queue, int* zones, int* dis
 	queue.push_back(std::make_pair(s, featureId));
 }
 
-void MCMC::removeStore(std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise, int s, int featureId) {
+void MCMC2::removeStore(std::list<std::pair<int, int> >& queue, int* zones, int* dist, int* obst, bool* toRaise, int s, int featureId) {
 	clearCell(dist, obst, s, featureId);
 
 	toRaise[s * NUM_FEATURES + featureId] = true;
@@ -307,13 +317,23 @@ void MCMC::removeStore(std::list<std::pair<int, int> >& queue, int* zones, int* 
 	queue.push_back(std::make_pair(s, featureId));
 }
 
-float MCMC::min3(float distToStore, float distToAmusement, float distToFactory) {
+float MCMC2::min3(float distToStore, float distToAmusement, float distToFactory) {
 	return std::min(std::min(distToStore, distToAmusement), distToFactory);
 }
 
-void MCMC::computeFeature(int city_size, int* zones, int* dist, int s, float feature[]) {
+/**
+ * 指定されたインデックスのセルのfeatureを計算し、返却する。
+ *
+ * @param city_size			グリッドの一辺の長さ
+ * @param zones				ゾーンを格納した配列
+ * @param dist				距離マップを格納した配列
+ * @param s					セルのインデックス
+ * @param feature [OUT]		計算されたfeature
+ */
+void MCMC2::computeFeature(int city_size, int* zones, int* dist, int s, std::vector<float>& feature) {
 	int cell_length = 10000 / city_size;
 
+	feature.resize(7);
 	feature[0] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // 店
 	feature[1] = distToFeature(dist[s * NUM_FEATURES + 4] * cell_length); // 学校
 	feature[2] = distToFeature(dist[s * NUM_FEATURES + 0] * cell_length); // レストラン
@@ -323,7 +343,7 @@ void MCMC::computeFeature(int city_size, int* zones, int* dist, int s, float fea
 	feature[6] = distToFeature(dist[s * NUM_FEATURES + 1] * cell_length); // 工場
 }
 
-void MCMC::computeRawFeature(int city_size, int* zones, int* dist, int s, float feature[]) {
+void MCMC2::computeRawFeature(int city_size, int* zones, int* dist, int s, float feature[]) {
 	int cell_length = 10000 / city_size;
 
 	feature[0] = dist[s * NUM_FEATURES + 0] * cell_length; // 店
@@ -335,32 +355,61 @@ void MCMC::computeRawFeature(int city_size, int* zones, int* dist, int s, float 
 	feature[6] = dist[s * NUM_FEATURES + 1] * cell_length; // 工場
 }
 
+bool MCMC2::GreaterScore(const std::pair<float, int>& rLeft, const std::pair<float, int>& rRight) { return rLeft.first > rRight.first; }
+
 /** 
  * ゾーンのスコアを計算する。
  */
-float MCMC::computeScore(int city_size, int* zones, int* dist) {
-	float ratioPeople = 1.0f / preferences.size();
-
-	float score = 0.0f;
-
+float MCMC2::computeScore(int city_size, int* zones, int* dist) {
 	int num_zones = 0;
-	for (int i = 0; i < city_size * city_size; ++i) {
-		if (zones[i] != ZoneType::TYPE_RESIDENTIAL) continue;
+
+	// 各ユーザ毎に、全セルのスコアを計算し、スコアでソートする
+	std::vector<std::vector<std::pair<float, int> > > all_scores(preferences.size());
+	for (int s = 0; s < city_size * city_size; ++s) {
+		if (zones[s] != ZoneType::TYPE_RESIDENTIAL) continue;
 
 		num_zones++;
 
-		float feature[7];
-		computeFeature(city_size, zones, dist, i, feature);
+		std::vector<float> feature;
+		computeFeature(city_size, zones, dist, s, feature);
+
 		for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
-			score += feature[0] * preferences[peopleType][0] * ratioPeople; // 店
-			score += feature[1] * preferences[peopleType][1] * ratioPeople; // 学校
-			score += feature[2] * preferences[peopleType][2] * ratioPeople; // レストラン
-			score += feature[3] * preferences[peopleType][3] * ratioPeople; // 公園
-			score += feature[4] * preferences[peopleType][4] * ratioPeople; // アミューズメント
-			score += feature[5] * preferences[peopleType][5] * ratioPeople; // 図書館
-			score += feature[6] * preferences[peopleType][6] * ratioPeople; // 工場
+			float score = dot(feature, preferences[peopleType]);
+
+			all_scores[peopleType].push_back(std::make_pair(score, s));
 		}
 	}
+	for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
+		std::sort(all_scores[peopleType].begin(), all_scores[peopleType].end(), GreaterScore);
+	}
+
+	// 使用済みチェック用
+	int* used = (int*)malloc(sizeof(int) * city_size * city_size);
+	memset(used, 0, sizeof(int) * city_size * city_size);
+
+	// ポインタ
+	int* pointer = (int*)malloc(sizeof(int) * preferences.size());
+	memset(pointer, 0, sizeof(int) * preferences.size());
+
+	float score = 0.0f;
+	int count = num_zones;
+	while (count > 0) {
+		for (int peopleType = 0; peopleType < preferences.size() && count > 0; ++peopleType) {
+			int s;
+			do {
+				s = all_scores[peopleType][pointer[peopleType]].second;
+			} while (used[s] == 1);
+
+			used[s] = 1;
+			score += all_scores[peopleType][pointer[peopleType]].first;
+			pointer[peopleType]++;
+			count--;
+		}
+	}
+
+	// メモリ解放
+	free(used);
+	free(pointer);
 
 	return score / num_zones;
 }
@@ -368,7 +417,7 @@ float MCMC::computeScore(int city_size, int* zones, int* dist) {
 /**
  * 計算したdistance mapが正しいか、チェックする。
  */
-int MCMC::check(int city_size, int* zones, int* dist) {
+int MCMC2::check(int city_size, int* zones, int* dist) {
 	int count = 0;
 
 	for (int r = 0; r < city_size; ++r) {
@@ -406,7 +455,7 @@ int MCMC::check(int city_size, int* zones, int* dist) {
 /**
  * ゾーンプランを生成する。
  */
-void MCMC::generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution) {
+void MCMC2::generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution) {
 	std::vector<float> numRemainings(NUM_FEATURES + 1);
 	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
 		numRemainings[i] = city_size * city_size * zoneTypeDistribution[i];
@@ -425,7 +474,7 @@ void MCMC::generateZoningPlan(int city_size, int* zones, std::vector<float> zone
  * bestZoneに、初期ゾーンプランが入っている。
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  */
-void MCMC::optimize(int city_size, int max_iterations, int* bestZone) {
+void MCMC2::optimize(int city_size, int max_iterations, int* bestZone) {
 	int* zone = (int*)malloc(sizeof(int) * city_size * city_size);
 	int* dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
@@ -537,7 +586,7 @@ void MCMC::optimize(int city_size, int max_iterations, int* bestZone) {
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  * 各ステップでは、隣接セルをランダムに選択し、ゾーンを交換する。
  */
-void MCMC::optimize2(int city_size, int max_iterations, int* bestZone) {
+void MCMC2::optimize2(int city_size, int max_iterations, int* bestZone) {
 	int* zone = (int*)malloc(sizeof(int) * city_size * city_size);
 	int* dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
@@ -663,3 +712,5 @@ void MCMC::optimize2(int city_size, int max_iterations, int* bestZone) {
 	free(obst);
 	free(toRaise);
 }
+
+};

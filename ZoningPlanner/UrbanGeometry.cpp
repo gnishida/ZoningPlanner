@@ -15,7 +15,7 @@
 #include <numeric>
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>
-#include "MCMC.h"
+#include "MCMC2.h"
 #include "global.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
@@ -115,7 +115,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 	zoneTypeDistribution[4] = distribution[4].toFloat(); // アミューズメント
 	zoneTypeDistribution[5] = distribution[5].toFloat(); // 学校・図書館
 
-	MCMC mcmc;
+	mcmc2::MCMC2 mcmc;
 	mcmc.setPreferences(preferences);
 	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"), zones.init_zones);
 }
@@ -126,7 +126,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
  * ブロックも生成済みである必要がある。
  */
 QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference) {
-	MCMC mcmc;
+	mcmc2::MCMC2 mcmc;
 
 	// 距離マップを生成する
 	int* dist;
@@ -144,18 +144,11 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 		QVector3D pt = bbox.midPt();
 
 		// 当該ブロックのfeatureを取得
-		float feature[7];
+		std::vector<float> feature;
 		int s = zones.positionToIndex(QVector2D(pt.x(), pt.y()));
 		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
 
-		float score = 0.0f;
-		score += feature[0] * preference[0]; // 店
-		score += feature[1] * preference[1]; // 学校
-		score += feature[2] * preference[2]; // レストラン
-		score += feature[3] * preference[3]; // 公園
-		score += feature[4] * preference[4]; // アミューズメント
-		score += feature[5] * preference[5]; // 図書館
-		score += feature[6] * preference[6]; // 工場
+		float score = mcmc2::MCMC2::dot(feature, preference);
 
 		if (score > best_score) {
 			best_score = score;
@@ -175,7 +168,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
  * ゾーンプランは既に生成済みである必要がある。
  */
 std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::generateTasks(int num) {
-	MCMC mcmc;
+	mcmc2::MCMC2 mcmc;
 	int* dist;
 	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);
 
