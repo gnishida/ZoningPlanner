@@ -3,7 +3,7 @@
 /**
  * Run gradient descent
  *
- * @w				推定されたpreference vector
+ * @w [OUT]			推定されたpreference vector
  * @features		学習データ　リストの各elementは、２つのfeatureベクトルのpair。
  * @choices			ラベルのリスト　これを学習する。
  * @maxIterations	最大ステップ数
@@ -12,7 +12,7 @@
  * @eta				学習速度
  * @threshold		収束しきい値
  */
-void GradientDescent::run(std::vector<float>& w, std::vector<std::pair<std::vector<float>, std::vector<float> > >& features, std::vector<int> choices, int maxIterations, bool l1, float lambda, float eta, float threshold) {
+void GradientDescent::run(std::vector<float>& w, std::vector<std::pair<std::vector<float>, std::vector<float> > >& features, std::vector<int> choices, int maxIterations, bool l1, float lambda, float eta, float threshold, bool normalize) {
 	int numFeatures = features[0].first.size();
 
 	FILE* fp = fopen("gd_curve.txt", "w");
@@ -52,6 +52,13 @@ void GradientDescent::run(std::vector<float>& w, std::vector<std::pair<std::vect
 		if (curE - nextE < threshold) break;
 
 		curE = nextE;
+	}
+
+	if (normalize) {
+		float n = sqrtf(dot(w, w));
+		for (int k = 0; k < numFeatures; ++k) {
+			w[k] /= n;
+		}
 	}
 
 	fclose(fp);
