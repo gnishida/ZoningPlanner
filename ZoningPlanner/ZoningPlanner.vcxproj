@@ -190,6 +190,7 @@
     <ClCompile Include="MCMC.cpp" />
     <ClCompile Include="MCMC2.cpp" />
     <ClCompile Include="MCMC3.cpp" />
+    <ClCompile Include="MCMC4.cpp" />
     <ClCompile Include="nvModel\nvModel.cpp" />
     <ClCompile Include="nvModel\nvModelObj.cpp" />
     <ClCompile Include="nvModel\nvModelQuery.cpp" />
@@ -332,6 +333,7 @@
     <ClInclude Include="MCMC.h" />
     <ClInclude Include="MCMC2.h" />
     <ClInclude Include="MCMC3.h" />
+    <ClInclude Include="MCMC4.h" />
     <ClInclude Include="nvModel\nvMath.h" />
     <ClInclude Include="nvModel\nvMatrix.h" />
     <ClInclude Include="nvModel\nvModel.h" />

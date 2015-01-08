@@ -247,6 +247,9 @@
     <ClCompile Include="MCMC3.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
+    <ClCompile Include="MCMC4.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -465,6 +468,9 @@
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="MCMC3.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MCMC4.h">
       <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>

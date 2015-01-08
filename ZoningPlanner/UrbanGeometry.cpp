@@ -15,7 +15,7 @@
 #include <numeric>
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>
-#include "MCMC3.h"
+#include "MCMC4.h"
 #include "global.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
@@ -120,7 +120,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
 	}
 
-	mcmc3::MCMC3 mcmc;
+	mcmc4::MCMC4 mcmc;
 	mcmc.setPreferences(preferences);
 	mcmc.setPreferenceForLandValue(preference_for_land_value);
 	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"), zones.init_zones);
@@ -139,7 +139,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
 	}
 
-	mcmc3::MCMC3 mcmc;
+	mcmc4::MCMC4 mcmc;
 	mcmc.setPreferenceForLandValue(preference_for_land_value);
 
 	// 距離マップを生成する
@@ -162,7 +162,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 		int s = zones.positionToIndex(QVector2D(pt.x(), pt.y()));
 		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
 
-		float score = mcmc3::MCMC3::dot(feature, preference);
+		float score = mcmc4::MCMC4::dot(feature, preference);
 
 		if (score > best_score) {
 			best_score = score;
@@ -189,7 +189,7 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
 	}
 
-	mcmc3::MCMC3 mcmc;
+	mcmc4::MCMC4 mcmc;
 	int* dist;
 	mcmc.setPreferenceForLandValue(preference_for_land_value);
 	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);
@@ -227,8 +227,8 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 
 			f2[7] = mcmc.computePriceIndex(f2);
 
-			option1 = mcmc3::MCMC3::featureToDist(features[r1]);
-			option2 = mcmc3::MCMC3::featureToDist(f2);
+			option1 = mcmc4::MCMC4::featureToDist(features[r1]);
+			option2 = mcmc4::MCMC4::featureToDist(f2);
 
 			// ２つのoptionが近すぎる場合は、棄却
 			float len = 0.0f;
