@@ -395,14 +395,16 @@ float MCMC2::computeScore(int city_size, int* zones, int* dist) {
 	int count = num_zones;
 	while (count > 0) {
 		for (int peopleType = 0; peopleType < preferences.size() && count > 0; ++peopleType) {
-			int s;
+			int cell;
+			float sc;
 			do {
-				s = all_scores[peopleType][pointer[peopleType]].second;
-			} while (used[s] == 1);
+				cell = all_scores[peopleType][pointer[peopleType]].second;
+				sc = all_scores[peopleType][pointer[peopleType]].first;
+				pointer[peopleType]++;
+			} while (used[cell] == 1);
 
-			used[s] = 1;
-			score += all_scores[peopleType][pointer[peopleType]].first;
-			pointer[peopleType]++;
+			used[cell] = 1;
+			score += sc;
 			count--;
 		}
 	}
