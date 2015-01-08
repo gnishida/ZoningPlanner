@@ -91,7 +91,7 @@ void Zoning::load(QDomNode& node) {
 */
 
 /**
- * 座標を、zones2のインデックス番号に変換する。
+ * 座標を、zonesのインデックス番号に変換する。
  *
  * @param city_length		cityの一辺の長さ
  * @param pt				座標
@@ -111,3 +111,14 @@ int Zoning::positionToIndex(const QVector2D& pt) const {
 	return r * zone_size + c;
 }
 
+/**
+ * zonesのインデックス番号を座標に変換する。
+ */
+QVector2D Zoning::indexToPosition(int index) const {
+	int cell_len = city_length / zone_size;
+
+	int c = index % zone_size;
+	int r = index / zone_size;
+
+	return QVector2D(((float)c + 0.5) * cell_len - city_length * 0.5, ((float)r + 0.5) * cell_len - city_length * 0.5);
+}

@@ -2,7 +2,8 @@
 
 namespace mcmc4 {
 
-MCMC4::MCMC4() {
+MCMC4::MCMC4(float city_length) {
+	this->city_length = city_length;
 }
 
 void MCMC4::setPreferences(std::vector<std::vector<float> >& preference) {
@@ -34,15 +35,17 @@ void MCMC4::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTy
 	*zones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 	
 	// 初期プランを生成
-	generateZoningPlan(*city_size, *zones, zoneTypeDistribution);
+	int* fixed_zones;
+	generateFixedZoning(*city_size, init_zones, &fixed_zones);
+	generateZoningPlan(*city_size, *zones, zoneTypeDistribution, fixed_zones);
 
 	int max_iterations = 10000;
 
 	for (int layer = 0; layer < num_layers; ++layer) {
 		if (layer == 0) {
-			optimize(*city_size, max_iterations, *zones);
+			optimize(*city_size, max_iterations, fixed_zones, *zones);
 		} else {
-			optimize2(*city_size, max_iterations, *zones);
+			optimize2(*city_size, max_iterations, fixed_zones, *zones);
 		}
 		int* tmpZones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 		memcpy(tmpZones, *zones, sizeof(int) * (*city_size) * (*city_size));
@@ -484,16 +487,56 @@ int MCMC4::check(int city_size, int* zones, int* dist) {
 }
 
 /**
+ * 固定ゾーンのデータを作成する。
+ */
+void MCMC4::generateFixedZoning(int city_size, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones, int** fixed_zones) {
+	*fixed_zones = (int*)malloc(sizeof(int) * city_size * city_size);
+	memset(*fixed_zones, ZoneType::TYPE_UNDEFINED, sizeof(int) * city_size * city_size);
+
+	// init_zonesに含まれるセルは、ゾーンをセットする
+	int numCells = 0;
+	for (int r = 0; r < city_size; ++r) {
+		for (int c = 0; c < city_size; ++c) {
+			QVector2D pt = indexToPosition(r * city_size + c);
+
+			// 除外する
+			for (int z = 0; z < init_zones.size(); ++z) {
+				if (init_zones[z].first.contains(pt)) {
+					*fixed_zones[r * city_size + c] = init_zones[z].second.type();
+					break;
+				}
+			}
+		}
+	}
+}
+
+/**
  * ゾーンプランを生成する。
  */
-void MCMC4::generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution) {
+void MCMC4::generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution, int* fixed_zones) {
+	// init_zonesに含まれないセルをカウントする
+	int numCells = 0;
+	for (int r = 0; r < city_size; ++r) {
+		for (int c = 0; c < city_size; ++c) {
+			if (fixed_zones[r * city_size + c] == ZoneType::TYPE_UNDEFINED) {
+				numCells++;
+			}
+		}
+	}
+
 	std::vector<float> numRemainings(NUM_FEATURES + 1);
 	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
-		numRemainings[i] = city_size * city_size * zoneTypeDistribution[i];
+		numRemainings[i] = numCells * zoneTypeDistribution[i];
 	}
 
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
+			// 除隊対象か？
+			if (fixed_zones[r * city_size + c] != ZoneType::TYPE_UNDEFINED) {
+				zones[r * city_size + c] = fixed_zones[r * city_size + c];
+				continue;
+			}
+
 			int type = sampleFromPdf(numRemainings.data(), numRemainings.size());
 			zones[r * city_size + c] = type;
 			numRemainings[type] -= 1;
@@ -505,7 +548,7 @@ void MCMC4::generateZoningPlan(int city_size, int* zones, std::vector<float> zon
  * bestZoneに、初期ゾーンプランが入っている。
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  */
-void MCMC4::optimize(int city_size, int max_iterations, int* bestZone) {
+void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* bestZone) {
 	int* zone = (int*)malloc(sizeof(int) * city_size * city_size);
 	int* dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
@@ -555,11 +598,11 @@ void MCMC4::optimize(int city_size, int max_iterations, int* bestZone) {
 		int s1, s2;
 		while (true) {
 			s1 = rand() % (city_size * city_size);
-			if (zone[s1] > 0) break;
+			if (fixed_zones[s1] == ZoneType::TYPE_UNDEFINED && zone[s1] > 0) break;
 		}
 		while (true) {
 			s2 = rand() % (city_size * city_size);
-			if (zone[s2] == 0) break;
+			if (fixed_zones[s2] == ZoneType::TYPE_UNDEFINED && zone[s2] == 0) break;
 		}
 
 		// move a store
@@ -617,7 +660,7 @@ void MCMC4::optimize(int city_size, int max_iterations, int* bestZone) {
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  * 各ステップでは、隣接セルをランダムに選択し、ゾーンを交換する。
  */
-void MCMC4::optimize2(int city_size, int max_iterations, int* bestZone) {
+void MCMC4::optimize2(int city_size, int max_iterations, int* fixed_zones, int* bestZone) {
 	int* zone = (int*)malloc(sizeof(int) * city_size * city_size);
 	int* dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
@@ -669,10 +712,13 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* bestZone) {
 		int s1, s2;
 		while (true) {
 			s1 = rand() % (city_size * city_size);
+			if (fixed_zones[s1] != ZoneType::TYPE_UNDEFINED) continue;
+
 			int u = rand() % 4;
 			s2 = s1 + adj[u];
 
 			if (s2 < 0 || s2 >= city_size * city_size) continue;
+			if (fixed_zones[s2] != ZoneType::TYPE_UNDEFINED) continue;
 			if (zone[s1] == zone[s2]) continue;
 
 			int x1 = s1 % city_size;
@@ -743,5 +789,18 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* bestZone) {
 	free(obst);
 	free(toRaise);
 }
+
+/**
+ * zonesのインデックス番号を座標に変換する。
+ */
+QVector2D MCMC4::indexToPosition(int index) const {
+	int cell_len = city_length / city_size;
+
+	int c = index % city_size;
+	int r = index / city_size;
+
+	return QVector2D(((float)c + 0.5) * cell_len - city_length * 0.5, ((float)r + 0.5) * cell_len - city_length * 0.5);
+}
+
 
 };

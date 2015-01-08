@@ -29,11 +29,12 @@ struct BF_QueueElement {
 
 class MCMC4 {
 private:
+	float city_length;
 	std::vector<std::vector<float> > preferences;
 	std::vector<float> preference_for_land_value;
 
 public:
-	MCMC4();
+	MCMC4(float city_length);
 
 public:
 	void setPreferences(std::vector<std::vector<float> >& preference);
@@ -73,9 +74,11 @@ private:
 	static bool GreaterScore(const std::pair<float, int>& rLeft, const std::pair<float, int>& rRight);
 	float computeScore(int city_size, int* zones, int* dist);
 	int check(int city_size, int* zones, int* dist);
-	void generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution);
-	void optimize(int city_size, int max_iterations, int* bestZone);
-	void optimize2(int city_size, int max_iterations, int* bestZone);
+	void generateFixedZoning(int city_size, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones, int** fixed_zones);
+	void generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution, int* fixed_zones);
+	void optimize(int city_size, int max_iterations, int* fixed_zones, int* bestZone);
+	void optimize2(int city_size, int max_iterations, int* fixed_zones, int* bestZone);
+	QVector2D indexToPosition(int index) const;
 };
 
 };

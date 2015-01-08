@@ -21,6 +21,7 @@ public:
 	void load(QDomNode& node);
 	//void save(const QString& filename);
 	int positionToIndex(const QVector2D& pt) const;
+	QVector2D indexToPosition(int index) const;
 };
 
 class CompareZoning
