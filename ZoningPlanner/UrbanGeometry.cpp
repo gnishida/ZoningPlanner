@@ -15,7 +15,7 @@
 #include <numeric>
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>
-#include "MCMC2.h"
+#include "MCMC3.h"
 #include "global.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
@@ -106,17 +106,23 @@ void UrbanGeometry::loadInitZones(const QString& filename) {
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
 void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences) {
+	// 各種ゾーンの配分を取得（住宅、商業、工場、公園、アミューズメント、学校・図書館）
 	QStringList distribution = G::g["zoning_type_distribution"].toString().split(",");
-	std::vector<float> zoneTypeDistribution(6);
-	zoneTypeDistribution[0] = distribution[0].toFloat(); // 住宅
-	zoneTypeDistribution[1] = distribution[1].toFloat(); // 商業
-	zoneTypeDistribution[2] = distribution[2].toFloat(); // 工場
-	zoneTypeDistribution[3] = distribution[3].toFloat(); // 公園
-	zoneTypeDistribution[4] = distribution[4].toFloat(); // アミューズメント
-	zoneTypeDistribution[5] = distribution[5].toFloat(); // 学校・図書館
+	std::vector<float> zoneTypeDistribution(distribution.size());
+	for (int i = 0; i < distribution.size(); ++i) {
+		zoneTypeDistribution[i] = distribution[i].toFloat();
+	}
 
-	mcmc2::MCMC2 mcmc;
+	// 価格を決定するためのpreference vectorを取得
+	QStringList pref_for_land_value = G::g["preference_for_land_value"].toString().split(",");
+	std::vector<float> preference_for_land_value(pref_for_land_value.size());
+	for (int i = 0; i < pref_for_land_value.size(); ++i) {
+		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
+	}
+
+	mcmc3::MCMC3 mcmc;
 	mcmc.setPreferences(preferences);
+	mcmc.setPreferenceForLandValue(preference_for_land_value);
 	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"), zones.init_zones);
 }
 
@@ -126,7 +132,15 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
  * ブロックも生成済みである必要がある。
  */
 QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference) {
-	mcmc2::MCMC2 mcmc;
+	// 価格を決定するためのpreference vectorを取得
+	QStringList pref_for_land_value = G::g["preference_for_land_value"].toString().split(",");
+	std::vector<float> preference_for_land_value(pref_for_land_value.size());
+	for (int i = 0; i < pref_for_land_value.size(); ++i) {
+		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
+	}
+
+	mcmc3::MCMC3 mcmc;
+	mcmc.setPreferenceForLandValue(preference_for_land_value);
 
 	// 距離マップを生成する
 	int* dist;
@@ -148,7 +162,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 		int s = zones.positionToIndex(QVector2D(pt.x(), pt.y()));
 		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
 
-		float score = mcmc2::MCMC2::dot(feature, preference);
+		float score = mcmc3::MCMC3::dot(feature, preference);
 
 		if (score > best_score) {
 			best_score = score;
@@ -168,20 +182,26 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
  * ゾーンプランは既に生成済みである必要がある。
  */
 std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::generateTasks(int num) {
-	mcmc2::MCMC2 mcmc;
+	// 価格を決定するためのpreference vectorを取得
+	QStringList pref_for_land_value = G::g["preference_for_land_value"].toString().split(",");
+	std::vector<float> preference_for_land_value(pref_for_land_value.size());
+	for (int i = 0; i < pref_for_land_value.size(); ++i) {
+		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
+	}
+
+	mcmc3::MCMC3 mcmc;
 	int* dist;
+	mcmc.setPreferenceForLandValue(preference_for_land_value);
 	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);
 
 	std::vector<std::vector<float> > features;
 	for (int s = 0; s < zones.zone_size * zones.zone_size; ++s) {
 		if (zones.zones[s] != ZoneType::TYPE_RESIDENTIAL) continue;
 
-		float feature[7];
-		mcmc.computeRawFeature(zones.zone_size, zones.zones, dist, s, feature);
+		std::vector<float> feature;
+		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
 
-		std::vector<float> f;
-		for (int i = 0; i < 7; ++i) f.push_back(feature[i]);
-		features.push_back(f);
+		features.push_back(feature);
 	}
 
 	free(dist);
@@ -194,27 +214,33 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 
 		int r1 = Util::genRand(0, features.size());
 		int r2;
-
-		std::vector<float> f2(7);
-
+				
+		std::vector<float> option1;
+		std::vector<float> option2;
 		while (true) {
 			r2 = Util::genRand(0, features.size());
 			if (r2 == r1) continue;
 
-			f2 = features[r2];
+			std::vector<float> f2 = features[r2];
 			f2[com1] = features[r1][com1];
 			f2[com2] = features[r1][com2];
 
+			f2[7] = mcmc.computePriceIndex(f2);
+
+			option1 = mcmc3::MCMC3::featureToDist(features[r1]);
+			option2 = mcmc3::MCMC3::featureToDist(f2);
+
+			// ２つのoptionが近すぎる場合は、棄却
 			float len = 0.0f;
-			for (int i = 0; i < 7; ++i) {
-				len += SQR(features[r1][i] - f2[i]);
+			for (int i = 0; i < option1.size(); ++i) {
+				len += SQR(option1[i] - option2[i]);
 			}
 			if (len < 100) continue;
 
 			break;
 		}
 
-		ret.push_back(std::make_pair(features[r1], f2));
+		ret.push_back(std::make_pair(option1, option2));
 	}
 
 	return ret;

@@ -21,7 +21,7 @@
 #include "HCStartWidget.h"
 #include "JSON.h"
 #include "GradientDescent.h"
-#include "MCMC2.h"
+#include "MCMC3.h"
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
@@ -304,8 +304,8 @@ void MainWindow::onHCStart() {
 	// 適当なpreference vectorを作成
 	std::vector<std::vector<float> > preference;
 	preference.resize(1);
-	for (int i = 0; i < 1; ++i) preference[i].resize(7);
-	preference[0][0] = 0.378; preference[0][1] = 0.378; preference[0][2] = 0.378; preference[0][3] = 0.378; preference[0][4] = 0.378; preference[0][5] = 0.378; preference[0][6] = -0.378;
+	for (int i = 0; i < 1; ++i) preference[i].resize(8);
+	preference[0][0] = 0.378; preference[0][1] = 0.378; preference[0][2] = 0.378; preference[0][3] = 0.378; preference[0][4] = 0.378; preference[0][5] = 0.378; preference[0][6] = -0.378; preference[0][7] = -0.378;
 
 	// ゾーンプランを作成する
 	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference);
@@ -394,9 +394,9 @@ void MainWindow::onHCResults() {
 			std::vector<float> f2;
 			QStringList feature1_list = tasks[step].first.split(",");
 			QStringList feature2_list = tasks[step].second.split(",");
-			for (int k = 0; k < 7; ++k) {
-				f1.push_back(mcmc2::MCMC2::distToFeature(feature1_list[k].toFloat()));
-				f2.push_back(mcmc2::MCMC2::distToFeature(feature2_list[k].toFloat()));
+			for (int k = 0; k < 8; ++k) {
+				f1.push_back(mcmc3::MCMC3::distToFeature(feature1_list[k].toFloat()));
+				f2.push_back(mcmc3::MCMC3::distToFeature(feature2_list[k].toFloat()));
 			}
 
 			features.push_back(std::make_pair(f1, f2));
@@ -404,8 +404,8 @@ void MainWindow::onHCResults() {
 			choices.push_back(chioces_list[step].toInt() == 1 ? 1 : 0);
 		}
 
-		std::vector<float> w(7);
-		w[0] = 0.3f; w[1] = 0.3f; w[2] = 0.3f; w[3] = 0.3f; w[4] = 0.3f; w[5] = 0.3f; w[6] = -0.3f;
+		std::vector<float> w(8);
+		w[0] = 0.3f; w[1] = 0.3f; w[2] = 0.3f; w[3] = 0.3f; w[4] = 0.3f; w[5] = 0.3f; w[6] = -0.3f; w[7] = -0.3f;
 		gd.run(w, features, choices, 10000, false, 0.0, 0.001, 0.0001);
 		preferences.push_back(w);
 

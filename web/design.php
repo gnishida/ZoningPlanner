@@ -70,6 +70,7 @@ $feature2 = explode(",", $row["option2"]);
 <tr><td>To the nearest amusement facility</td><td><?= $feature1[4] ?> [m]</td><td><?= $feature2[4] ?> [m]</td></tr>
 <tr><td>To the nearest library</td><td><?= $feature1[5] ?> [m]</td><td><?= $feature2[5] ?> [m]</td></tr>
 <tr><td>To the nearest factory</td><td><?= $feature1[6] ?> [m]</td><td><?= $feature2[6] ?> [m]</td></tr>
+<tr><td>Price of 2 bed room rent / 4 bed room house</td><td>$ <?= round($feature1[7] * 1000) ?> / $ <?= round($feature1[7] * 300) ?>K</td><td>$ <?= round($feature2[7] * 1000) ?> / $ <?= round($feature2[7] * 300) ?>K</td></tr>
 </table>
 
 <p>Which option do you prefer?

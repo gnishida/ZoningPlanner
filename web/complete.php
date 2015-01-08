@@ -12,7 +12,7 @@ $email = $_SESSION["email"];
 <div id="task">
 <p class="right"><?=$email?></p>
 	
-<h1>All rounds have completed</h1>
+<h1>You have completed all rounds.</h1>
 <form>
 <p>Thank you very much for your time!</p>
 </form>
