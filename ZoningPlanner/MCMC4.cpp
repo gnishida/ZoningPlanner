@@ -55,11 +55,17 @@ void MCMC4::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTy
 		// ゾーンマップを、たて、よこ、２倍ずつに増やす
 		*city_size *= 2;
 		*zones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
+		free(fixed_zones);
+		generateFixedZoning(*city_size, init_zones, &fixed_zones);
 		for (int r = 0; r < *city_size; ++r) {
 			for (int c = 0; c < *city_size; ++c) {
 				int oldR = r / 2;
 				int oldC = c / 2;
-				(*zones)[r * (*city_size) + c] = tmpZones[(int)(oldR * (*city_size) * 0.5 + oldC)];
+				if (fixed_zones[r * (*city_size) + c] != ZoneType::TYPE_UNDEFINED) {
+					(*zones)[r * (*city_size) + c] = fixed_zones[r * (*city_size) + c];
+				} else {
+					(*zones)[r * (*city_size) + c] = tmpZones[(int)(oldR * (*city_size) * 0.5 + oldC)];
+				}
 			}
 		}
 
