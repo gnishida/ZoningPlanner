@@ -78,7 +78,7 @@ private:
 	void generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution, int* fixed_zones);
 	void optimize(int city_size, int max_iterations, int* fixed_zones, int* bestZone);
 	void optimize2(int city_size, int max_iterations, int* fixed_zones, int* bestZone);
-	QVector2D indexToPosition(int index) const;
+	QVector2D indexToPosition(int index, int city_size) const;
 };
 
 };

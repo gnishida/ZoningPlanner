@@ -120,7 +120,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
 	}
 
-	mcmc4::MCMC4 mcmc;
+	mcmc4::MCMC4 mcmc(renderManager.side);
 	mcmc.setPreferences(preferences);
 	mcmc.setPreferenceForLandValue(preference_for_land_value);
 	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"), zones.init_zones);
@@ -139,7 +139,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
 	}
 
-	mcmc4::MCMC4 mcmc;
+	mcmc4::MCMC4 mcmc(renderManager.side);
 	mcmc.setPreferenceForLandValue(preference_for_land_value);
 
 	// 距離マップを生成する
@@ -181,7 +181,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
  * 生成済みのゾーンプランから、ランダムに２つのセルを選択し、それぞれのfeatureを取得してcomparison taskとする。
  * ゾーンプランは既に生成済みである必要がある。
  */
-std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::generateTasks(int num) {
+std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::generateTasks(VBORenderManager& renderManager, int num) {
 	// 価格を決定するためのpreference vectorを取得
 	QStringList pref_for_land_value = G::g["preference_for_land_value"].toString().split(",");
 	std::vector<float> preference_for_land_value(pref_for_land_value.size());
@@ -189,7 +189,7 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
 	}
 
-	mcmc4::MCMC4 mcmc;
+	mcmc4::MCMC4 mcmc(renderManager.side);
 	int* dist;
 	mcmc.setPreferenceForLandValue(preference_for_land_value);
 	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);

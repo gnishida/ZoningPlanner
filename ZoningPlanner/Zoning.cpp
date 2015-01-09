@@ -5,6 +5,7 @@
 #include "BlockSet.h"
 
 Zoning::Zoning() {
+	zones = 0;
 }
 
 int Zoning::getZone(const QVector2D& pt) const {
@@ -34,7 +35,7 @@ void Zoning::loadInitZones(const QString& filename) {
 		QDomNode nodePoint = node.firstChild();
 		while (!nodePoint.isNull()) {
 			float x = nodePoint.toElement().attribute("x").toFloat();
-			float y = nodePoint.toElement().attribute("x").toFloat();
+			float y = nodePoint.toElement().attribute("y").toFloat();
 			polygon.push_back(QVector2D(x, y));
 
 			nodePoint = nodePoint.nextSibling();

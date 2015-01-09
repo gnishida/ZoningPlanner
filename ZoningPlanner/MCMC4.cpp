@@ -491,20 +491,28 @@ int MCMC4::check(int city_size, int* zones, int* dist) {
  */
 void MCMC4::generateFixedZoning(int city_size, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones, int** fixed_zones) {
 	*fixed_zones = (int*)malloc(sizeof(int) * city_size * city_size);
-	memset(*fixed_zones, ZoneType::TYPE_UNDEFINED, sizeof(int) * city_size * city_size);
 
 	// init_zonesに含まれるセルは、ゾーンをセットする
 	int numCells = 0;
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
-			QVector2D pt = indexToPosition(r * city_size + c);
+			QVector2D pt = indexToPosition(r * city_size + c, city_size);
 
 			// 除外する
+			bool fixed = false;
+			int type;
 			for (int z = 0; z < init_zones.size(); ++z) {
 				if (init_zones[z].first.contains(pt)) {
-					*fixed_zones[r * city_size + c] = init_zones[z].second.type();
+					fixed = true;
+					type = init_zones[z].second.type();
 					break;
 				}
+			}
+
+			if (fixed) {
+				(*fixed_zones)[r * city_size + c] = type;
+			} else {
+				(*fixed_zones)[r * city_size + c] = ZoneType::TYPE_UNDEFINED;
 			}
 		}
 	}
@@ -793,7 +801,7 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 /**
  * zonesのインデックス番号を座標に変換する。
  */
-QVector2D MCMC4::indexToPosition(int index) const {
+QVector2D MCMC4::indexToPosition(int index, int city_size) const {
 	int cell_len = city_length / city_size;
 
 	int c = index % city_size;

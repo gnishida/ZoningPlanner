@@ -324,7 +324,7 @@ void MainWindow::onHCStart() {
 	}
 
 	// HCタスク生成
-	std::vector<std::pair<std::vector<float>, std::vector<float> > > tasks = urbanGeometry->generateTasks(max_step);
+	std::vector<std::pair<std::vector<float>, std::vector<float> > > tasks = urbanGeometry->generateTasks(glWidget->vboRenderManager, max_step);
 
 	// HCタスクをアップロード
 	for (int step = 0; step < max_step; ++step) {
@@ -339,6 +339,13 @@ void MainWindow::onHCStart() {
 			return;
 		}
 	}
+
+	// 3D更新
+	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+	//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	glWidget->shadow.makeShadowMap(glWidget);
+	glWidget->updateGL();
 
 	// HCラウンドを1にセット
 	client.setUrl("http://gnishida.site90.com/next_round.php");
@@ -467,7 +474,7 @@ void MainWindow::onHCNext() {
 	int max_step = client.reply().toInt();
 
 	// HCタスク生成
-	std::vector<std::pair<std::vector<float>, std::vector<float> > > tasks = urbanGeometry->generateTasks(max_step);
+	std::vector<std::pair<std::vector<float>, std::vector<float> > > tasks = urbanGeometry->generateTasks(glWidget->vboRenderManager, max_step);
 
 	// HCタスクをアップロード
 	for (int step = 0; step < max_step; ++step) {
