@@ -1,4 +1,4 @@
-#version 330
+#version 420
 
 layout(location = 0)in vec3 vertex;
 layout(location = 1)in vec4 color;
@@ -14,6 +14,7 @@ out vec3 varyingNormal;
 
 // UNIFORM
 uniform int mode;
+uniform int terrainMode;//0 FLAT 1 Mountains
 
 // MODE 1--> color
 // MODE 2--> texture
@@ -22,6 +23,10 @@ uniform int mode;
 // MODE 5--> model obj: one color
 // MODE 6--> model obj: texture
 
+         // // MODE 9--> hatch
+		// // MODE 10--> hatch
+
+//0x0100 --> adapt terrain
 //0x0200 --> lighting
 
 uniform mat4 mvpMatrix;
@@ -50,7 +55,6 @@ void main(){
 	outColor=color;
 	outUV=uv;
 	origVertex=vertex;
-
 	//////////////////////////////////////
 	// 1. TRANSFORM MODEL
 	if(((mode&0x0FF)==0x05)||((mode&0xFF)==0x06)){
@@ -59,21 +63,26 @@ void main(){
 		origVertex=(modelTransf*vec4(origVertex,1.0)).xyz;//note 1.0
 
 	}
-
 	//////////////////////////////////////
 	// 2. ADAPT TO TERRAIN
-	if ((mode&0xFF)==0x03) {// terrain or adapt to terrain
-		const float maxHeight=7.0;//7=255*7 1785m (change in fragment as well) !!!Also in VBOTerrain
+	if(((mode&0xFF)==0x03)&&(terrainMode==0)){//flat terrain--> Compute height
+		vec2 terrainTexCoord=vec2(
+			(origVertex.x-terrain_size.x)/terrain_size.z,
+			(origVertex.y-terrain_size.y)/terrain_size.w
+			);
+		float height = texture(terrain_tex,terrainTexCoord.rg).r;
+		outColor.r=height;
+	}
+
+	if((((mode&0xFF)==0x03)||((mode&0x0100)==0x0100))&&terrainMode==1){// terrain or adapt to terrain (and terrainMode=1)
 		vec2 terrainTexCoord=vec2(
 			(origVertex.x-terrain_size.x)/terrain_size.z,
 			(origVertex.y-terrain_size.y)/terrain_size.w
 			);
 		//float height=255.0f*length(texture(terrain_tex,terrainTexCoord.rg));
-		float height=maxHeight*255.0f*texture(terrain_tex,terrainTexCoord.rg).r;
+		float height = texture(terrain_tex,terrainTexCoord.rg).r;
 
 		origVertex.z+=height;
-		//if(height<15.0f)//water height
-		//	origVertex.z=-100.0f;
 
 		if((mode&0xFF)==0x03){// terrain
 			// computer normal from heightmap
@@ -84,21 +93,26 @@ void main(){
 			float s21 = textureOffset(terrain_tex, terrainTexCoord.rg, off.zy).r;
 			float s10 = textureOffset(terrain_tex, terrainTexCoord.rg, off.yx).r;
 			float s12 = textureOffset(terrain_tex, terrainTexCoord.rg, off.yz).r;
-			vec3 va = normalize(vec3(size.xy,10*(s21-s01)));
-			vec3 vb = normalize(vec3(size.yx,10*(s12-s10)));
-			//vec3 va = normalize(vec3(size.x,s21-s01,size.y));
-			//vec3 vb = normalize(vec3(size.y,s12-s10,size.x));
+
+			//vec3 va = normalize(vec3(size.xy,10*(s21-s01)));
+			//vec3 vb = normalize(vec3(size.yx,10*(s12-s10)));
+
+			// GEN 1/17/2015
+			// Originally UCHAR image is used and the texture data is [0, 1]
+			// Now I use FLOAT image and the texture data is [0, infinate]
+			// 0.039 is just a good number to make the things look 3D
+			vec3 va = normalize(vec3(size.xy, (s21-s01) * 0.039));
+			vec3 vb = normalize(vec3(size.yx, (s12-s10) * 0.039));
+
 			varyingNormal=cross(va,vb);
 		}
 	}
-
 	//////////////////////////////////////
 	// SHADOW: From light
 	if(shadowState==2){
 		gl_Position = light_mvpMatrix * vec4(origVertex,1.0);
 		return;
 	}
-
 	//////////////////////////////////////
 	// WATER
 	if((mode&0xFF)==0x04){
@@ -110,7 +124,6 @@ void main(){
 		outUV.s = r.x/m + 0.5;
 		outUV.t = r.y/m + 0.5;
 	}
-
 	//////////////////////////////////////
 	// LIGHTING
 	if((mode&0x0200)==0x0200){
@@ -125,4 +138,5 @@ void main(){
 	}
 
 	gl_Position = mvpMatrix * vec4(origVertex,1.0);
+
 }

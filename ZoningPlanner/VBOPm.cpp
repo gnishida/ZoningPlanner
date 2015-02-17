@@ -257,6 +257,7 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 	// 3Dモデルを生成する
 	rendManager.removeStaticGeometry("zoning");
 	for (int i = 0; i < blocks.size(); ++i) {
+		if (!blocks[i].valid) continue;
 		blocks[i].adaptToTerrain(&rendManager);
 		
 		if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) continue;

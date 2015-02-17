@@ -10,9 +10,11 @@
 // Contaisn the Vertex structure to do the rendering
 struct Vertex{
 	float info[16];	
+
 	// Contructors
-	Vertex(){
+	Vertex() {
 	}
+
 	Vertex(float x,float y,float z,float r,float g,float b,float a,float nX,float nY,float nZ,float tS,float tT,float tW){
 		info[0]=x;
 		info[1]=y;
@@ -30,8 +32,25 @@ struct Vertex{
 		info[12]=tS;
 		info[13]=tT;
 		info[14]=tW;
-	}//
-	Vertex(QVector3D pos,QColor color,QVector3D normal,QVector3D tex){
+	}
+
+	Vertex(float x, float y, float z, const QColor& color, float nX, float nY, float nZ, float tS, float tT, float tW) {
+		info[0] = x;
+		info[1] = y;
+		info[2] = z;
+		info[4] = color.redF();
+		info[5] = color.greenF();
+		info[6] = color.blueF();
+		info[7] = color.alphaF();
+		info[8] = nX;
+		info[9] = nY;
+		info[10] = nZ;
+		info[12] = tS;
+		info[13] = tT;
+		info[14] = tW;
+	}
+
+	Vertex(QVector3D pos,QColor color,QVector3D normal,QVector3D tex) {
 		info[0]=pos.x();
 		info[1]=pos.y();
 		info[2]=pos.z();

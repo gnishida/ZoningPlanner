@@ -99,6 +99,8 @@ void Zoning::load(QDomNode& node) {
  * @return					インデックス番号
  */
 int Zoning::positionToIndex(const QVector2D& pt) const {
+	if (zones == 0) return -1;
+
 	int cell_len = city_length / zone_size;
 
 	int c = (pt.x() + city_length * 0.5 + cell_len * 0.5) / cell_len;

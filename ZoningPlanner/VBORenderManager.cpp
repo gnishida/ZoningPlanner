@@ -20,7 +20,7 @@ void VBORenderManager::init(){
 	program=Shader::initShader(QString("../data/shaders/lc_vertex_sk.glsl"),QString("../data/shaders/lc_fragment_sk.glsl"));
 	glUseProgram(program);
 
-	vboTerrain.init(*this);
+	vboTerrain.init(this, 200);
 	vboSkyBox.init(*this);
 
 	// initialize layer
@@ -151,21 +151,24 @@ void VBORenderManager::cleanVAO(GLuint vbo,GLuint vao){
 /**
 	* If "actual" flag is on, then the actual elevation will be returned even if the 2D flat terrain is used.
 	*/
-float VBORenderManager::getTerrainHeight(float xP,float xY){
-	float xM=1.0f-(side/2.0f-xP)/side;
-	float yM=1.0f-(side/2.0f-xY)/side;
-	return vboTerrain.getTerrainHeight(xM,yM);
+float VBORenderManager::getTerrainHeight(float x, float y) {
+	float u = x / side + 0.5f;
+	float v = y / side + 0.5f;
+	if (u < 0) u = 0.0f;
+	if (u > 1.0f) u = 1.0f;
+	if (v < 0) v = 0.0f;
+	if (v > 1.0f) v = 1.0f;
+
+	return vboTerrain.getTerrainHeight(u, v);
 }
 
 void VBORenderManager::changeTerrainDimensions(float terrainSide,int resolution){
-	side=terrainSide;
-	minPos=QVector3D (-side/2.0f,-side/2.0f,0);
-	maxPos=QVector3D (side/2.0f,side/2.0f,0);
-	vboTerrain.resolutionX=resolution;
-	vboTerrain.resolutionY=resolution;
-	vboTerrain.init(*this);
+	side = terrainSide;
+	minPos = QVector3D(-side/2.0f, -side/2.0f, 0);
+	maxPos = QVector3D(side/2.0f, side/2.0f, 0);
+	vboTerrain.init(this, resolution);
 	vboSkyBox.init(*this);
-}//
+}
 
 ///////////////////////////////////////////////////////////////////
 // STATIC

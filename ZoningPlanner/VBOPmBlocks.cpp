@@ -19,14 +19,16 @@ RoadGraph * roadGraphPtr;
 std::vector< Block > * blocksPtr;
 
 Polygon3D sidewalkContourTmp;
-Polygon3D sidewalkContourPoints;
-std::vector<Polyline3D> sidewalkContourLines;
+Polygon2D sidewalkContourPoints;
+std::vector<Polyline2D> sidewalkContourLines;
 
 std::vector< float > sidewalkContourWidths;
 bool isFirstVertexVisited;
 
 int curRandSeed;
 int curPlaceTypeIdx;
+
+std::vector<RoadVertexDesc> visitedVs;
 
 int face_index = 0;
 bool vertex_output_visitor_invalid = false;
@@ -35,8 +37,7 @@ struct output_visitor : public boost::planar_face_traversal_visitor
 {
 	void begin_face()
 	{
-		//std::cout << "face: " << face_index++ << std::endl;
-		
+		face_index++;
 		sidewalkContourTmp.clear();
 		sidewalkContourWidths.clear();
 
@@ -44,18 +45,25 @@ struct output_visitor : public boost::planar_face_traversal_visitor
 		sidewalkContourLines.clear();
 
 		vertex_output_visitor_invalid = false;
+		visitedVs.clear();
 	}
 
 	void end_face()
 	{
-		sidewalkContourTmp.clear();
-
 		if (vertex_output_visitor_invalid){ 
 			printf("INVALID end face\n");
 			return;
 		}
+
+		sidewalkContourTmp.clear();
+
+		if (sidewalkContourPoints.size() <= 2) {
+			return;
+		}
 			
-		for (int i = 0; i < sidewalkContourPoints.contour.size(); ++i) {
+		for (int i = 0; i < sidewalkContourPoints.size(); ++i) {
+			if (i >= sidewalkContourLines.size()) break;
+			if (sidewalkContourLines[i].size() == 0) continue;
 			sidewalkContourTmp.push_back(sidewalkContourPoints[i]);
 			//sidewalkContourTmp.contour.back().setZ(0);//forze height =0
 
@@ -97,107 +105,86 @@ struct vertex_output_visitor : public output_visitor
 	{ 	
 		if (v >= boost::num_vertices(roadGraphPtr->graph)) {
 			vertex_output_visitor_invalid = true;
-			printf("INVALID vertex\n");
 			return;
 		}
-		//std::cout << v << " 
-		/*
-		if(  v >= 0 && v < boost::num_vertices(roadGraphPtr->graph) ){
-			blockContourTmp.push_back( (roadGraphPtr->graph)[v]->pt );
 
-			//initialize block random seed from first street node random seed
-			if(isFirstVertexVisited){
-				isFirstVertexVisited = false;
-				curRandSeed = ( (roadGraphPtr->graph)[v]->randSeed*4096 + 150889) % 714025;
+		if (!vertex_output_visitor_invalid) {
+			visitedVs.push_back(v);
+			if (v >= boost::num_vertices(roadGraphPtr->graph)) {
+				vertex_output_visitor_invalid = true;
+				printf("INVALID vertex\n");
+				return;
 			}
-		}*/
-		sidewalkContourPoints.push_back(roadGraphPtr->graph[v]->pt);
+			sidewalkContourPoints.push_back(roadGraphPtr->graph[v]->pt);
+
+		}
 	}
 
 	template <typename Edge> 
 	void next_edge(Edge e) 
-	{ 
-		RoadVertexDesc src = boost::source(e, roadGraphPtr->graph);
-		RoadVertexDesc tgt = boost::target(e, roadGraphPtr->graph);
-		if (src >= boost::num_vertices(roadGraphPtr->graph) || tgt >= boost::num_vertices(roadGraphPtr->graph)) {
-			vertex_output_visitor_invalid = true;
-			printf("INVALID edge\n");
-			return;
+	{
+		if (!vertex_output_visitor_invalid) {
+			RoadVertexDesc src = boost::source(e, roadGraphPtr->graph);
+			RoadVertexDesc tgt = boost::target(e, roadGraphPtr->graph);
+
+			if (src == tgt) {
+				vertex_output_visitor_invalid = true;
+				return;
+			}
+			if (visitedVs.size() > 0 && src != visitedVs.back() && tgt != visitedVs.back()) {
+				vertex_output_visitor_invalid = true;
+				return;
+			}
+			if (src >= boost::num_vertices(roadGraphPtr->graph) || tgt >= boost::num_vertices(roadGraphPtr->graph)) {
+				vertex_output_visitor_invalid = true;
+				printf("INVALID edge\n");
+				return;
+			}
+
+			sidewalkContourLines.push_back(roadGraphPtr->graph[e]->polyline);
+
+			for (int i = 0; i < roadGraphPtr->graph[e]->polyline.size() - 1; ++i) {
+				sidewalkContourWidths.push_back(0.5f * roadGraphPtr->graph[e]->getWidth());
+			}
 		}
-
-		sidewalkContourLines.push_back(roadGraphPtr->graph[e]->polyline3D);
-
-		for (int i = 0; i < roadGraphPtr->graph[e]->polyline3D.size() - 1; ++i) {
-			sidewalkContourWidths.push_back(0.5f * roadGraphPtr->graph[e]->getWidth());
-		}
-
 	}
 };
 
 //
 // Remove intersecting edges of a graph
-// GEN: This function considers each edge as a straight line segment, instead of a polyline.
-//      This may cause unnecessary removal of edges, but it usually can guarantee the planar graph after this process, so I will go with this.
 //
-bool removeIntersectingEdges(RoadGraph &roadGraph)
-{
-	//QSet<RoadGraph::roadGraphEdgeIter*> edgesToRemove2;
+bool removeIntersectingEdges(RoadGraph &roadGraph) {
 	std::vector<RoadEdgeIter> edgesToRemove;
 
-	QVector2D a0, a1, b0, b1;
-	QVector2D intPt;
-	RoadEdgeIter a_ei, a_ei_end;
-	RoadEdgeIter b_ei, b_ei_end;
-	float ta0a1, tb0b1;
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roadGraph.graph); ei != eend; ++ei) {
+		RoadEdgeIter ei2;
+		for (ei2 = ei; ei2 != eend; ++ei2) {
+			if (ei2 != ei) {
+				if (GraphUtil::isIntersect(roadGraph, roadGraph.graph[*ei]->polyline, roadGraph.graph[*ei2]->polyline)) {
+					if (std::find(edgesToRemove.begin(), edgesToRemove.end(), ei2) == edgesToRemove.end()) {
+						edgesToRemove.push_back(ei2);
 
-	for(boost::tie(a_ei, a_ei_end) = boost::edges(roadGraph.graph); a_ei != a_ei_end; ++a_ei){
-		a0 = QVector2D(roadGraph.graph[boost::source(*a_ei,roadGraph.graph)]->pt);
-		a1 = QVector2D(roadGraph.graph[boost::target(*a_ei,roadGraph.graph)]->pt);
-
-		//for(tie(b_ei, b_ei_end) = boost::edges(roadGraph.graph); b_ei != b_ei_end; ++b_ei){
-		for(b_ei = a_ei; b_ei != a_ei_end; ++b_ei){			
-
-			if(b_ei != a_ei){
-				b0 = QVector2D(roadGraph.graph[boost::source(*b_ei,roadGraph.graph)]->pt);
-				b1 = QVector2D(roadGraph.graph[boost::target(*b_ei,roadGraph.graph)]->pt);
-
-				if(Polygon3D::segmentSegmentIntersectXY(a0, a1, b0, b1, &ta0a1, &tb0b1, true, intPt) ){
-					bool addEd=true;
-					for(int eN=0;eN<edgesToRemove.size();eN++){
-						if(edgesToRemove[eN]==b_ei){
-							addEd=false;
-							break;
-						}
+						RoadVertexDesc src = boost::source(*ei2, roadGraph.graph);
+						RoadVertexDesc tgt = boost::target(*ei2, roadGraph.graph);
+						printf("remove edge: (%lf, %lf) - (%lf, %lf)\n", roadGraph.graph[src]->pt.x(), roadGraph.graph[src]->pt.y(), roadGraph.graph[tgt]->pt.x(), roadGraph.graph[tgt]->pt.y());
 					}
-					if(addEd)
-						edgesToRemove.push_back(b_ei);
-					/*// remove other as well
-					addEd=true;
-					for(int eN=0;eN<edgesToRemove.size();eN++){
-						if(edgesToRemove[eN]==a_ei){
-							addEd=false;
-							break;
-						}
-					}
-					if(addEd)
-						edgesToRemove.push_back(a_ei);
-					///*/
 				}
 			}
 		}		
 	}
 
 	for(int i=0; i<edgesToRemove.size(); ++i){
-		boost::remove_edge(*(edgesToRemove[i]),roadGraph.graph);
+		boost::remove_edge(*(edgesToRemove[i]), roadGraph.graph);
 	}
 
 	if(edgesToRemove.size()>0){
-		printf("Edge removed %d\n",edgesToRemove.size());
+		printf("Edge removed %d\n", edgesToRemove.size());
 		return true;
 	} else {
 		return false;
 	}
-}//
+}
 
 
 /**
@@ -222,6 +209,7 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 
 	int cont=0;
 
+	/*
 	// Test for planarity
 	while (cont<2) {
 		if (boost::boyer_myrvold_planarity_test(boost::boyer_myrvold_params::graph =roadGraph.graph,
@@ -241,6 +229,7 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		std::cout << "ERROR: Graph could not be planarized: (generateBlocks)\n";
 		return false;
 	}
+	*/
 	
 	// build embedding manually
 	//embedding.clear();
@@ -275,13 +264,15 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 
 		if( blocks[i].sidewalkContour.contour.size() != blocks[i].sidewalkContourRoadsWidths.size() ){
 			std::cout << "Error: contour" << blocks[i].sidewalkContour.contour.size() << " widhts " << blocks[i].sidewalkContourRoadsWidths.size() << "\n";
-			blocks[i].sidewalkContour.contour.clear();
+			blocks[i].sidewalkContour.clear();
+			blocks[i].valid = false;
 			blockAreas.push_back(0.0f);
 			continue;
 		}
 
 		if(blocks[i].sidewalkContour.contour.size() < 3){
 			std::cout << "Error: Contour <3 " << "\n";
+			blocks[i].valid = false;
 			blockAreas.push_back(0.0f);
 			continue;
 		}
@@ -290,7 +281,7 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		float insetArea = blocks[i].sidewalkContour.computeInset(blocks[i].sidewalkContourRoadsWidths,sidewalkContourInset);
 		
 		blocks[i].sidewalkContour.contour = sidewalkContourInset;
-		blocks[i].sidewalkContour.getBBox3D(blocks[i].bbox.minPt, blocks[i].bbox.maxPt);
+		//blocks[i].sidewalkContour.getBBox3D(blocks[i].bbox.minPt, blocks[i].bbox.maxPt);
 		
 		blockAreas.push_back(insetArea);
 	}
@@ -308,17 +299,16 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		}
 	}
 	if (maxAreaIdx != -1) {
-		blocks.blocks.erase(blocks.blocks.begin()+maxAreaIdx);
+		blocks[maxAreaIdx].valid = false;
+		//blocks.blocks.erase(blocks.blocks.begin()+maxAreaIdx);
 	}
 
 	// GEN: remove the blocks whose edges are less than 3
 	// This problem is caused by the computeInset() function.
 	// ToDo: fix the computeInset function.
-	for (int i = 0; i < blocks.size(); ) {
+	for (int i = 0; i < blocks.size(); ++i) {
 		if (blocks[i].sidewalkContour.contour.size() < 3) {
-			blocks.blocks.erase(blocks.blocks.begin() + i);
-		} else {
-			i++;
+			blocks[i].valid = false;
 		}
 	}
 
@@ -329,21 +319,28 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 }
 
 void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadEdgeDesc> > &embedding) {
-	for (int i = 0; i < embedding.size(); ++i) {
+	embedding.clear();
+
+	RoadVertexIter vi, vend;
+	for (boost::tie(vi, vend) = boost::vertices(roads.graph); vi != vend; ++vi) {
 		QMap<float, RoadEdgeDesc> edges;
 
-		for (int j = 0; j < embedding[i].size(); ++j) {
-			Polyline2D polyline = GraphUtil::orderPolyLine(roads, embedding[i][j], i);
+		RoadOutEdgeIter ei, eend;
+		for (boost::tie(ei, eend) = boost::out_edges(*vi, roads.graph); ei != eend; ++ei) {
+			Polyline2D polyline = GraphUtil::orderPolyLine(roads, *ei, *vi);
 			QVector2D vec = polyline[1] - polyline[0];
-			edges[-atan2f(vec.y(), vec.x())] = embedding[i][j];
+			edges[-atan2f(vec.y(), vec.x())] = *ei;
 		}
 
 		std::vector<RoadEdgeDesc> edge_descs;
 		for (QMap<float, RoadEdgeDesc>::iterator it = edges.begin(); it != edges.end(); ++it) {
 			edge_descs.push_back(it.value());
+
+			RoadEdgePtr e = roads.graph[it.value()];
+			Polyline2D pl = e->polyline;
 		}
 
-		embedding[i] = edge_descs;
+		embedding.push_back(edge_descs);
 	}
 }
 
@@ -356,6 +353,8 @@ void VBOPmBlocks::buildEmbedding(RoadGraph &roads, std::vector<std::vector<RoadE
  */
 void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 	for (int i = 0; i < blocks.size(); ++i) {
+		if (!blocks[i].valid) continue;
+
 		// assign a zone type to the block
 		{
 			BBox3D bbox;
@@ -363,17 +362,22 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 
 			// ブロックが細すぎる場合は、使用不可ブロックとする
 			if (blocks[i].sidewalkContour.isTooNarrow(8.0f, 18.0f) || blocks[i].sidewalkContour.isTooNarrow(1.0f, 3.0f)) {
-				blocks[i].zone = ZoneType(ZoneType::TYPE_UNUSED, 1);
+				blocks[i].valid = false;
 				continue;
 			}
 
 			int s = zoning.positionToIndex(QVector2D(bbox.midPt()));
-			blocks[i].zone = ZoneType(zoning.zones[s], 1);
+			if (s >= 0)  {
+				blocks[i].zone = ZoneType(zoning.zones[s], 1);
+			} else {
+				blocks[i].zone = ZoneType(0, 3);
+			}
 		}
 	}
 
 	// 歩道の分を確保するため、ブロックを縮小する。
 	for (int i = 0; i < blocks.size(); ++i) {
+		if (!blocks[i].valid) continue;
 		//if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) continue;
 
 		Loop3D blockContourInset;

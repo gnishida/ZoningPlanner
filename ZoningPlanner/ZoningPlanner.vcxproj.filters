@@ -196,9 +196,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ControlWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="VBOLayer.cpp">
-      <Filter>VBO</Filter>
-    </ClCompile>
     <ClCompile Include="FLayer.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
@@ -249,6 +246,12 @@
     </ClCompile>
     <ClCompile Include="MCMC4.cpp">
       <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockMeshGenerator.cpp">
+      <Filter>VBO</Filter>
+    </ClCompile>
+    <ClCompile Include="VBOLayer.cpp">
+      <Filter>VBO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -422,9 +425,6 @@
     <ClInclude Include="GeneratedFiles\ui_ControlWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="VBOLayer.h">
-      <Filter>VBO</Filter>
-    </ClInclude>
     <ClInclude Include="FLayer.h">
       <Filter>Main Files</Filter>
     </ClInclude>
@@ -472,6 +472,12 @@
     </ClInclude>
     <ClInclude Include="MCMC4.h">
       <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockMeshGenerator.h">
+      <Filter>VBO</Filter>
+    </ClInclude>
+    <ClInclude Include="VBOLayer.h">
+      <Filter>VBO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

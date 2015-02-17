@@ -133,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BBox.cpp" />
+    <ClCompile Include="BlockMeshGenerator.cpp" />
     <ClCompile Include="BlockSet.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CarCamera.cpp" />
@@ -273,6 +274,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BBox.h" />
+    <ClInclude Include="BlockMeshGenerator.h" />
     <ClInclude Include="BlockSet.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Camera2D.h" />

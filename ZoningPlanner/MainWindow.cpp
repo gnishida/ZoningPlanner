@@ -23,6 +23,7 @@
 #include "GradientDescent.h"
 #include "MCMC4.h"
 #include <iostream>
+#include "BlockMeshGenerator.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
 	ui.setupUi(this);
@@ -188,8 +189,11 @@ void MainWindow::onResetCamera() {
 }
 
 void MainWindow::onGenerateBlocks() {
-	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+	VBOPmBlocks::generateBlocks(urbanGeometry->zones, urbanGeometry->roads, urbanGeometry->blocks);
+	BlockMeshGenerator::generateBlockMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+
+	//VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
+	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->updateGL();
 }
 

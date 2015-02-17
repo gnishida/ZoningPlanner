@@ -153,17 +153,18 @@ void GLWidget3D::drawScene(int drawMode) {
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
 		vboRenderManager.renderStaticGeometry("sky");
-		vboRenderManager.vboWater.render(vboRenderManager);
+		//vboRenderManager.vboWater.render(vboRenderManager);
 
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 1);
 	} else {
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 2);// SHADOW: From light
 	}
 
-	vboRenderManager.vboTerrain.render(vboRenderManager);
-
-	vboRenderManager.renderStaticGeometry("3d_sidewalk");
-	vboRenderManager.renderStaticGeometry("3d_parcel");
+	vboRenderManager.vboTerrain.render(true);
+	
+	vboRenderManager.renderStaticGeometry("3d_blocks");
+	vboRenderManager.renderStaticGeometry("3d_parks");
+	vboRenderManager.renderStaticGeometry("3d_parcels");
 
 	vboRenderManager.renderStaticGeometry("3d_roads");			
 	vboRenderManager.renderStaticGeometry("3d_roads_inter");

@@ -8,10 +8,10 @@
 #include "VBOWater.h"
 #include "VBOSkyBox.h"
 #include "VBOTerrain.h"
-#include "VBOModel.h"
 #include "VBOLayer.h"
-#include "Polygon3D.h"
 #include "VBOModel_StreetElements.h"
+#include "VBOModel.h"
+#include "Polygon3D.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/geometry/geometry.hpp>

@@ -34,6 +34,7 @@ public:
 	parcelGraph myParcels;
 
 	BBox3D bbox;
+	bool valid;
 
 	int randSeed;
 	ZoneType zone;
@@ -49,7 +50,7 @@ public:
 
 public:
 	/** Constructor */
-	Block() {}
+	Block() : valid(true) {}
 
 	/** Clear */
 	void clear(void);

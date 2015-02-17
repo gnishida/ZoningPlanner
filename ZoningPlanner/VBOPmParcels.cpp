@@ -1,27 +1,25 @@
-/************************************************************************************************
+﻿/************************************************************************************************
  *		Procedural City Generation: Parcel
  *		@author igarciad
  ************************************************************************************************/
 
 #include "VBOPmParcels.h"
 #include "qmatrix4x4.h"
-
-
-void subdivideBlockIntoParcels(Block &block);
-bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin, float areaVar, float splitIrregularity, std::vector<Parcel> &outParcels); 
+#include "Util.h"
 
 bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks) {
 	srand(0);
 	for (int i = 0; i < blocks.size(); ++i) {
-		subdivideBlockIntoParcels(blocks[i]);
-
-		blocks[i].adaptToTerrain(&rendManager);
+		if (blocks[i].valid) {
+			subdivideBlockIntoParcels(blocks[i]);
+			//blocks[i].adaptToTerrain(&rendManager);
+		}
 	}
 
 	return true;
 }
 
-void subdivideBlockIntoParcels(Block &block) {
+void VBOPmParcels::subdivideBlockIntoParcels(Block &block) {
 	//srand(block.randSeed);
 	std::vector<Parcel> tmpParcels;
 
@@ -54,17 +52,10 @@ void subdivideBlockIntoParcels(Block &block) {
 * @splitIrregularity: A normalized value 0-1 indicating how far
 *					from the middle point the split line should be
 **/
-bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin, float areaStd,
-	float splitIrregularity, std::vector<Parcel> &outParcels)
-{
-	//printf("subdivideParcel\n");
-	//check if parcel is subdividable
+bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin, float areaStd, float splitIrregularity, std::vector<Parcel> &outParcels) {
 	float thresholdArea = areaMean + areaStd*areaMean*(((float)qrand()/RAND_MAX)*2.0f-1.0f);//LC::misctools::genRand(-1.0f, 1.0f)
 	
-	if( (fabs(boost::geometry::area(parcel.bg_parcelContour))) <= std::max(thresholdArea, areaMin)) {
-		//printf("a: %.3f %.3f", boost::geometry::area(parcel.bg_parcelContour));
-		//boost::geometry::correct(parcel.bg_parcelContour);
-		//printf("a: %.3f %.3f", boost::geometry::area(parcel.bg_parcelContour));
+	if (parcel.parcelContour.area() <= std::max(thresholdArea, areaMin)) {
 		outParcels.push_back(parcel);
 		return true;
 	}
@@ -94,8 +85,8 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 		dirVector = dirVectorInit;
 	}
 
-	midPtNoise.setX( splitIrregularity*(((float)qrand()/RAND_MAX)*20.0f-10.0f));//LC::misctools::genRand(-10.0f, 10.0f) );
-	midPtNoise.setY( splitIrregularity*(((float)qrand()/RAND_MAX)*20.0f-10.0f));//LC::misctools::genRand(-10.0f, 10.0f) );
+	midPtNoise.setX(splitIrregularity * Util::genRand(-10, 10));
+	midPtNoise.setY(splitIrregularity * Util::genRand(-10, 10));
 	midPt = midPt + midPtNoise;
 
 	slEndPoint = midPt + 10000.0f*dirVector;
@@ -109,6 +100,8 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 	float kDistTol = 0.01f;
 
 	std::vector<Polygon3D> pgons;
+	/*
+	// CGAL版の分割（遅いが、優れている）
 	if (parcel.parcelContour.split(splitLine, pgons)) {
 		for (int i = 0; i < pgons.size(); ++i) {
 			Parcel parcel;
@@ -117,7 +110,9 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 			subdivideParcel(block, parcel, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
 		}
 	}
-	/*
+	*/
+
+	// 簡易版の分割（しょぼいが、速い）
 	if (parcel.parcelContour.splitMeWithPolyline(splitLine, pgon1.contour, pgon2.contour)) {
 		Parcel parcel1;
 		Parcel parcel2;
@@ -129,15 +124,21 @@ bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin,
 		subdivideParcel(block, parcel1, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
 		subdivideParcel(block, parcel2, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
 	} else {
-		return false;
+		// CGAL版の分割（遅いが、優れている）
+		if (parcel.parcelContour.split(splitLine, pgons)) {
+			for (int i = 0; i < pgons.size(); ++i) {
+				Parcel parcel;
+				parcel.setContour(pgons[i]);
+
+				subdivideParcel(block, parcel, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
+			}
+		} else {
+			//parcel.isPark = true;
+			outParcels.push_back(parcel);
+		}
 	}
-	*/
 
 	return true;
-}
-
-bool compareFirstPartTuple (const std::pair<float,Parcel*> &i, const std::pair<float,Parcel*> &j) {
-	return (i.first<j.first);
 }
 
 void VBOPmParcels::assignZoneType(Block& block) {
