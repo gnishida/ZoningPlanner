@@ -14,7 +14,6 @@ out vec3 varyingNormal;
 
 // UNIFORM
 uniform int mode;
-uniform int terrainMode;//0 FLAT 1 Mountains
 
 // MODE 1--> color
 // MODE 2--> texture
@@ -65,16 +64,7 @@ void main(){
 	}
 	//////////////////////////////////////
 	// 2. ADAPT TO TERRAIN
-	if(((mode&0xFF)==0x03)&&(terrainMode==0)){//flat terrain--> Compute height
-		vec2 terrainTexCoord=vec2(
-			(origVertex.x-terrain_size.x)/terrain_size.z,
-			(origVertex.y-terrain_size.y)/terrain_size.w
-			);
-		float height = texture(terrain_tex,terrainTexCoord.rg).r;
-		outColor.r=height;
-	}
-
-	if((((mode&0xFF)==0x03)||((mode&0x0100)==0x0100))&&terrainMode==1){// terrain or adapt to terrain (and terrainMode=1)
+	if ((mode&0xFF)==0x03 || (mode&0x0100) == 0x0100) { // terrain or adapt to terrain (and terrainMode=1)
 		vec2 terrainTexCoord=vec2(
 			(origVertex.x-terrain_size.x)/terrain_size.z,
 			(origVertex.y-terrain_size.y)/terrain_size.w

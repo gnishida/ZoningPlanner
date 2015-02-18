@@ -24,6 +24,7 @@
 #include "MCMC4.h"
 #include <iostream>
 #include "BlockMeshGenerator.h"
+#include "VBOPmBuildings.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
 	ui.setupUi(this);
@@ -192,13 +193,14 @@ void MainWindow::onGenerateBlocks() {
 	VBOPmBlocks::generateBlocks(urbanGeometry->zones, urbanGeometry->roads, urbanGeometry->blocks);
 	BlockMeshGenerator::generateBlockMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 
-	//VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->updateGL();
 }
 
 void MainWindow::onGenerateParcels() {
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	VBOPmParcels::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks.blocks);
+	VBOPmBuildings::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks.blocks);
+
+	BlockMeshGenerator::generateParcelMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->updateGL();
 }
 

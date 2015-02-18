@@ -11,7 +11,6 @@ in vec4 varyingLightVertexPosition;//position respect the camera view
 out vec4 outputF;
 
 uniform int mode;
-uniform int terrainMode;
 uniform sampler2D tex0;
 uniform sampler2DArray tex_3D;
 //uniform sampler3D tex_3D;
@@ -31,14 +30,6 @@ uniform float waterMove;
 const float ambientColor=0.1;
 const float diffuseColor=1.0;
 const float specularColor=1.0;
-
-vec3 terrainMode3Colors[] = vec3[5]( 
-   vec3( 0xf0/255.0, 0xed/255.0, 0xe5/255.0 ), // 7 mid river
-   vec3( 0xca/255.0 ,0xdf/255.0, 0xaa/255.0 ), // 8 green
-   vec3( 0xdf/255.0, 0xd9/255.0, 0xc3/255.0 ), // 9 coast
-   vec3( 0xe9/255.0, 0xe5/255.0, 0xdc/255.0 ), //10 flat
-   vec3( 0x50/255.0, 0x44/255.0, 0x43/255.0 ) //11 mountain 504443
-);
 
 vec2 poissonDisk4[4] = vec2[](
   vec2( -0.94201624, -0.39906216 ),
@@ -161,68 +152,19 @@ void main(){
 	//////////////
 	// TERRAIN
 	if((mode&0xFF)==3){
-		///////////////////////////
-		// 0 FLAT (Maps)
-		if(terrainMode==0){
-			float height=outColor.r;///COMPUTED IN VERTEX
-			if (height < 50){ //water
-				outputF=mix(
-						vec4(190/255.0, 225/255.0, 255/255.0, 1.0),
-						vec4(154/255.0, 197/255.0, 255/255.0, 1.0),
-						height/40);
-			} else if (height < 71) {
-				outputF=vec4(242/255.0, 239/255.0, 233/255.0, 1.0);
-			} else if (height < 200) {
-				//outputF=vec4(232/255.0, 230/255.0, 221/255.0, 1.0);
-				outputF=vec4(211/255.0, 228/255.0, 200/255.0, 1.0);
-			} else {
-				//outputF=vec4(212/255.0, 230/255.0, 183/255.0, 1.0);
-				outputF=vec4(202/255.0, 219/255.0, 189/255.0, 1.0);
-			}
-			return;
-		}
-		///////////////////////////
-		// 2 FLAT (Content Design)
-		if(terrainMode==2){
-			outputF=vec4(0,1,1,1);//0xe9/255.0,0xe5/255.0,0xdc/255.0,1.0);//gray dark
-			vec2 terrainTexCoord=vec2(
-				int(origVertex.x-terrain_size.x)/terrain_size.z,
-				int(origVertex.y-terrain_size.y)/terrain_size.w
-				);
-			float height=texture(terrain_tex,terrainTexCoord.rg).r;
+		vec4 terrainColor=vec4(0,0,0,1.0);
+		float factor;
+		const float maxHeight=9.0;//7=255*7 1500m (change in vertex shader as well) HERE IS 9 TO ALLOW LESS HIGH MOUNTAINS
+		float height=origVertex.z*0.15;//100.0f*(origVertex.z/maxHeight)/255.0;//0-100
+		height=clamp(height,0.0,99.999999);//0-99.99
 
-			if (height <= 42) {//water
-				if (height <= 0) {
-					outputF = vec4(0x84/255.0,0xa9/255.0,0xe6/255.0,1.0);//water blue dark 92bbff (mine 84a9e6)
-				} else {
-					outputF = vec4(0xa0/255.0,0xc3/255.0,0xff/255.0,1.0);//water blue
-				}
-			} else {
-				outputF = vec4(0xe9/255.0,0xe5/255.0,0xdc/255.0,1.0);//gray dark
-				int heighStep = int((height - 64) / 2);//index 0-4 (0 mid river, 1 green, 2 coast, 3 flat, 4 mountain)
-				if (heighStep < 0) heighStep = 0;
-				if (heighStep > 4) heighStep = 4;
-				outputF = vec4(terrainMode3Colors[heighStep], 1.0);
-			}
-			return;
-		}
-		///////////////////////////
-		// 1 MOUNTAIN
-		if(terrainMode==1){
-			vec4 terrainColor=vec4(0,0,0,1.0);
-			float factor;
-			const float maxHeight=9.0;//7=255*7 1500m (change in vertex shader as well) HERE IS 9 TO ALLOW LESS HIGH MOUNTAINS
-			float height=origVertex.z*0.15;//100.0f*(origVertex.z/maxHeight)/255.0;//0-100
-			height=clamp(height,0.0,99.999999);//0-99.99
-
-			int texInd=int(height/25);
-			float interpTex=mod(height,25.0);
-			// texture
-			outputF=mix(
-				texture( tex_3D, vec3(outUV.rg,texInd) ),
-				texture( tex_3D, vec3(outUV.rg,texInd+1) ),
-				interpTex/25.0);
-		}
+		int texInd=int(height/25);
+		float interpTex=mod(height,25.0);
+		// texture
+		outputF=mix(
+			texture( tex_3D, vec3(outUV.rg,texInd) ),
+			texture( tex_3D, vec3(outUV.rg,texInd+1) ),
+			interpTex/25.0);
 	}
 
 	//////////////
@@ -247,32 +189,6 @@ void main(){
 		return;
 	}
 
-	//////////////
-	// HATCH WATER
-	if((mode&0xFF)==11){
-		vec2 coordFac=outUV.xy;
-		//vec2 coord0=coordFac+vec2(waterMove);
-		vec2 coord0=(coordFac+vec2(waterMove*3))*0.33;
-		vec2 coord1=(coordFac+vec2(-waterMove*4))*0.25;
-		vec3 normalC=texture( tex_3D, vec3(coord0,6.0) ).xyz;//6 water normal
-		vec3 normalC2=texture( tex_3D, vec3(coord1,6.0) ).xyz;//6 water normal
-
-		normalC = normalC*2.0-vec3(1.0);
-		normalC2 = normalC2*2.0-vec3(1.0);
-		normalC = normalize((normalC+normalC2)*0.5);
-	
-		float intensity=1.0f;
-
-		intensity=1-(0.95*max(0.0, dot(normalize(-lightDir), normalize(normalC)))+0.05);
-		int darknessInt=int(99.999*(1.0-intensity));
-		int texInd=darknessInt/25;
-		int interpTex=darknessInt%25;
-		outputF=mix(
-			texture( tex_3D, vec3(coordFac.xy*0.1,texInd) ),
-			texture( tex_3D, vec3(coordFac.xy*0.1,texInd+1) ),
-			interpTex/25.0);
-		return;
-	}
 	//////////////
 	// FACADE ARRAY TEXTURE
 	if((mode&0xFF)==9||(mode&0xFF)==10){
@@ -328,6 +244,7 @@ void main(){
 	// SHADOW Disable
 	if(shadowState==0){// 0 SHADOW Disable
 		outputF=(ambientIllumination+diffuseIllumination)*outputF;
+		outputF.a = outColor.a;
 		return;
 	}
 
@@ -336,6 +253,7 @@ void main(){
 		float shadow_coef=0.95;
 		shadow_coef= shadowCoef();
 		outputF=(ambientIllumination+(shadow_coef+0.05)*diffuseIllumination)*outputF;
+		outputF.a = outColor.a;
 		return;
 	}
 

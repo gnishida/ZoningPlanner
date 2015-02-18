@@ -153,7 +153,7 @@ void GLWidget3D::drawScene(int drawMode) {
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 0);
 
 		vboRenderManager.renderStaticGeometry("sky");
-		//vboRenderManager.vboWater.render(vboRenderManager);
+		vboRenderManager.vboWater.render(vboRenderManager);
 
 		glUniform1i(glGetUniformLocation(vboRenderManager.program,"shadowState"), 1);
 	} else {
