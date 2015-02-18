@@ -8,47 +8,6 @@
 Parcel::Parcel(){
 }
 
-bool Parcel::intersectsParcel(Parcel &other)
-{
-	if(this->bbox.overlapsWithBBox3DXY(other.bbox))
-	{
-		if(boost::geometry::intersects(this->bg_parcelContour, other.bg_parcelContour)){
-			return true;
-		}					
-	}
-	return false;
-}
-
-int Parcel::unionWithParcel(Parcel &other)
-{
-	if(!(this->intersectsParcel(other))){
-		return 0;
-	}
-	typedef boost::geometry::model::d2::point_xy<double> point_2d;
-	typedef boost::geometry::model::polygon<point_2d> polygon_2d;
-
-
-	typedef std::vector<polygon_2d> polygon_list;
-	polygon_list pl;
-	boost::geometry::union_<boost::geometry::ring_type<Polygon3D>::type,boost::geometry::ring_type<Polygon3D>::type>(this->bg_parcelContour, other.bg_parcelContour, pl);//std::back_inserter(pl));///!!!!!!!!!
-
-	if(pl.size()!=1){
-		return 0;
-	} else {
-		Polygon3D newContour;
-		QVector3D tmpPt;
-		for(int i=0; i< (pl[0].outer()).size(); ++i){						
-			tmpPt.setX( (pl[0].outer())[i].x() );
-			tmpPt.setY( (pl[0].outer())[i].y() );
-			newContour.contour.push_back(tmpPt);						
-		}
-
-		this->setContour(newContour);
-		this->initializeParcel();
-	}
-	return 1;
-}
-
 /**
 * Compute Parcel Buildable Area
 **/
