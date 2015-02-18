@@ -8,6 +8,10 @@ Zoning::Zoning() {
 	zones = 0;
 }
 
+Zoning::~Zoning() {
+	if (zones != 0) delete [] zones;
+}
+
 int Zoning::getZone(const QVector2D& pt) const {
 	int s = positionToIndex(pt);
 	return zones[s];
@@ -47,49 +51,66 @@ void Zoning::loadInitZones(const QString& filename) {
 	}
 }
 
-void Zoning::load(QDomNode& node) {
-	int startSize = node.toElement().attribute("startSize").toInt();
-	int numLayers = node.toElement().attribute("numLayers").toInt();
+/**
+ * xmlノードからゾーンデータを読み込む。
+ * ゾーンはグリッド型で、(0,0)->(0,N),(1,0)->(1,N),..の順にxmlノードに格納されているとみなす。
+ * また、レベルは現在1固定。
+ */
+void Zoning::load(const QString& filename) {
+	// メモリ解放
+	if (zones != 0) {
+		delete [] zones;
+		zones = 0;
+	}
 
-	QDomNode nodeZone = node.firstChild();
+	QFile file(filename); 
+    if (!file.open(QFile::ReadOnly| QFile::Truncate)) return;
+
+	QDomDocument doc;
+	QDomElement root = doc.firstChildElement("zoning");
+
+	city_length = root.toElement().attribute("city_length").toInt();
+	zone_size = root.toElement().attribute("zone_size").toInt();
+
+	int count = 0;
+	QDomNode nodeZone = root.firstChild();
 	while (!nodeZone.isNull()) {
 		int type = nodeZone.toElement().attribute("type").toInt();
 		int level = nodeZone.toElement().attribute("level").toInt();
+		int row = nodeZone.toElement().attribute("row").toInt();
+		int col = nodeZone.toElement().attribute("col").toInt();
+
+		zones[count++] = type;
 
 		nodeZone = nodeZone.nextSibling();
 	}
 }
 
-/*void Zoning::save(const QString& filename) {
+void Zoning::save(const QString& filename) {
 	QFile file(filename);
-     
     if (!file.open(QFile::WriteOnly| QFile::Truncate)) return;
 
 	QDomDocument doc;
 	QDomElement root = doc.createElement("zoning");
+	root.setAttribute("city_length", city_length);
+	root.setAttribute("zone_size", zone_size);
 	doc.appendChild(root);
 
-	for (int i = 0; i < zones.size(); ++i) {
-		QDomElement zoneNode = doc.createElement("zone");
-		zoneNode.setAttribute("type", zones[i].second.type());
-		zoneNode.setAttribute("level", zones[i].second.level());
-		
-		QDomElement polygonNode = doc.createElement("polygon");
-		for (int j = 0; j < zones[i].first.size(); ++j) {
-			QDomElement pointNode = doc.createElement("point");
-			pointNode.setAttribute("x", zones[i].first.at(j).x());
-			pointNode.setAttribute("y", zones[i].first.at(j).y());
-			polygonNode.appendChild(pointNode);
-		}
-		zoneNode.appendChild(polygonNode);
+	for (int r = 0; r < zone_size; ++r) {
+		for (int c = 0; c < zone_size; ++c) {
+			QDomElement zoneNode = doc.createElement("zone");
+			zoneNode.setAttribute("type", zones[r * zone_size + c]);
+			zoneNode.setAttribute("level", 1);
+			zoneNode.setAttribute("row", r);
+			zoneNode.setAttribute("col", c);
 
-		root.appendChild(zoneNode);
+			root.appendChild(zoneNode);
+		}
 	}
 
 	QTextStream out(&file);
 	doc.save(out, 4);
 }
-*/
 
 /**
  * 座標を、zonesのインデックス番号に変換する。

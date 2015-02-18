@@ -38,6 +38,7 @@
     <addaction name="actionSaveTerrain"/>
     <addaction name="separator"/>
     <addaction name="actionLoadZoning"/>
+    <addaction name="actionSaveZoning"/>
     <addaction name="separator"/>
     <addaction name="actionLoadRoads"/>
     <addaction name="actionSaveRoads"/>
@@ -475,6 +476,11 @@
   <action name="actionFileUpload">
    <property name="text">
     <string>File Upload</string>
+   </property>
+  </action>
+  <action name="actionSaveZoning">
+   <property name="text">
+    <string>Save Zoning</string>
    </property>
   </action>
  </widget>

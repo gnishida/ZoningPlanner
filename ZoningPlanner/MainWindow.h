@@ -31,6 +31,7 @@ public:
 
 public slots:
 	void onLoadZoning();
+	void onSaveZoning();
 	void onLoadRoads();
 	void onSaveImage();
 	void onLoadCamera();

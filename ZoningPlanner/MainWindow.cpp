@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 
 	// register the menu's action handlers
 	connect(ui.actionLoadZoning, SIGNAL(triggered()), this, SLOT(onLoadZoning()));
+	connect(ui.actionSaveZoning, SIGNAL(triggered()), this, SLOT(onSaveZoning()));
 	connect(ui.actionLoadRoads, SIGNAL(triggered()), this, SLOT(onLoadRoads()));
 	connect(ui.actionSaveImage, SIGNAL(triggered()), this, SLOT(onSaveImage()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -113,38 +114,22 @@ bool MainWindow::savePreferences(std::vector<int>& user_ids, std::vector<std::ve
 }
 
 void MainWindow::onLoadZoning() {
-	/*
-	clock_t startTime, endTime;
-
 	QString filename = QFileDialog::getOpenFileName(this, tr("Open zoning file..."), "", tr("Zoning Files (*.xml)"));
 	if (filename.isEmpty()) return;
 
-	startTime = clock();
 	urbanGeometry->zones.load(filename);
-	endTime = clock();
-	printf("Load zone file: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
 
 	// re-generate blocks
-	startTime = clock();
-	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-	endTime = clock();
-	printf("Blocks generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
-
-	startTime = clock();
-	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	endTime = clock();
-	printf("Zoning mesh generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
-
-	// re-generate parcels
-	startTime = clock();
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-	endTime = clock();
-	printf("Parcels generation: %lf\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
-
+	urbanGeometry->generateBlocks();
 	glWidget->shadow.makeShadowMap(glWidget);
-
 	glWidget->updateGL();
-	*/
+}
+
+void MainWindow::onSaveZoning() {
+	QString filename = QFileDialog::getSaveFileName(this, tr("Save zoning file..."), "", tr("Zoning Files (*.xml)"));
+	if (filename.isEmpty()) return;
+
+	urbanGeometry->zones.save(filename);
 }
 
 void MainWindow::onLoadRoads() {
@@ -257,8 +242,6 @@ void MainWindow::onBestPlan() {
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
-	urbanGeometry->update(glWidget->vboRenderManager);
-	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
@@ -335,8 +318,6 @@ void MainWindow::onHCStart() {
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
-	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	urbanGeometry->update(glWidget->vboRenderManager);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 
@@ -433,8 +414,6 @@ void MainWindow::onHCResults() {
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
-	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	urbanGeometry->update(glWidget->vboRenderManager);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 

@@ -48,7 +48,6 @@ void BlockMeshGenerator::generateBlockMesh(VBORenderManager& rendManager, BlockS
 
 	for (int i = 0; i < blocks.size(); ++i) {
 		if (!blocks[i].valid) continue;
-		//blocks[i].adaptToTerrain(&rendManager);
 
 		// 歩道の3Dモデルを生成
 		{
