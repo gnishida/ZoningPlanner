@@ -12,7 +12,6 @@ bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< B
 	for (int i = 0; i < blocks.size(); ++i) {
 		if (blocks[i].valid) {
 			subdivideBlockIntoParcels(blocks[i]);
-			//blocks[i].adaptToTerrain(&rendManager);
 		}
 	}
 
@@ -20,7 +19,6 @@ bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< B
 }
 
 void VBOPmParcels::subdivideBlockIntoParcels(Block &block) {
-	//srand(block.randSeed);
 	std::vector<Parcel> tmpParcels;
 
 	//Empty parcels in block
@@ -34,9 +32,6 @@ void VBOPmParcels::subdivideBlockIntoParcels(Block &block) {
 
 	Block::parcelGraphVertexDesc tmpPGVD;
 	for(int i=0; i<tmpParcels.size(); ++i){
-		//assign a zone type to parcel
-		tmpParcels[i].zone = block.zone;
-
 		//add parcel to block parcels graph
 		tmpPGVD = boost::add_vertex(block.myParcels);
 		block.myParcels[tmpPGVD] = tmpParcels[i];
@@ -56,6 +51,7 @@ bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, 
 	float thresholdArea = areaMean + areaStd*areaMean*(((float)qrand()/RAND_MAX)*2.0f-1.0f);//LC::misctools::genRand(-1.0f, 1.0f)
 	
 	if (parcel.parcelContour.area() <= std::max(thresholdArea, areaMin)) {
+		parcel.zone = block.zone;
 		outParcels.push_back(parcel);
 		return true;
 	}
@@ -100,17 +96,6 @@ bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, 
 	float kDistTol = 0.01f;
 
 	std::vector<Polygon3D> pgons;
-	/*
-	// CGAL版の分割（遅いが、優れている）
-	if (parcel.parcelContour.split(splitLine, pgons)) {
-		for (int i = 0; i < pgons.size(); ++i) {
-			Parcel parcel;
-			parcel.setContour(pgons[i]);
-
-			subdivideParcel(block, parcel, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
-		}
-	}
-	*/
 
 	// 簡易版の分割（しょぼいが、速い）
 	if (parcel.parcelContour.splitMeWithPolyline(splitLine, pgon1.contour, pgon2.contour)) {
@@ -133,7 +118,7 @@ bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, 
 				subdivideParcel(block, parcel, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
 			}
 		} else {
-			//parcel.isPark = true;
+			parcel.zone = ZoneType(ZoneType::TYPE_PARK, 1);
 			outParcels.push_back(parcel);
 		}
 	}
