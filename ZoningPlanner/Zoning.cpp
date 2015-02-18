@@ -67,7 +67,12 @@ void Zoning::load(const QString& filename) {
     if (!file.open(QFile::ReadOnly| QFile::Truncate)) return;
 
 	QDomDocument doc;
-	QDomElement root = doc.firstChildElement("zoning");
+	int errorLine;
+	QString errorStr;
+    int errorColumn;
+	doc.setContent(&file);// true, &errorStr, &errorLine, &errorColumn);
+	QDomElement root = doc.documentElement();
+	//QDomElement root = doc.firstChildElement("zoning");
 
 	city_length = root.toElement().attribute("city_length").toInt();
 	zone_size = root.toElement().attribute("zone_size").toInt();
