@@ -135,6 +135,7 @@
     <ClCompile Include="BBox.cpp" />
     <ClCompile Include="BlockMeshGenerator.cpp" />
     <ClCompile Include="BlockSet.cpp" />
+    <ClCompile Include="BuildingMeshGenerator.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CarCamera.cpp" />
     <ClCompile Include="clipper.cpp" />
@@ -217,7 +218,6 @@
     <ClCompile Include="VBOModel.cpp" />
     <ClCompile Include="VBOModel_StreetElements.cpp" />
     <ClCompile Include="VBOParcel.cpp" />
-    <ClCompile Include="VBOPm.cpp" />
     <ClCompile Include="VBOPmBlocks.cpp" />
     <ClCompile Include="VBOPmBuildings.cpp" />
     <ClCompile Include="VBOPmParcels.cpp" />
@@ -228,6 +228,7 @@
     <ClCompile Include="VBOUtil.cpp" />
     <ClCompile Include="VBOVegetation.cpp" />
     <ClCompile Include="VBOWater.cpp" />
+    <ClCompile Include="ZoneMeshGenerator.cpp" />
     <ClCompile Include="ZoneType.cpp" />
     <ClCompile Include="Zoning.cpp" />
   </ItemGroup>
@@ -277,6 +278,7 @@
     <ClInclude Include="BBox.h" />
     <ClInclude Include="BlockMeshGenerator.h" />
     <ClInclude Include="BlockSet.h" />
+    <ClInclude Include="BuildingMeshGenerator.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Camera2D.h" />
     <ClInclude Include="CarCamera.h" />
@@ -365,7 +367,6 @@
     <ClInclude Include="VBOModel.h" />
     <ClInclude Include="VBOModel_StreetElements.h" />
     <ClInclude Include="VBOParcel.h" />
-    <ClInclude Include="VBOPm.h" />
     <ClInclude Include="VBOPmBlocks.h" />
     <ClInclude Include="VBOPmBuildings.h" />
     <ClInclude Include="VBOPmParcels.h" />
@@ -376,6 +377,7 @@
     <ClInclude Include="VBOUtil.h" />
     <ClInclude Include="VBOVegetation.h" />
     <ClInclude Include="VBOWater.h" />
+    <ClInclude Include="ZoneMeshGenerator.h" />
     <ClInclude Include="ZoneType.h" />
     <ClInclude Include="Zoning.h" />
   </ItemGroup>

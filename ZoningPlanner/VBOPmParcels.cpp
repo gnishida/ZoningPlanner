@@ -19,23 +19,14 @@ bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< B
 }
 
 void VBOPmParcels::subdivideBlockIntoParcels(Block &block) {
-	std::vector<Parcel> tmpParcels;
-
 	//Empty parcels in block
-	block.myParcels.clear();
+	block.parcels.clear();
 
 	//Make the initial parcel of the block be the block itself
 	Parcel tmpParcel;
 	tmpParcel.setContour(block.blockContour);
 
-	subdivideParcel(block, tmpParcel, block.zone.parcel_area_mean, block.zone.parcel_area_min, block.zone.parcel_area_deviation, block.zone.parcel_split_deviation, tmpParcels);
-
-	Block::parcelGraphVertexDesc tmpPGVD;
-	for(int i=0; i<tmpParcels.size(); ++i){
-		//add parcel to block parcels graph
-		tmpPGVD = boost::add_vertex(block.myParcels);
-		block.myParcels[tmpPGVD] = tmpParcels[i];
-	}
+	subdivideParcel(block, tmpParcel, block.zone.parcel_area_mean, block.zone.parcel_area_min, block.zone.parcel_area_deviation, block.zone.parcel_split_deviation, block.parcels);
 }
 
 /**
@@ -125,11 +116,3 @@ bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, 
 
 	return true;
 }
-
-void VBOPmParcels::assignZoneType(Block& block) {
-	Block::parcelGraphVertexIter vi, viEnd;
-	for (boost::tie(vi, viEnd) = boost::vertices(block.myParcels); vi != viEnd; ++vi) {
-		block.myParcels[*vi].zone = block.zone;
-	}
-}
-

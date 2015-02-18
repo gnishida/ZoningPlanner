@@ -85,15 +85,14 @@ void BlockSet::saveBlock(QDomDocument& doc, QDomNode& node, Block& block) {
 
 	//if (block.isPark) return;
 
-	Block::parcelGraphVertexIter vi, viEnd;
 	int id = 0;
-	for (boost::tie(vi, viEnd) = boost::vertices(block.myParcels); vi != viEnd; ++vi) {
+	for (int i = 0; i < block.parcels.size(); ++i) {
 		QDomElement child = doc.createElement("parcel");
 		child.setAttribute("id", id++);
-		child.setAttribute("zoneType", block.myParcels[*vi].zone.type());
-		child.setAttribute("zoneLevel", block.myParcels[*vi].zone.level());
+		child.setAttribute("zoneType", block.parcels[i].zone.type());
+		child.setAttribute("zoneLevel", block.parcels[i].zone.level());
 
-		saveParcel(doc, child, block.myParcels[*vi]);
+		saveParcel(doc, child, block.parcels[i]);
 
 		node.appendChild(child);
 	}
@@ -123,8 +122,7 @@ void BlockSet::loadParcel(QDomNode& node, Block& block) {
 
 	parcel.setContour(polygon);
 
-	Block::parcelGraphVertexDesc v_desc = boost::add_vertex(block.myParcels);
-	block.myParcels[v_desc] = parcel;
+	block.parcels.push_back(parcel);
 }
 
 void BlockSet::saveParcel(QDomDocument& doc, QDomNode& node, Parcel& parcel) {
@@ -160,17 +158,16 @@ int BlockSet::selectBlock(const QVector2D& pos) {
 
 std::pair<int, int> BlockSet::selectParcel(const QVector2D& pos) {
 	for (int i = 0; i < blocks.size(); ++i) {
-		Block::parcelGraphVertexIter vi, viEnd;
-		for (boost::tie(vi, viEnd) = boost::vertices(blocks[i].myParcels); vi != viEnd; ++vi) {
+		for (int pi = 0; pi < blocks[i].parcels.size(); ++pi) {
 			Polygon2D polygon;
-			for (int j = 0; j < blocks[i].myParcels[*vi].parcelContour.contour.size(); ++j) {
-				polygon.push_back(QVector2D(blocks[i].myParcels[*vi].parcelContour[j]));
+			for (int j = 0; j < blocks[i].parcels[pi].parcelContour.contour.size(); ++j) {
+				polygon.push_back(QVector2D(blocks[i].parcels[pi].parcelContour[j]));
 			}
 			polygon.correct();
 
 			if (polygon.contains(pos)) {
 				selectedBlockIndex = i;
-				selectedParcelIndex = *vi;
+				selectedParcelIndex = pi;
 
 				return std::make_pair(selectedBlockIndex, selectedParcelIndex);
 			}

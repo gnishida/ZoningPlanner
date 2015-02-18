@@ -3,7 +3,6 @@
 #include "GraphUtil.h"
 #include "MainWindow.h"
 #include <gl/GLU.h>
-#include "VBOPm.h"
 
 GLWidget3D::GLWidget3D(MainWindow* mainWin) : QGLWidget(QGLFormat(QGL::SampleBuffers), (QWidget*)mainWin) {
 	this->mainWin = mainWin;

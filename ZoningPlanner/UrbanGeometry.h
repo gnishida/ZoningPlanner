@@ -52,9 +52,6 @@ public:
 	void loadRoads(const QString& filename);
 	void saveRoads(const QString& filename);
 	void clearRoads();
-
-	void loadBlocks(const QString& filename);
-	void saveBlocks(const QString& filename);
 	
 	void loadInitZones(const QString& filename);
 

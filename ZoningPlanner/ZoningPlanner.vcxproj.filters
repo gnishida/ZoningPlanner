@@ -136,9 +136,6 @@
     <ClCompile Include="VBOParcel.cpp">
       <Filter>VBO</Filter>
     </ClCompile>
-    <ClCompile Include="VBOPm.cpp">
-      <Filter>VBO</Filter>
-    </ClCompile>
     <ClCompile Include="VBOPmBlocks.cpp">
       <Filter>VBO</Filter>
     </ClCompile>
@@ -256,6 +253,12 @@
     <ClCompile Include="RoadMeshGenerator.cpp">
       <Filter>VBO</Filter>
     </ClCompile>
+    <ClCompile Include="BuildingMeshGenerator.cpp">
+      <Filter>VBO</Filter>
+    </ClCompile>
+    <ClCompile Include="ZoneMeshGenerator.cpp">
+      <Filter>VBO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -339,9 +342,6 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="VBOParcel.h">
-      <Filter>VBO</Filter>
-    </ClInclude>
-    <ClInclude Include="VBOPm.h">
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="VBOPmBlocks.h">
@@ -483,6 +483,12 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="RoadMeshGenerator.h">
+      <Filter>VBO</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildingMeshGenerator.h">
+      <Filter>VBO</Filter>
+    </ClInclude>
+    <ClInclude Include="ZoneMeshGenerator.h">
       <Filter>VBO</Filter>
     </ClInclude>
   </ItemGroup>

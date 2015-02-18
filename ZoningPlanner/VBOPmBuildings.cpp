@@ -5,28 +5,23 @@
 
 #include "VBOPmBuildings.h"
 
-bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock);
-
-bool VBOPmBuildings::generateBuildings(VBORenderManager& rendManager, std::vector< Block > &blocks){
-	//For each block
-	for(int i=0; i<blocks.size(); ++i){
-		generateBlockBuildings(rendManager, blocks[i]);
+bool VBOPmBuildings::generateBuildings(VBORenderManager& rendManager, std::vector< Block > &blocks) {
+	for (int i = 0; i < blocks.size(); ++i) {
+		for (int pi = 0; pi < blocks[i].parcels.size(); ++pi) {
+			if (!generateParcelBuildings(rendManager, blocks[i], blocks[i].parcels[pi])) {
+				blocks[i].parcels[pi].zone.setType(ZoneType::TYPE_PARK);
+			}
+		}
 	}
+
 	return true;
-}//
+}
 
 /**
 * Compute Building Footprint Polygon
 **/
-bool computeBuildingFootprintPolygon(float maxFrontage, float maxDepth,
-	std::vector<int> &frontEdges,
-	std::vector<int> &rearEdges, 
-	std::vector<int> &sideEdges,
-	Loop3D &buildableAreaCont,
-	Loop3D &buildingFootprint)
-{
-
-	if( (maxFrontage < 1.0f) || (maxDepth < 1.0f) ){
+bool VBOPmBuildings::computeBuildingFootprintPolygon(float maxFrontage, float maxDepth,	std::vector<int> &frontEdges, std::vector<int> &rearEdges, std::vector<int> &sideEdges, Loop3D &buildableAreaCont, Loop3D &buildingFootprint) {
+	if ((maxFrontage < 1.0f) || (maxDepth < 1.0f)) {
 		buildingFootprint = buildableAreaCont;
 		return true;
 	}
@@ -113,8 +108,7 @@ bool computeBuildingFootprintPolygon(float maxFrontage, float maxDepth,
 /**
  * 指定されたParcelの中に、ビルを建てる。
  */
-bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parcel &inParcel)
-{
+bool VBOPmBuildings::generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parcel &inParcel) {
 	float probEmptyParcel = 0.0f;
 	Loop3D pContourCpy;
 
@@ -197,20 +191,3 @@ bool generateParcelBuildings(VBORenderManager& rendManager, Block &inBlock, Parc
 
 	return true;
 }
-
-/**
- * 指定されたブロック内に、ビルを建てる
- */
-bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock)
-{
-	Block::parcelGraphVertexIter vi, viEnd;	
-
-	//For each parcel
-	for(boost::tie(vi, viEnd) = boost::vertices(inBlock.myParcels); vi != viEnd; ++vi){
-		if (!generateParcelBuildings(rendManager, inBlock, inBlock.myParcels[*vi])) {
-			inBlock.myParcels[*vi].zone.setType(ZoneType::TYPE_PARK);
-		}
-	}
-	return true;
-}
-

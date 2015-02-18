@@ -8,7 +8,6 @@
 #include "GraphUtil.h"
 #include "MainWindow.h"
 #include "Util.h"
-#include "VBOPm.h"
 #include "VBOPmBlocks.h"
 #include "VBOPmParcels.h"
 #include "Util.h"
@@ -21,6 +20,8 @@
 #include "BlockMeshGenerator.h"
 #include "VBOVegetation.h"
 #include "VBOPmBuildings.h"
+#include "BuildingMeshGenerator.h"
+#include "ZoneMeshGenerator.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -75,19 +76,6 @@ void UrbanGeometry::clearRoads() {
 	update(mainWin->glWidget->vboRenderManager);
 }
 
-void UrbanGeometry::loadBlocks(const QString& filename) {
-	/*
-	blocks.load(filename);
-	VBOPmBlocks::assignZonesToBlocks(zones, blocks);
-	VBOPm::generateBlockModels(mainWin->glWidget->vboRenderManager, roads, blocks);
-	VBOPm::generateParcelModels(mainWin->glWidget->vboRenderManager, blocks);
-	*/
-}
-
-void UrbanGeometry::saveBlocks(const QString& filename) {
-	blocks.save(filename);
-}
-
 void UrbanGeometry::loadInitZones(const QString& filename) {
 	zones.loadInitZones(filename);
 }
@@ -99,7 +87,6 @@ void UrbanGeometry::generateBlocks() {
 
 void UrbanGeometry::generateParcels() {
 	VBOPmParcels::generateParcels(mainWin->glWidget->vboRenderManager, blocks.blocks);
-	VBOPm::generateBuildings(mainWin->glWidget->vboRenderManager, blocks, zones);
 	update(mainWin->glWidget->vboRenderManager);
 }
 
@@ -142,9 +129,9 @@ void UrbanGeometry::update(VBORenderManager& vboRenderManager) {
 	RoadMeshGenerator::generateRoadMesh(vboRenderManager, roads);
 	BlockMeshGenerator::generateBlockMesh(vboRenderManager, blocks);
 	BlockMeshGenerator::generateParcelMesh(vboRenderManager, blocks);
-	VBOPm::generateBuildings(mainWin->glWidget->vboRenderManager, blocks, zones);
+	BuildingMeshGenerator::generateBuildingMesh(vboRenderManager, blocks, zones);
 	VBOVegetation::generateVegetation(vboRenderManager, blocks.blocks);
-	VBOPm::generateZoningMesh(vboRenderManager, blocks);
+	ZoneMeshGenerator::generateZoneMesh(vboRenderManager, blocks);
 }
 
 /**

@@ -127,31 +127,30 @@ void BlockMeshGenerator::generateParcelMesh(VBORenderManager& rendManager, Block
 	const float deltaZ = 2.6f;
 
 	for (int i = 0; i < blocks.size(); ++i) {
-		Block::parcelGraphVertexIter vi, viEnd;
-			
 		int cnt = 0;
-		for (boost::tie(vi, viEnd) = boost::vertices(blocks[i].myParcels); vi != viEnd; ++vi, ++cnt) {
+		
+		for (int pi = 0; pi < blocks[i].parcels.size(); ++pi) {
 			std::vector<Vertex> vert;
 			QVector3D color;
 
-			if (blocks[i].myParcels[*vi].parcelContour.isSelfIntersecting()) continue;
+			if (blocks[i].parcels[pi].parcelContour.isSelfIntersecting()) continue;
 
 			// 上面のモデル
 			int randPark=1;//qrand()%grassFileNames.size();
-			rendManager.addStaticGeometry2("3d_parcels", blocks[i].myParcels[*vi].parcelContour.contour, deltaZ, false, grassFileNames[randPark], GL_QUADS, 2|mode_AdaptTerrain, QVector3D(0.05f,0.05f,0.05f), QColor());
+			rendManager.addStaticGeometry2("3d_parcels", blocks[i].parcels[pi].parcelContour.contour, deltaZ, false, grassFileNames[randPark], GL_QUADS, 2|mode_AdaptTerrain, QVector3D(0.05f,0.05f,0.05f), QColor());
 
 			// 側面のモデル
-			for(int sN=0;sN<blocks[i].myParcels[*vi].parcelContour.contour.size();sN++){
+			for(int sN=0;sN<blocks[i].parcels[pi].parcelContour.contour.size();sN++){
 				int ind1 = sN;
-				int ind2 = (sN+1) % blocks[i].myParcels[*vi].parcelContour.contour.size();
-				QVector3D dir = blocks[i].myParcels[*vi].parcelContour.contour[ind2] - blocks[i].myParcels[*vi].parcelContour.contour[ind1];
+				int ind2 = (sN+1) % blocks[i].parcels[pi].parcelContour.contour.size();
+				QVector3D dir = blocks[i].parcels[pi].parcelContour.contour[ind2] - blocks[i].parcels[pi].parcelContour.contour[ind1];
 				float length = dir.length();
 				dir /= length;
 				
-				QVector3D p1(blocks[i].myParcels[*vi].parcelContour.contour[ind1].x(), blocks[i].myParcels[*vi].parcelContour.contour[ind1].y(), 0);
-				QVector3D p2(blocks[i].myParcels[*vi].parcelContour.contour[ind2].x(), blocks[i].myParcels[*vi].parcelContour.contour[ind2].y(), 0);
-				QVector3D p3(blocks[i].myParcels[*vi].parcelContour.contour[ind2].x(), blocks[i].myParcels[*vi].parcelContour.contour[ind2].y(), deltaZ);
-				QVector3D p4(blocks[i].myParcels[*vi].parcelContour.contour[ind1].x(), blocks[i].myParcels[*vi].parcelContour.contour[ind1].y(), deltaZ);
+				QVector3D p1(blocks[i].parcels[pi].parcelContour.contour[ind1].x(), blocks[i].parcels[pi].parcelContour.contour[ind1].y(), 0);
+				QVector3D p2(blocks[i].parcels[pi].parcelContour.contour[ind2].x(), blocks[i].parcels[pi].parcelContour.contour[ind2].y(), 0);
+				QVector3D p3(blocks[i].parcels[pi].parcelContour.contour[ind2].x(), blocks[i].parcels[pi].parcelContour.contour[ind2].y(), deltaZ);
+				QVector3D p4(blocks[i].parcels[pi].parcelContour.contour[ind1].x(), blocks[i].parcels[pi].parcelContour.contour[ind1].y(), deltaZ);
 				QVector3D normal = QVector3D::crossProduct(p2-p1,p4-p1).normalized();
 				vert.push_back(Vertex(p1, QColor(128, 128, 128), normal, QVector3D()));
 				vert.push_back(Vertex(p4, QColor(128, 128, 128), normal, QVector3D()));
@@ -161,32 +160,4 @@ void BlockMeshGenerator::generateParcelMesh(VBORenderManager& rendManager, Block
 			rendManager.addStaticGeometry("3d_parcels", vert, "", GL_QUADS, 1|mode_Lighting|mode_AdaptTerrain);
 		}
 	}
-}
-
-void BlockMeshGenerator::generate2DParcelMesh(VBORenderManager& rendManager, BlockSet& blocks) {
-	rendManager.removeStaticGeometry("3d_blocks");
-	rendManager.removeStaticGeometry("3d_parks");
-
-	const float deltaZ = 3.0f;
-
-	QColor parkColor(0xca, 0xdf, 0xaa);
-	for (int bN = 0; bN < blocks.size(); ++bN) {
-		if (!blocks[bN].valid) continue;
-		if (blocks[bN].zone.type() == ZoneType::TYPE_PARK) {
-			Loop3D parkC = blocks[bN].blockContour.contour;
-			if (parkC.size() > 2) {
-				parkC.push_back(parkC.front());
-				rendManager.addStaticGeometry2("3d_parks", parkC, deltaZ, false, "", GL_QUADS, 1, QVector3D(), parkColor);
-			}
-		}/* else {
-			Block::parcelGraphVertexIter vi, vend;
-			for (boost::tie(vi, vend) = boost::vertices(blocks[bN].myParcels); vi != vend; ++vi) {
-				if (blocks[bN].myParcels[*vi].isPark && blocks[bN].myParcels[*vi].parcelContour.contour.size() > 2) {
-					rendManager.addStaticGeometry2("3d_parks", blocks[bN].myParcels[*vi].parcelContour.contour, deltaZ, false, "", GL_QUADS, 1, QVector3D(), parkColor);
-				}
-			}
-		}*/
-	}
-
-
 }

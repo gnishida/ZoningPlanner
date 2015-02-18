@@ -1,6 +1,5 @@
 ﻿#include "MainWindow.h"
 #include <QFileDialog>
-#include "VBOPm.h"
 #include "Util.h"
 #include "VBOPmBlocks.h"
 #include "VBOPmParcels.h"

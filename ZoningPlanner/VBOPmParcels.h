@@ -9,9 +9,7 @@
 
 class VBOPmParcels{
 public:
-
 	static bool generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks);
-	static void assignZoneType(Block& block);
 
 private:
 	static void subdivideBlockIntoParcels(Block &block);

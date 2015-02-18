@@ -281,7 +281,6 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 		float insetArea = blocks[i].sidewalkContour.computeInset(blocks[i].sidewalkContourRoadsWidths,sidewalkContourInset);
 		
 		blocks[i].sidewalkContour.contour = sidewalkContourInset;
-		//blocks[i].sidewalkContour.getBBox3D(blocks[i].bbox.minPt, blocks[i].bbox.maxPt);
 		
 		blockAreas.push_back(insetArea);
 	}
@@ -384,6 +383,5 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 		float sidewalk_width = blocks[i].zone.sidewalk_width;
 		blocks[i].sidewalkContour.computeInset(sidewalk_width, blockContourInset, false);
 		blocks[i].blockContour.contour = blockContourInset;
-		//blocks[i].blockContour.getBBox3D(blocks[i].bbox.minPt, blocks[i].bbox.maxPt);
 	}
 }
