@@ -69,8 +69,6 @@ void BlockSet::loadBlock(QDomNode& node, Block& block) {
 
 		child = child.nextSibling();
 	}
-
-	block.computeMyBBox3D();
 }
 
 void BlockSet::saveBlock(QDomDocument& doc, QDomNode& node, Block& block) {

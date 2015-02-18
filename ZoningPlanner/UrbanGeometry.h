@@ -49,8 +49,6 @@ public:
 	void clear();
 	void clearGeometry();
 
-	void adaptToTerrain();
-
 	void loadRoads(const QString& filename);
 	void saveRoads(const QString& filename);
 	void clearRoads();
@@ -59,6 +57,13 @@ public:
 	void saveBlocks(const QString& filename);
 	
 	void loadInitZones(const QString& filename);
+
+	void generateBlocks();
+	void generateParcels();
+	void generateBuildings();
+	void generateVegetation();
+	void generateAll();
+	void update(VBORenderManager& vboRenderManager);
 
 	void findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference);
 	QVector2D findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference);

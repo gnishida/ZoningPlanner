@@ -64,6 +64,7 @@ void VBOPm::initLC(){
 /**
  * 道路網から、ブロック情報を抽出する。
  */
+/*
 bool VBOPm::generateBlocks(VBORenderManager& rendManager,RoadGraph &roadGraph, BlockSet& blocks, Zoning& zones){
 	// INIT
 	if(initializedLC==false){
@@ -79,10 +80,12 @@ bool VBOPm::generateBlocks(VBORenderManager& rendManager,RoadGraph &roadGraph, B
 
 	return true;
 }
+*/
 
 /**
  * ブロック情報から、その3Dモデルを生成する
  */
+/*
 void VBOPm::generateBlockModels(VBORenderManager& rendManager,RoadGraph &roadGraph, BlockSet& blocks) {
 	// 3Dモデルを生成する
 	rendManager.removeStaticGeometry("3d_sidewalk");
@@ -145,10 +148,12 @@ void VBOPm::generateBlockModels(VBORenderManager& rendManager,RoadGraph &roadGra
 		}
 	}
 }
+*/
 
 /**
  * Block情報から、Parcel情報を計算する。
  */
+/*
 bool VBOPm::generateParcels(VBORenderManager& rendManager, BlockSet& blocks) {
 	if (!VBOPmParcels::generateParcels(rendManager, blocks.blocks)) {
 		printf("ERROR: generateParcels\n");
@@ -165,10 +170,12 @@ bool VBOPm::generateParcels(VBORenderManager& rendManager, BlockSet& blocks) {
 		
 	return true;
 }
+*/
 
 /**
  * Parcel情報から、その3Dモデルを生成する
  */
+/*
 void VBOPm::generateParcelModels(VBORenderManager& rendManager, BlockSet& blocks) {
 	rendManager.removeStaticGeometry("3d_parcel");
 	for (int i = 0; i < blocks.size(); ++i) {
@@ -207,6 +214,7 @@ void VBOPm::generateParcelModels(VBORenderManager& rendManager, BlockSet& blocks
 		}
 	}
 }
+*/
 
 bool VBOPm::generateBuildings(VBORenderManager& rendManager, BlockSet& blocks, Zoning& zones) {
 	rendManager.removeStaticGeometry("3d_building");
@@ -247,18 +255,12 @@ bool VBOPm::generateBuildings(VBORenderManager& rendManager, BlockSet& blocks, Z
 	return true;
 }
 
-bool VBOPm::generateVegetation(VBORenderManager& rendManager, BlockSet& blocks, Zoning& zones) {
-	VBOVegetation::generateVegetation(rendManager, zones, blocks.blocks);
-
-	return true;
-}
-
 void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) {
 	// 3Dモデルを生成する
 	rendManager.removeStaticGeometry("zoning");
 	for (int i = 0; i < blocks.size(); ++i) {
 		if (!blocks[i].valid) continue;
-		blocks[i].adaptToTerrain(&rendManager);
+		//blocks[i].adaptToTerrain(&rendManager);
 		
 		if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) continue;
 
@@ -286,7 +288,7 @@ void VBOPm::generateZoningMesh(VBORenderManager& rendManager, BlockSet& blocks) 
 				color = QColor(128, 128, 128, opacity);
 			}
 
-			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 1, false, "", GL_QUADS, 1, QVector3D(1, 1, 1), color);
+			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 8.0f, false, "", GL_QUADS, 1|mode_AdaptTerrain, QVector3D(1, 1, 1), color);
 		}
 	}
 }

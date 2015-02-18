@@ -17,7 +17,6 @@
 /**
 * Block.
 **/
-
 class Block {
 public:
 	/**
@@ -33,46 +32,21 @@ public:
 public:
 	parcelGraph myParcels;
 
-	BBox3D bbox;
-	bool valid;
-
-	int randSeed;
 	ZoneType zone;
 
-	/** Contour of the block */
 	Polygon3D blockContour;
-
-	/** contour of the sidewalk */
 	Polygon3D sidewalkContour;
-
-	/** Boundary road widths */
 	std::vector<float> sidewalkContourRoadsWidths;
+	bool valid;
 
 public:
-	/** Constructor */
 	Block() : valid(true) {}
 
-	/** Clear */
 	void clear(void);
-
-	void computeMyBBox3D(void);
-
-	/** Compute parcel adjacency graph */
-	void computeParcelAdjacencyGraph(void);
-
 	void buildableAreaMock(void);
 
-	static void findParcelFrontAndBackEdges(Block &inBlock, Parcel &inParcel,
-		std::vector<int> &frontEdges,
-		std::vector<int> &rearEdges,
-		std::vector<int> &sideEdges );
+	static void findParcelFrontAndBackEdges(Block &inBlock, Parcel &inParcel, std::vector<int> &frontEdges,	std::vector<int> &rearEdges, std::vector<int> &sideEdges);
 
-
-	bool splitBlockParcelsWithRoadSegment(std::vector<QVector3D> &roadSegmentGeometry,
-		float roadSegmentWidth, BBox3D roadSegmentBBox3D, std::list<Parcel> &blockParcels);
-
-	bool areParcelsAdjacent(parcelGraphVertexIter &p0, parcelGraphVertexIter &p1);
-	
-	void adaptToTerrain(VBORenderManager* vboRenderManager);
+	bool splitBlockParcelsWithRoadSegment(std::vector<QVector3D> &roadSegmentGeometry, float roadSegmentWidth, BBox3D roadSegmentBBox3D, std::list<Parcel> &blockParcels);
 };
 

@@ -10,7 +10,6 @@ bool generateBlockBuildings(VBORenderManager& rendManager, Block &inBlock);
 bool VBOPmBuildings::generateBuildings(VBORenderManager& rendManager, std::vector< Block > &blocks){
 	//For each block
 	for(int i=0; i<blocks.size(); ++i){
-		srand(blocks[i].randSeed);
 		generateBlockBuildings(rendManager, blocks[i]);
 	}
 	return true;

@@ -23,8 +23,6 @@
 #include "GradientDescent.h"
 #include "MCMC4.h"
 #include <iostream>
-#include "BlockMeshGenerator.h"
-#include "VBOPmBuildings.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
 	ui.setupUi(this);
@@ -190,42 +188,32 @@ void MainWindow::onResetCamera() {
 }
 
 void MainWindow::onGenerateBlocks() {
-	VBOPmBlocks::generateBlocks(urbanGeometry->zones, urbanGeometry->roads, urbanGeometry->blocks);
-	BlockMeshGenerator::generateBlockMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-
+	urbanGeometry->generateBlocks();
+	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
 
 void MainWindow::onGenerateParcels() {
-	VBOPmParcels::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks.blocks);
-	VBOPmBuildings::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks.blocks);
-
-	BlockMeshGenerator::generateParcelMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+	urbanGeometry->generateParcels();
+	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
 
 void MainWindow::onGenerateBuildings() {
-	VBOPm::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
+	urbanGeometry->generateBuildings();
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
 
 void MainWindow::onGenerateVegetation() {
-	VBOPm::generateVegetation(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
+	urbanGeometry->generateVegetation();
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
 
 void MainWindow::onGenerateAll() {
-	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
-
-	VBOPm::generateBuildings(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
-	VBOPm::generateVegetation(glWidget->vboRenderManager, urbanGeometry->blocks, urbanGeometry->zones);
+	urbanGeometry->generateAll();
 	glWidget->shadow.makeShadowMap(glWidget);
-
 	glWidget->updateGL();
 }
 
@@ -269,9 +257,9 @@ void MainWindow::onBestPlan() {
 	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences);
 
 	// 3D更新
-	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	urbanGeometry->generateBlocks();
+	urbanGeometry->update(glWidget->vboRenderManager);
+	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 }
@@ -347,9 +335,9 @@ void MainWindow::onHCStart() {
 	}
 
 	// 3D更新
-	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	urbanGeometry->generateBlocks();
+	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+	urbanGeometry->update(glWidget->vboRenderManager);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 
@@ -445,9 +433,9 @@ void MainWindow::onHCResults() {
 	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences);
 
 	// 3D更新
-	VBOPm::generateBlocks(glWidget->vboRenderManager, urbanGeometry->roads, urbanGeometry->blocks, urbanGeometry->zones);
-	VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
-	//VBOPm::generateParcels(glWidget->vboRenderManager, urbanGeometry->blocks);
+	urbanGeometry->generateBlocks();
+	//VBOPm::generateZoningMesh(glWidget->vboRenderManager, urbanGeometry->blocks);
+	urbanGeometry->update(glWidget->vboRenderManager);
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
 

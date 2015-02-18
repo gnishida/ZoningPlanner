@@ -208,6 +208,7 @@
     <ClCompile Include="Polyline3D.cpp" />
     <ClCompile Include="RoadEdge.cpp" />
     <ClCompile Include="RoadGraph.cpp" />
+    <ClCompile Include="RoadMeshGenerator.cpp" />
     <ClCompile Include="RoadVertex.cpp" />
     <ClCompile Include="UrbanGeometry.cpp" />
     <ClCompile Include="Util.cpp" />
@@ -354,6 +355,7 @@
     <ClInclude Include="Polyline3D.h" />
     <ClInclude Include="RoadEdge.h" />
     <ClInclude Include="RoadGraph.h" />
+    <ClInclude Include="RoadMeshGenerator.h" />
     <ClInclude Include="RoadVertex.h" />
     <ClInclude Include="UrbanGeometry.h" />
     <ClInclude Include="Util.h" />

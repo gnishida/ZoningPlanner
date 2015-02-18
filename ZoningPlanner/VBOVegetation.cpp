@@ -3,6 +3,7 @@
 #include "VBORenderManager.h"
 #include "BBox.h"
 #include "Util.h"
+#include "global.h"
 
 VBOVegetation::VBOVegetation(void){
 }
@@ -54,6 +55,7 @@ ModelSpec addStreetLap( QVector3D pos,QVector3D contourDir){
 
 	float rotAngle=atan2(perP.y(),perP.x())*57.2957795f;//rad to degrees (angle to rotate will be the tan since we compare respect 1,0,0)
 	stEl.transMatrix.rotate(rotAngle,0.0f,0.0f,1.0f);
+	stEl.transMatrix.scale(0.6f);
 
 	stEl.colors.resize(1);
 	//body xolor
@@ -63,11 +65,13 @@ ModelSpec addStreetLap( QVector3D pos,QVector3D contourDir){
 	return stEl;
 }
 
-bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, Zoning& zoning, std::vector< Block > &blocks){
+bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, std::vector< Block > &blocks){
 	QTime tim;
 	tim.start();
 
 	std::cout << "Generating vegetation...";
+
+	const float deltaZ = 2.0f;
 
 	rendManager.removeAllStreetElementName("streetLamp");
 	rendManager.removeAllStreetElementName("tree");
@@ -95,7 +99,7 @@ bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, Zoning& zo
 				QVector3D pos;
 				pos.setX(Util::genRand(xmin, xmax));
 				pos.setY(Util::genRand(ymin, ymax));
-				pos.setZ(rendManager.getTerrainHeight(pos.x(), pos.y()));
+				pos.setZ(deltaZ);
 				if(blocks[bN].blockContour.isPointWithinLoop(pos)){
 					rendManager.addStreetElementModel("tree",addTree(pos));
 				}
@@ -114,7 +118,7 @@ bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, Zoning& zo
 					QVector3D pos;
 					pos.setX(Util::genRand(minCorner.x(), maxCorner.x()));
 					pos.setY(Util::genRand(minCorner.y(), maxCorner.y()));
-					pos.setZ(rendManager.getTerrainHeight(pos.x(), pos.y()));
+					pos.setZ(deltaZ);
 					if (blocks[bN].myParcels[*vi].parcelContour.isPointWithinLoop(pos)) {
 						rendManager.addStreetElementModel("tree",addTree(pos));
 					}
@@ -132,9 +136,7 @@ bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, Zoning& zo
 	std::vector <QVector3D> *contourPtr;
 
 	for (int i = 0; i < blocks.size(); ++i) {
-		srand(blocks.at(i).randSeed);
-	
-		float tree_setback = blocks[i].zone.tree_setback;//placeTypesIn.myPlaceTypes.at(blocks[i].getMyPlaceTypeIdx()).getFloat("tree_setback");
+		float tree_setback = G::getFloat("tree_setback");//placeTypesIn.myPlaceTypes.at(blocks[i].getMyPlaceTypeIdx()).getFloat("tree_setback");
 
 		contourPtr = &(blocks.at(i).sidewalkContour.contour);
 
@@ -166,10 +168,11 @@ bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, Zoning& zo
 
 				if (type % 2 == 0) {
 					QVector3D pos = ptThis + segmentVector * distFromSegmentStart;
-					pos.setZ(rendManager.getTerrainHeight(pos.x(), pos.y()) + 0.5f);//pavement at 1.5f
+					pos.setZ(deltaZ);
 					rendManager.addStreetElementModel("tree", addTree(pos));
 				} else {
 					QVector3D pos = ptThis2 + segmentVector * distFromSegmentStart;
+					pos.setZ(deltaZ);
 					rendManager.addStreetElementModel("streetLamp", addStreetLap(pos, segmentVector));
 				}
 

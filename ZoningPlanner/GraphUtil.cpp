@@ -797,6 +797,39 @@ Polyline2D GraphUtil::orderPolyLine(RoadGraph& roads, RoadEdgeDesc e, RoadVertex
 }
 
 /**
+ * Sort the points of the polyline of the edge such that the first point is the location of the src vertex.
+ * @angle		the angle from 0 in CCW order [rad]
+ */
+Polyline2D GraphUtil::orderPolyLine(RoadGraph& roads, RoadEdgeDesc e, RoadVertexDesc src, float angle) {
+	RoadVertexDesc tgt;
+
+	RoadVertexDesc s = boost::source(e, roads.graph);
+	RoadVertexDesc t = boost::target(e, roads.graph);
+
+	if (s == src) {
+		tgt = t;
+	} else {
+		tgt = s;
+	}
+
+	// If the order is opposite, reverse the order.
+	if ((roads.graph[src]->pt - roads.graph[e]->polyline[0]).lengthSquared() > (roads.graph[tgt]->pt - roads.graph[e]->polyline[0]).lengthSquared()) {
+		std::reverse(roads.graph[e]->polyline.begin(), roads.graph[e]->polyline.end());
+	}
+
+	// For self-loop edge
+	if (src == tgt) {
+		QVector2D dir = roads.graph[e]->polyline[1] - roads.graph[e]->polyline[0];
+		float a = atan2f(dir.y(), dir.x());
+		if (fabs(angle - a) > 0.1f) {
+			std::reverse(roads.graph[e]->polyline.begin(), roads.graph[e]->polyline.end());
+		}
+	}
+
+	return roads.graph[e]->polyline;
+}
+
+/**
  * Move the edge to the specified location.
  * src_posは、エッジeのsource頂点の移動先
  * tgt_posは、エッジeのtarget頂点の移動先

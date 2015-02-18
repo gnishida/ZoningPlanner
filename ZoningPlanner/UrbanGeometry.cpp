@@ -17,6 +17,10 @@
 #include <boost/date_time.hpp>
 #include "MCMC4.h"
 #include "global.h"
+#include "RoadMeshGenerator.h"
+#include "BlockMeshGenerator.h"
+#include "VBOVegetation.h"
+#include "VBOPmBuildings.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -39,19 +43,8 @@ void UrbanGeometry::clear() {
 }
 
 void UrbanGeometry::clearGeometry() {
-	//if (&mainWin->glWidget->vboRenderManager != NULL) delete &mainWin->glWidget->vboRenderManager;
-
 	roads.clear();
-}
-
-/**
- * Adapt all geometry objects to &mainWin->glWidget->vboRenderManager.
- */
-void UrbanGeometry::adaptToTerrain() {
-	roads.adaptToTerrain(&mainWin->glWidget->vboRenderManager);
-	for (int i = 0; i < blocks.size(); ++i) {
-		blocks[i].adaptToTerrain(&mainWin->glWidget->vboRenderManager);
-	}
+	update(mainWin->glWidget->vboRenderManager);
 }
 
 void UrbanGeometry::loadRoads(const QString &filename) {
@@ -63,9 +56,7 @@ void UrbanGeometry::loadRoads(const QString &filename) {
 
 	roads.clear();
 	GraphUtil::loadRoads(roads, filename);
-
-	roads.adaptToTerrain(&mainWin->glWidget->vboRenderManager);
-	roads.updateRoadGraph(mainWin->glWidget->vboRenderManager);
+	update(mainWin->glWidget->vboRenderManager);
 }
 
 void UrbanGeometry::saveRoads(const QString &filename) {
@@ -80,18 +71,17 @@ void UrbanGeometry::saveRoads(const QString &filename) {
 
 void UrbanGeometry::clearRoads() {
 	roads.clear();
-	roads.updateRoadGraph(mainWin->glWidget->vboRenderManager);
-
 	blocks.clear();
-	VBOPm::generateBlockModels(mainWin->glWidget->vboRenderManager, roads, blocks);
-	VBOPm::generateParcelModels(mainWin->glWidget->vboRenderManager, blocks);
+	update(mainWin->glWidget->vboRenderManager);
 }
 
 void UrbanGeometry::loadBlocks(const QString& filename) {
+	/*
 	blocks.load(filename);
 	VBOPmBlocks::assignZonesToBlocks(zones, blocks);
 	VBOPm::generateBlockModels(mainWin->glWidget->vboRenderManager, roads, blocks);
 	VBOPm::generateParcelModels(mainWin->glWidget->vboRenderManager, blocks);
+	*/
 }
 
 void UrbanGeometry::saveBlocks(const QString& filename) {
@@ -100,6 +90,61 @@ void UrbanGeometry::saveBlocks(const QString& filename) {
 
 void UrbanGeometry::loadInitZones(const QString& filename) {
 	zones.loadInitZones(filename);
+}
+
+void UrbanGeometry::generateBlocks() {
+	VBOPmBlocks::generateBlocks(zones, roads, blocks);
+	update(mainWin->glWidget->vboRenderManager);
+}
+
+void UrbanGeometry::generateParcels() {
+	VBOPmParcels::generateParcels(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	VBOPm::generateBuildings(mainWin->glWidget->vboRenderManager, blocks, zones);
+	update(mainWin->glWidget->vboRenderManager);
+}
+
+void UrbanGeometry::generateBuildings() {
+	VBOPmBuildings::generateBuildings(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	update(mainWin->glWidget->vboRenderManager);
+}
+
+void UrbanGeometry::generateVegetation() {
+	VBOVegetation::generateVegetation(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	update(mainWin->glWidget->vboRenderManager);
+}
+
+void UrbanGeometry::generateAll() {
+	VBOPmBlocks::generateBlocks(zones, roads, blocks);
+	VBOPmParcels::generateParcels(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	VBOPmBuildings::generateBuildings(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	update(mainWin->glWidget->vboRenderManager);
+}
+
+/**
+ * 道路、歩道、区画、ビル、木のジオミトリを作成しなおす。
+ * この関数を頻繁に呼ぶべきではない。道路が更新/生成された時、PMメニューから新規にジオミトリを生成した時だけ。
+ */
+void UrbanGeometry::update(VBORenderManager& vboRenderManager) {
+	// 地面が変わっている可能性などがあるので、ビルなどのジオミトリも一旦削除してしまう。
+	// 道路以外のジオミトリは、別途、PMメニューから作成すること
+	vboRenderManager.removeStaticGeometry("3d_blocks");
+	vboRenderManager.removeStaticGeometry("3d_parks");
+	vboRenderManager.removeStaticGeometry("3d_parcels");
+	vboRenderManager.removeStaticGeometry("3d_roads");
+	vboRenderManager.removeStaticGeometry("3d_roads_inter");
+	vboRenderManager.removeStaticGeometry("3d_roads_interCom");
+	vboRenderManager.removeStaticGeometry("3d_building");
+	vboRenderManager.removeStaticGeometry("3d_building_fac");
+	vboRenderManager.removeStaticGeometry("tree");
+	vboRenderManager.removeStaticGeometry("streetLamp");
+	vboRenderManager.removeStaticGeometry("zoning");
+
+	RoadMeshGenerator::generateRoadMesh(vboRenderManager, roads);
+	BlockMeshGenerator::generateBlockMesh(vboRenderManager, blocks);
+	BlockMeshGenerator::generateParcelMesh(vboRenderManager, blocks);
+	VBOPm::generateBuildings(mainWin->glWidget->vboRenderManager, blocks, zones);
+	VBOVegetation::generateVegetation(vboRenderManager, blocks.blocks);
+	VBOPm::generateZoningMesh(vboRenderManager, blocks);
 }
 
 /**
