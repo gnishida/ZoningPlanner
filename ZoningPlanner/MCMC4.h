@@ -42,7 +42,7 @@ public:
 	void setPreferenceForLandValue(std::vector<float>& preference_for_land_value);
 	void findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones);
 	void computeDistanceMap(int city_size, int* zones, int** dist);
-	void showZone(int city_size, int* zones, char* filename);
+	void saveZoneImage(int city_size, int* zones, char* filename);
 	void loadZone(int city_size, int* zones, char* filename);
 	void saveZone(int city_size, int* zones, char* filename);
 	float computePriceIndex(std::vector<float>& feature);

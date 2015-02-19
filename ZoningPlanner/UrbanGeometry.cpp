@@ -86,24 +86,24 @@ void UrbanGeometry::generateBlocks() {
 }
 
 void UrbanGeometry::generateParcels() {
-	VBOPmParcels::generateParcels(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	VBOPmParcels::generateParcels(zones, mainWin->glWidget->vboRenderManager, blocks);
 	update(mainWin->glWidget->vboRenderManager);
 }
 
 void UrbanGeometry::generateBuildings() {
-	VBOPmBuildings::generateBuildings(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	VBOPmBuildings::generateBuildings(mainWin->glWidget->vboRenderManager, blocks);
 	update(mainWin->glWidget->vboRenderManager);
 }
 
 void UrbanGeometry::generateVegetation() {
-	VBOVegetation::generateVegetation(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	VBOVegetation::generateVegetation(mainWin->glWidget->vboRenderManager, blocks);
 	update(mainWin->glWidget->vboRenderManager);
 }
 
 void UrbanGeometry::generateAll() {
 	VBOPmBlocks::generateBlocks(zones, roads, blocks);
-	VBOPmParcels::generateParcels(mainWin->glWidget->vboRenderManager, blocks.blocks);
-	VBOPmBuildings::generateBuildings(mainWin->glWidget->vboRenderManager, blocks.blocks);
+	VBOPmParcels::generateParcels(zones, mainWin->glWidget->vboRenderManager, blocks);
+	VBOPmBuildings::generateBuildings(mainWin->glWidget->vboRenderManager, blocks);
 	update(mainWin->glWidget->vboRenderManager);
 }
 
@@ -130,7 +130,7 @@ void UrbanGeometry::update(VBORenderManager& vboRenderManager) {
 	BlockMeshGenerator::generateBlockMesh(vboRenderManager, blocks);
 	BlockMeshGenerator::generateParcelMesh(vboRenderManager, blocks);
 	BuildingMeshGenerator::generateBuildingMesh(vboRenderManager, blocks, zones);
-	VBOVegetation::generateVegetation(vboRenderManager, blocks.blocks);
+	VBOVegetation::generateVegetation(vboRenderManager, blocks);
 	ZoneMeshGenerator::generateZoneMesh(vboRenderManager, blocks);
 }
 

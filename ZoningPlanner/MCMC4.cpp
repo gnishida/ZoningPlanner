@@ -74,7 +74,7 @@ void MCMC4::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTy
 		free(tmpZones);
 	}
 	
-	//showZone(city_size, zone, "zone_final.png");
+	saveZoneImage(*city_size, *zones, "zone_final.png");
 	//saveZone(city_size, zone, "zone_final.txt");
 }
 
@@ -104,30 +104,31 @@ void MCMC4::computeDistanceMap(int city_size, int* zones, int** dist) {
 	free(toRaise);
 }
 
-void MCMC4::showZone(int city_size, int* zones, char* filename) {
+void MCMC4::saveZoneImage(int city_size, int* zones, char* filename) {
 	cv::Mat m(city_size, city_size, CV_8UC3);
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
 			cv::Vec3b p;
-			if (zones[r * city_size + c] == 0) {
+			if (zones[r * city_size + c] == 0) {		// 住宅街（赤色）
 				p = cv::Vec3b(0, 0, 255);
-			} else if (zones[r * city_size + c] == 1) {
+			} else if (zones[r * city_size + c] == 1) {	// 商業地（青色）
 				p = cv::Vec3b(255, 0, 0);
-			} else if (zones[r * city_size + c] == 2) {
+			} else if (zones[r * city_size + c] == 2) {	// 工業地（灰色）
 				p = cv::Vec3b(64, 64, 64);
-			} else if (zones[r * city_size + c] == 3) {
+			} else if (zones[r * city_size + c] == 3) {	// 公園（緑色）
 				p = cv::Vec3b(0, 255, 0);
-			} else if (zones[r * city_size + c] == 4) {
-				p = cv::Vec3b(255, 0, 255);
-			} else if (zones[r * city_size + c] == 5) {
+			} else if (zones[r * city_size + c] == 4) {	// 歓楽街（黄色）
 				p = cv::Vec3b(0, 255, 255);
-			} else {
+			} else if (zones[r * city_size + c] == 5) {	// 公共施設（水色）
+				p = cv::Vec3b(255, 255, 0);
+			} else {									// その他（黒色）
 				p = cv::Vec3b(255, 255, 255);
 			}
 			m.at<cv::Vec3b>(r, c) = p;
 		}
 	}
 
+	cv::flip(m, m, 0);
 	cv::imwrite(filename, m);
 }
 
@@ -655,7 +656,7 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 
 	char filename[256];
 	sprintf(filename, "zone_%d.png", city_size);
-	showZone(city_size, bestZone, filename);
+	saveZoneImage(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
 
 	free(tmpZone);
@@ -791,7 +792,7 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 
 	char filename[256];
 	sprintf(filename, "zone_%d.png", city_size);
-	showZone(city_size, bestZone, filename);
+	saveZoneImage(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
 
 	free(tmpZone);

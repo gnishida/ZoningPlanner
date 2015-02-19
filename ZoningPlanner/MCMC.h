@@ -38,7 +38,7 @@ public:
 	void addPreference(std::vector<float>& preference);
 	void findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTypeDistribution, int start_size, int num_layers, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones);
 	void computeDistanceMap(int city_size, int* zones, int** dist);
-	void showZone(int city_size, int* zones, char* filename);
+	void saveZoneImage(int city_size, int* zones, char* filename);
 	void loadZone(int city_size, int* zones, char* filename);
 	void saveZone(int city_size, int* zones, char* filename);
 	void computeFeature(int city_size, int* zones, int* dist, int s, std::vector<float>& feature);

@@ -7,18 +7,18 @@
 #include "qmatrix4x4.h"
 #include "Util.h"
 
-bool VBOPmParcels::generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks) {
+bool VBOPmParcels::generateParcels(Zoning& zoning, VBORenderManager& rendManager, BlockSet &blocks) {
 	srand(0);
 	for (int i = 0; i < blocks.size(); ++i) {
 		if (blocks[i].valid) {
-			subdivideBlockIntoParcels(blocks[i]);
+			subdivideBlockIntoParcels(zoning, blocks[i]);
 		}
 	}
 
 	return true;
 }
 
-void VBOPmParcels::subdivideBlockIntoParcels(Block &block) {
+void VBOPmParcels::subdivideBlockIntoParcels(Zoning& zoning, Block &block) {
 	//Empty parcels in block
 	block.parcels.clear();
 
@@ -26,7 +26,7 @@ void VBOPmParcels::subdivideBlockIntoParcels(Block &block) {
 	Parcel tmpParcel;
 	tmpParcel.setContour(block.blockContour);
 
-	subdivideParcel(block, tmpParcel, block.zone.parcel_area_mean, block.zone.parcel_area_min, block.zone.parcel_area_deviation, block.zone.parcel_split_deviation, block.parcels);
+	subdivideParcel(zoning, tmpParcel, block.parcels);
 }
 
 /**
@@ -38,11 +38,15 @@ void VBOPmParcels::subdivideBlockIntoParcels(Block &block) {
 * @splitIrregularity: A normalized value 0-1 indicating how far
 *					from the middle point the split line should be
 **/
-bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin, float areaStd, float splitIrregularity, std::vector<Parcel> &outParcels) {
-	float thresholdArea = areaMean + areaStd*areaMean*(((float)qrand()/RAND_MAX)*2.0f-1.0f);//LC::misctools::genRand(-1.0f, 1.0f)
+bool VBOPmParcels::subdivideParcel(Zoning& zoning, Parcel parcel, std::vector<Parcel> &outParcels) {
+	BBox3D bbox;
+	parcel.parcelContour.getBBox3D(bbox.minPt, bbox.maxPt);
+	ZoneType z = zoning.getZone(QVector2D(bbox.midPt()));
+
+	float thresholdArea = z.parcel_area_mean + z.parcel_area_deviation * z.parcel_area_mean * Util::genRand(-1, 1);
 	
-	if (parcel.parcelContour.area() <= std::max(thresholdArea, areaMin)) {
-		parcel.zone = block.zone;
+	if (parcel.parcelContour.area() <= std::max(thresholdArea, z.parcel_area_min)) {
+		parcel.zone = z;
 		outParcels.push_back(parcel);
 		return true;
 	}
@@ -72,8 +76,8 @@ bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, 
 		dirVector = dirVectorInit;
 	}
 
-	midPtNoise.setX(splitIrregularity * Util::genRand(-10, 10));
-	midPtNoise.setY(splitIrregularity * Util::genRand(-10, 10));
+	midPtNoise.setX(z.parcel_split_deviation * Util::genRand(-10, 10));
+	midPtNoise.setY(z.parcel_split_deviation * Util::genRand(-10, 10));
 	midPt = midPt + midPtNoise;
 
 	slEndPoint = midPt + 10000.0f*dirVector;
@@ -97,8 +101,8 @@ bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, 
 		parcel2.setContour(pgon2);
 
 		//call recursive function for both parcels
-		subdivideParcel(block, parcel1, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
-		subdivideParcel(block, parcel2, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
+		subdivideParcel(zoning, parcel1, outParcels);
+		subdivideParcel(zoning, parcel2, outParcels);
 	} else {
 		// CGAL版の分割（遅いが、優れている）
 		if (parcel.parcelContour.split(splitLine, pgons)) {
@@ -106,7 +110,7 @@ bool VBOPmParcels::subdivideParcel(Block &block, Parcel parcel, float areaMean, 
 				Parcel parcel;
 				parcel.setContour(pgons[i]);
 
-				subdivideParcel(block, parcel, areaMean, areaMin, areaStd, splitIrregularity, outParcels);
+				subdivideParcel(zoning, parcel, outParcels);
 			}
 		} else {
 			parcel.zone = ZoneType(ZoneType::TYPE_PARK, 1);

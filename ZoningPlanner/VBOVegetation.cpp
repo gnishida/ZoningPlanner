@@ -65,7 +65,7 @@ ModelSpec addStreetLap( QVector3D pos,QVector3D contourDir){
 	return stEl;
 }
 
-bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, std::vector< Block > &blocks){
+bool VBOVegetation::generateVegetation(VBORenderManager& rendManager, BlockSet &blocks){
 	QTime tim;
 	tim.start();
 

@@ -6,12 +6,13 @@
 #pragma once
 
 #include "VBOBlock.h"
+#include "Zoning.h"
 
 class VBOPmParcels{
 public:
-	static bool generateParcels(VBORenderManager& rendManager, std::vector< Block > &blocks);
+	static bool generateParcels(Zoning& zoning, VBORenderManager& rendManager, BlockSet &blocks);
 
 private:
-	static void subdivideBlockIntoParcels(Block &block);
-	static bool subdivideParcel(Block &block, Parcel parcel, float areaMean, float areaMin, float areaVar, float splitIrregularity, std::vector<Parcel> &outParcels);
+	static void subdivideBlockIntoParcels(Zoning& zoning, Block &block);
+	static bool subdivideParcel(Zoning& zoning, Parcel parcel, std::vector<Parcel> &outParcels);
 };

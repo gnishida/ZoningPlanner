@@ -365,12 +365,7 @@ void VBOPmBlocks::assignZonesToBlocks(Zoning& zoning, BlockSet& blocks) {
 				continue;
 			}
 
-			int s = zoning.positionToIndex(QVector2D(bbox.midPt()));
-			if (s >= 0)  {
-				blocks[i].zone = ZoneType(zoning.zones[s], 1);
-			} else {
-				blocks[i].zone = ZoneType(0, 3);
-			}
+			blocks[i].zone = zoning.getZone(QVector2D(bbox.midPt()));
 		}
 	}
 

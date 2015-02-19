@@ -5,18 +5,13 @@
 #include "VBOParcel.h"
 
 
-Parcel::Parcel(){
+Parcel::Parcel() {
 }
 
 /**
 * Compute Parcel Buildable Area
 **/
-float Parcel::computeBuildableArea(float frontSetback, float rearSetback, float sideSetback,
-	std::vector<int> &frontEdges, 
-	std::vector<int> &rearEdges, 
-	std::vector<int> &sideEdges,
-	Loop3D &pgonInset)
-{
+float Parcel::computeBuildableArea(float frontSetback, float rearSetback, float sideSetback, std::vector<int> &frontEdges, std::vector<int> &rearEdges, std::vector<int> &sideEdges, Loop3D &pgonInset) {
 	float buildableArea = 0.0f;
 
 	int contourSz = this->parcelContour.contour.size();

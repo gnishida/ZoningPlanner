@@ -5,7 +5,7 @@
 
 #include "VBOPmBuildings.h"
 
-bool VBOPmBuildings::generateBuildings(VBORenderManager& rendManager, std::vector< Block > &blocks) {
+bool VBOPmBuildings::generateBuildings(VBORenderManager& rendManager, BlockSet &blocks) {
 	for (int i = 0; i < blocks.size(); ++i) {
 		for (int pi = 0; pi < blocks[i].parcels.size(); ++pi) {
 			if (!generateParcelBuildings(rendManager, blocks[i], blocks[i].parcels[pi])) {

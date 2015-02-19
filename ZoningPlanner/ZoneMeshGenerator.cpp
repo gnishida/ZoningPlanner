@@ -7,34 +7,31 @@ void ZoneMeshGenerator::generateZoneMesh(VBORenderManager& rendManager, BlockSet
 	rendManager.removeStaticGeometry("zoning");
 	for (int i = 0; i < blocks.size(); ++i) {
 		if (!blocks[i].valid) continue;
-		
 		if (blocks[i].zone.type() == ZoneType::TYPE_UNUSED) continue;
 
-		// Blockの3Dモデルを生成（Block表示モードの時にのみ、表示される）
-		{
+		for (int pi = 0; pi < blocks[i].parcels.size(); ++pi) {
 			std::vector<Vertex> vert;
 
 			QColor color;
 			int opacity = 192;
-			if (i == blocks.selectedBlockIndex) {
-				color = QColor(255, 255, 255, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_RESIDENTIAL) {	// 住宅街は赤色ベース
-				color = QColor(255 - (blocks[i].zone.level() - 1) * 70, 0, 0, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_COMMERCIAL) {	// 商業地は青色ベース
-				color = QColor(0, 0, 255 - (blocks[i].zone.level() - 1) * 70, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_MANUFACTURING) {	// 工場街は灰色ベース
-				color = QColor(200 - (blocks[i].zone.level() - 1) * 60, 150 - (blocks[i].zone.level() - 1) * 40, 200 - (blocks[i].zone.level() - 1) * 60, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_PARK) {			// 公園は緑色
+			if (blocks[i].parcels[pi].zone.type() == ZoneType::TYPE_RESIDENTIAL) {			// 住宅街（赤色）
+				color = QColor(255 - (blocks[i].parcels[pi].zone.level() - 1) * 70, 0, 0, opacity);
+			} else if (blocks[i].parcels[pi].zone.type() == ZoneType::TYPE_COMMERCIAL) {	// 商業地（青色）
+				color = QColor(0, 0, 255 - (blocks[i].parcels[pi].zone.level() - 1) * 70, opacity);
+			} else if (blocks[i].parcels[pi].zone.type() == ZoneType::TYPE_MANUFACTURING) {	// 工業地（灰色）
+				int intensity = 200 - (blocks[i].parcels[pi].zone.level() - 1) * 60;
+				color = QColor(intensity, intensity, intensity, opacity);
+			} else if (blocks[i].parcels[pi].zone.type() == ZoneType::TYPE_PARK) {			// 公園（緑色）
 				color = QColor(0, 255, 0, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_AMUSEMENT) {		// 繁華街は黄色
+			} else if (blocks[i].parcels[pi].zone.type() == ZoneType::TYPE_AMUSEMENT) {		// 繁華街（黄色）
 				color = QColor(255, 255, 0, opacity);
-			} else if (blocks[i].zone.type() == ZoneType::TYPE_PUBLIC) {		// 公共施設は水色ベース
+			} else if (blocks[i].parcels[pi].zone.type() == ZoneType::TYPE_PUBLIC) {		// 公共施設（水色）
 				color = QColor(0, 255, 255, opacity);
 			} else {
-				color = QColor(128, 128, 128, opacity);
+				color = QColor(0, 0, 0, opacity);											// その他（黒色）
 			}
 
-			rendManager.addStaticGeometry2("zoning", blocks[i].blockContour.contour, 8.0f, false, "", GL_QUADS, 1|mode_AdaptTerrain, QVector3D(1, 1, 1), color);
+			rendManager.addStaticGeometry2("zoning", blocks[i].parcels[pi].parcelContour.contour, 7.0f, false, "", GL_QUADS, 1|mode_AdaptTerrain, QVector3D(1, 1, 1), color);
 		}
 	}
 }

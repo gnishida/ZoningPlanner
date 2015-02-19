@@ -12,9 +12,13 @@ Zoning::~Zoning() {
 	if (zones != 0) delete [] zones;
 }
 
-int Zoning::getZone(const QVector2D& pt) const {
+ZoneType Zoning::getZone(const QVector2D& pt) const {
 	int s = positionToIndex(pt);
-	return zones[s];
+	if (s >= 0) {
+		return ZoneType(zones[s], 1);
+	} else {
+		return ZoneType(ZoneType::TYPE_UNDEFINED, 1);
+	}
 }
 
 void Zoning::loadInitZones(const QString& filename) {
