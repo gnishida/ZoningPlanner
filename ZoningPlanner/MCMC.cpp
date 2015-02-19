@@ -27,7 +27,7 @@ void MCMC::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTyp
 	srand(10);
 	*city_size = start_size;
 
-	*zones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
+	*zones = new int[(*city_size) * (*city_size)];//(int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 	
 	// 初期プランを生成
 	generateZoningPlan(*city_size, *zones, zoneTypeDistribution);
@@ -40,14 +40,14 @@ void MCMC::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTyp
 		} else {
 			optimize2(*city_size, max_iterations, *zones);
 		}
-		int* tmpZones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
+		int* tmpZones = new int[(*city_size) * (*city_size)];//(int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 		memcpy(tmpZones, *zones, sizeof(int) * (*city_size) * (*city_size));
 
 		free(*zones);
 
 		// ゾーンマップを、たて、よこ、２倍ずつに増やす
 		*city_size *= 2;
-		*zones = (int*)malloc(sizeof(int) * (*city_size) * (*city_size));
+		*zones = new int[(*city_size) * (*city_size)];//(int*)malloc(sizeof(int) * (*city_size) * (*city_size));
 		for (int r = 0; r < *city_size; ++r) {
 			for (int c = 0; c < *city_size; ++c) {
 				int oldR = r / 2;
@@ -66,9 +66,9 @@ void MCMC::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTyp
 }
 
 void MCMC::computeDistanceMap(int city_size, int* zones, int** dist) {
-	*dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	bool* toRaise = (bool*)malloc(city_size * city_size * NUM_FEATURES);
+	*dist = new int[city_size * city_size * NUM_FEATURES];// (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	int* obst = new int[city_size * city_size * NUM_FEATURES];//(int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	bool* toRaise = new bool[city_size * city_size * NUM_FEATURES];// (bool*)malloc(city_size * city_size * NUM_FEATURES);
 
 
 	// キューのセットアップ
@@ -87,8 +87,8 @@ void MCMC::computeDistanceMap(int city_size, int* zones, int** dist) {
 
 	updateDistanceMap(city_size, queue, zones, *dist, obst, toRaise);
 
-	free(obst);
-	free(toRaise);
+	delete [] obst;//free(obst);
+	delete [] toRaise;//free(toRaise);
 }
 
 void MCMC::showZone(int city_size, int* zones, char* filename) {
@@ -440,17 +440,17 @@ void MCMC::generateZoningPlan(int city_size, int* zones, std::vector<float> zone
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  */
 void MCMC::optimize(int city_size, int max_iterations, int* bestZone) {
-	int* zone = (int*)malloc(sizeof(int) * city_size * city_size);
-	int* dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	bool* toRaise = (bool*)malloc(city_size * city_size * NUM_FEATURES);
+	int* zone = new int[city_size * city_size];//(int*)malloc(sizeof(int) * city_size * city_size);
+	int* dist = new int[city_size * city_size * NUM_FEATURES];// (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	int* obst = new int[city_size * city_size * NUM_FEATURES];// (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	bool* toRaise = new bool[city_size * city_size * NUM_FEATURES];// (bool*)malloc(city_size * city_size * NUM_FEATURES);
 
 	memcpy(zone, bestZone, sizeof(int) * city_size * city_size);
 
 	// for backup
-	int* tmpZone = (int*)malloc(sizeof(int) * city_size * city_size);
-	int* tmpDist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	int* tmpObst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	int* tmpZone = new int[city_size * city_size];// (int*)malloc(sizeof(int) * city_size * city_size);
+	int* tmpDist = new int[city_size * city_size * NUM_FEATURES];//(int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	int* tmpObst = new int[city_size * city_size * NUM_FEATURES];// (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 
 	// キューのセットアップ
 	std::list<std::pair<int, int> > queue;
@@ -535,14 +535,14 @@ void MCMC::optimize(int city_size, int max_iterations, int* bestZone) {
 	showZone(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
 
-	free(tmpZone);
-	free(tmpDist);
-	free(tmpObst);
+	delete [] tmpZone;//free(tmpZone);
+	delete [] tmpDist;//free(tmpDist);
+	delete [] tmpObst;//free(tmpObst);
 
-	free(zone);
-	free(dist);
-	free(obst);
-	free(toRaise);
+	delete [] zone;//free(zone);
+	delete [] dist;//free(dist);
+	delete [] obst;//free(obst);
+	delete [] toRaise;//free(toRaise);
 }
 
 
@@ -552,9 +552,9 @@ void MCMC::optimize(int city_size, int max_iterations, int* bestZone) {
  * 各ステップでは、隣接セルをランダムに選択し、ゾーンを交換する。
  */
 void MCMC::optimize2(int city_size, int max_iterations, int* bestZone) {
-	int* zone = (int*)malloc(sizeof(int) * city_size * city_size);
-	int* dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	int* zone = new int[city_size * city_size];//(int*)malloc(sizeof(int) * city_size * city_size);
+	int* dist = new int[city_size * city_size * NUM_FEATURES];//(int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
+	int* obst = new int[city_size * city_size * NUM_FEATURES];//(int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
 	bool* toRaise = (bool*)malloc(city_size * city_size * NUM_FEATURES);
 
 	memcpy(zone, bestZone, sizeof(int) * city_size * city_size);
@@ -668,14 +668,14 @@ void MCMC::optimize2(int city_size, int max_iterations, int* bestZone) {
 	showZone(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
 
-	free(tmpZone);
-	free(tmpDist);
-	free(tmpObst);
+	delete [] tmpZone;//free(tmpZone);
+	delete [] tmpDist;//free(tmpDist);
+	delete [] tmpObst;//free(tmpObst);
 
-	free(zone);
-	free(dist);
-	free(obst);
-	free(toRaise);
+	delete [] zone;//free(zone);
+	delete [] dist;//free(dist);
+	delete [] obst;//free(obst);
+	delete [] toRaise;//free(toRaise);
 }
 
 };

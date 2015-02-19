@@ -70,12 +70,12 @@ void Zoning::load(const QString& filename) {
 	int errorLine;
 	QString errorStr;
     int errorColumn;
-	doc.setContent(&file);// true, &errorStr, &errorLine, &errorColumn);
+	doc.setContent(&file);
 	QDomElement root = doc.documentElement();
-	//QDomElement root = doc.firstChildElement("zoning");
 
 	city_length = root.toElement().attribute("city_length").toInt();
 	zone_size = root.toElement().attribute("zone_size").toInt();
+	zones = new int[zone_size * zone_size];
 
 	int count = 0;
 	QDomNode nodeZone = root.firstChild();
