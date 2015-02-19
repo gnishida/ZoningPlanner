@@ -5,6 +5,7 @@
 #include "BlockSet.h"
 
 Zoning::Zoning() {
+	zone_size = 0;
 	zones = 0;
 }
 
@@ -17,7 +18,7 @@ ZoneType Zoning::getZone(const QVector2D& pt) const {
 	if (s >= 0) {
 		return ZoneType(zones[s], 1);
 	} else {
-		return ZoneType(ZoneType::TYPE_UNDEFINED, 1);
+		return ZoneType(ZoneType::TYPE_RESIDENTIAL, 2);
 	}
 }
 
@@ -130,6 +131,7 @@ void Zoning::save(const QString& filename) {
  */
 int Zoning::positionToIndex(const QVector2D& pt) const {
 	if (zones == 0) return -1;
+	if (zone_size == 0) return -1;
 
 	int cell_len = city_length / zone_size;
 
@@ -148,6 +150,8 @@ int Zoning::positionToIndex(const QVector2D& pt) const {
  * zonesのインデックス番号を座標に変換する。
  */
 QVector2D Zoning::indexToPosition(int index) const {
+	if (zone_size == 0) return QVector2D(0, 0);
+
 	int cell_len = city_length / zone_size;
 
 	int c = index % zone_size;
