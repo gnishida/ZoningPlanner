@@ -49,7 +49,7 @@ void ExhaustiveSearch::findOptimalPlan(int** zones, std::vector<float>& zoneType
 		}
 	}
 
-	float best_score = 0.0f;
+	float best_score = -std::numeric_limits<float>::max();
 	unsigned long count = 0;
 	QMap<QString, bool> checked_zones;
 	clock_t start = clock();
@@ -72,7 +72,7 @@ void ExhaustiveSearch::findOptimalPlan(int** zones, std::vector<float>& zoneType
 				start = now;
 			}
 		}
-	} while (std::next_permutation(zones, zones + numCells));
+	} while (std::next_permutation((*zones), (*zones) + numCells));
 
 	printf("seraching best done. [count = %d], [best_score = %lf]\n", count, best_score);
 
