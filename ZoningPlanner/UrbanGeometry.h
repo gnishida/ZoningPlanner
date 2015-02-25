@@ -62,7 +62,9 @@ public:
 	void generateAll();
 	void update(VBORenderManager& vboRenderManager);
 
-	void findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference);
+	void findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference, int zoning_start_size, int zoning_num_layers);
 	QVector2D findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference);
 	std::vector<std::pair<std::vector<float>, std::vector<float> > > generateTasks(VBORenderManager& renderManager, int num);
+
+	void findOptimalPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference, int zoning_start_size);
 };

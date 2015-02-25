@@ -51,6 +51,7 @@ public slots:
 	void onHCResults();
 	void onHCNext();
 	void onFileUpload();
+	void onHCSimulation();
 };
 
 #endif // MAINWINDOW_H

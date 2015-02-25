@@ -97,6 +97,8 @@
     <addaction name="actionHCResults"/>
     <addaction name="actionHCNext"/>
     <addaction name="actionFileUpload"/>
+    <addaction name="separator"/>
+    <addaction name="actionHCSimulation"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
@@ -481,6 +483,11 @@
   <action name="actionSaveZoning">
    <property name="text">
     <string>Save Zoning</string>
+   </property>
+  </action>
+  <action name="actionHCSimulation">
+   <property name="text">
+    <string>Simulation</string>
    </property>
   </action>
  </widget>

@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionHCNext, SIGNAL(triggered()), this, SLOT(onHCNext()));
 	connect(ui.actionFileUpload, SIGNAL(triggered()), this, SLOT(onFileUpload()));
 
+	connect(ui.actionHCSimulation, SIGNAL(triggered()), this, SLOT(onHCSimulation()));
+
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
 	setCentralWidget(glWidget);
@@ -238,7 +240,7 @@ void MainWindow::onBestPlan() {
 		preferences.push_back(preference);
 	}
 	
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 5, 5);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
@@ -284,7 +286,7 @@ void MainWindow::onHCStart() {
 	preference[0][0] = 0.378; preference[0][1] = 0.378; preference[0][2] = 0.378; preference[0][3] = 0.378; preference[0][4] = 0.378; preference[0][5] = 0.378; preference[0][6] = -0.378; preference[0][7] = -0.378;
 
 	// ゾーンプランを作成する
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference, 5, 5);
 
 	// HC初期化
 	HTTPClient client;
@@ -410,7 +412,7 @@ void MainWindow::onHCResults() {
 	savePreferences(user_ids, preferences, filename);
 
 	// ベストプランを計算する
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 5, 5);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
@@ -484,4 +486,48 @@ void MainWindow::onFileUpload() {
 		msgBox.setText("Server response: " + client.reply());
 		msgBox.exec();
 	}
+}
+
+void MainWindow::onHCSimulation() {
+	std::vector<std::vector<float> > preference;
+	preference.resize(9);
+	for (int i = 0; i < 9; ++i) preference[i].resize(8);
+
+
+	// 店、                   学校、                     レストラン、               公園、                    アミューズメント、          図書館、                  工場、                     地価
+	// 主婦A（赤ちゃん）
+	preference[0][0] = 0.378; preference[0][1] = 0.000; preference[0][2] = 0.100; preference[0][3] = 0.378; preference[0][4] =-0.200; preference[0][5] = 0.100; preference[0][6] = -0.578; preference[0][7] = -0.278;
+	// 主婦B（小学生）
+	preference[1][0] = 0.200; preference[1][1] = 0.378; preference[1][2] = 0.000; preference[1][3] = 0.378; preference[1][4] = 0.000; preference[1][5] = 0.100; preference[1][6] = -0.578; preference[1][7] = -0.378;
+	// 主婦C（大学生）
+	preference[2][0] = 0.200; preference[2][1] = 0.278; preference[2][2] = 0.100; preference[2][3] = 0.378; preference[2][4] = 0.100; preference[2][5] = 0.100; preference[2][6] = -0.578; preference[2][7] = -0.378;
+	// 学生A
+	preference[3][0] = 0.178; preference[3][1] = 0.578; preference[3][2] = 0.178; preference[3][3] = 0.000; preference[3][4] = 0.000; preference[3][5] = 0.378; preference[3][6] = -0.278; preference[3][7] = -0.378;
+	// 学生B
+	preference[4][0] = 0.378; preference[4][1] = 0.578; preference[4][2] = 0.378; preference[4][3] = 0.000; preference[4][4] = 0.378; preference[4][5] = 0.000; preference[4][6] = -0.278; preference[4][7] = -0.100;
+	// サラリーマンA（独身）
+	preference[5][0] = 0.378; preference[5][1] = 0.000; preference[5][2] = 0.378; preference[5][3] = 0.000; preference[5][4] = 0.278; preference[5][5] = 0.000; preference[5][6] = -0.378; preference[5][7] = -0.100;
+	// サラリーマンB（既婚、赤ちゃん）
+	preference[6][0] = 0.178; preference[6][1] = 0.000; preference[6][2] = 0.178; preference[6][3] = 0.378; preference[6][4] = 0.000; preference[6][5] = 0.100; preference[6][6] = -0.378; preference[6][7] = -0.378;
+	// サラリーマンC（既婚、中学生）
+	preference[7][0] = 0.278; preference[7][1] = 0.378; preference[7][2] = 0.078; preference[7][3] = 0.378; preference[7][4] = 0.000; preference[7][5] = 0.200; preference[7][6] = -0.378; preference[7][7] = -0.378;
+	// 老人A
+	preference[8][0] = 0.378; preference[8][1] = 0.100; preference[8][2] = 0.000; preference[8][3] = 0.278; preference[8][4] = 0.000; preference[8][5] = 0.178; preference[8][6] = -0.378; preference[8][7] = -0.378;
+
+	// normalize
+	for (int i = 0; i < 9; ++i) {
+		float total = 0.0f;
+		for (int j = 0; j < 8; ++j) {
+			total += preference[i][j] * preference[i][j];
+		}
+		total = sqrtf(total);
+
+		for (int j = 0; j < 8; ++j) {
+			preference[i][j] /= total;
+		}
+	}
+
+	// ゾーンプランを作成する
+	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preference, 4);
+
 }

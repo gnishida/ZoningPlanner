@@ -22,6 +22,7 @@
 #include "VBOPmBuildings.h"
 #include "BuildingMeshGenerator.h"
 #include "ZoneMeshGenerator.h"
+#include "ExhaustiveSearch.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -137,7 +138,7 @@ void UrbanGeometry::update(VBORenderManager& vboRenderManager) {
 /**
  * ベストのゾーンプランを探す（シングルスレッド版）
  */
-void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences) {
+void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences, int zoning_start_size, int zoning_num_layers) {
 	// 各種ゾーンの配分を取得（住宅、商業、工場、公園、アミューズメント、学校・図書館）
 	QStringList distribution = G::g["zoning_type_distribution"].toString().split(",");
 	std::vector<float> zoneTypeDistribution(distribution.size());
@@ -155,7 +156,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 	mcmc4::MCMC4 mcmc(renderManager.side);
 	mcmc.setPreferences(preferences);
 	mcmc.setPreferenceForLandValue(preference_for_land_value);
-	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, G::getInt("zoning_start_size"), G::getInt("zoning_num_layers"), zones.init_zones);
+	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, zoning_start_size, zoning_num_layers, zones.init_zones);
 }
 
 /**
@@ -276,4 +277,26 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 	}
 
 	return ret;
+}
+
+void UrbanGeometry::findOptimalPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preference, int zoning_start_size) {
+	// 各種ゾーンの配分を取得（住宅、商業、工場、公園、アミューズメント、学校・図書館）
+	QStringList distribution = G::g["zoning_type_distribution"].toString().split(",");
+	std::vector<float> zoneTypeDistribution(distribution.size());
+	for (int i = 0; i < distribution.size(); ++i) {
+		zoneTypeDistribution[i] = distribution[i].toFloat();
+	}
+
+	// 価格を決定するためのpreference vectorを取得
+	QStringList pref_for_land_value = G::g["preference_for_land_value"].toString().split(",");
+	std::vector<float> preference_for_land_value(pref_for_land_value.size());
+	for (int i = 0; i < pref_for_land_value.size(); ++i) {
+		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
+	}
+
+	exhaustive_search::ExhaustiveSearch es;
+	es.setPreferences(preference);
+	es.setPreferenceForLandValue(preference_for_land_value);
+	es.findOptimalPlan(&zones.zones, zoneTypeDistribution, zoning_start_size);
+	zones.zone_size = zoning_start_size;
 }
