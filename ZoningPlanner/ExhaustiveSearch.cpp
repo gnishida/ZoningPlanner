@@ -68,7 +68,7 @@ void ExhaustiveSearch::findOptimalPlan(int** zones, std::vector<float>& zoneType
 			}
 			if (++count % 10000 == 0) {
 				clock_t now = clock();
-				printf("searching [count = %ld/%ld (%.2lf )] (%lf sec)\n", count, expected_num, (float)count / expected_num * 100, (double)(now - start) / CLOCKS_PER_SEC);
+				printf("searching [count = %ld/%ld (%.2lf %%)] (%lf sec)\n", count, expected_num, (float)count / expected_num * 100, (double)(now - start) / CLOCKS_PER_SEC);
 				start = now;
 			}
 		}
