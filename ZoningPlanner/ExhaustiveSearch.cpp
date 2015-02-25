@@ -39,6 +39,25 @@ void ExhaustiveSearch::findOptimalPlan(int** zones, std::vector<float>& zoneType
 		}
 	}
 
+	/*
+	(*zones)[0] = 0;
+	(*zones)[1] = 0;
+	(*zones)[2] = 1;
+	(*zones)[3] = 0;
+	(*zones)[4] = 3;
+	(*zones)[5] = 4;
+	(*zones)[6] = 0;
+	(*zones)[7] = 3;
+	(*zones)[8] = 0;
+	(*zones)[9] = 0;
+	(*zones)[10] = 5;
+	(*zones)[11] = 0;
+	(*zones)[12] = 2;
+	(*zones)[13] = 1;
+	(*zones)[14] = 0;
+	(*zones)[15] = 0;
+	*/
+
 	// 予想される全組合せ数
 	unsigned long expected_num = 1;
 	{
@@ -106,7 +125,8 @@ void ExhaustiveSearch::computeFeature(int city_size, int* zones, int* dist, int 
 	feature[5] = distToFeature(dist[s * NUM_FEATURES + 4] * cell_length); // 図書館
 	feature[6] = distToFeature(dist[s * NUM_FEATURES + 1] * cell_length); // 工場
 
-	feature[7] = computePriceIndex(feature); // 価格
+	//feature[7] = computePriceIndex(feature); // 価格
+	feature[7] = computePriceIndex2(city_size, s); // 価格
 }
 
 void ExhaustiveSearch::saveZoneImage(int city_size, int* zones, char* filename) {
@@ -157,6 +177,23 @@ float ExhaustiveSearch::computePriceIndex(std::vector<float>& feature) {
 	float s = dot(preference_for_land_value, feature) + 0.3;
 	if (s < 0) s = 0;
 	return sqrtf(s);
+}
+
+/**
+ * セルの場所から、価格インデックスを決定する。
+ * テスト中。。。
+ * 街の中心から、ガウス分布で価格を決定する。
+ */
+float ExhaustiveSearch::computePriceIndex2(int city_size, int s) {
+	float x = s % city_size + 0.5;
+	float y = (int)(s / city_size) + 0.5;
+
+	float cx = city_size * 0.5;
+	float cy = city_size * 0.5;
+	
+	float sigma = city_size * 0.2;
+
+	return expf(-(SQR(x - cx) + SQR(y - cy)) / 2 / sigma);
 }
 
 float ExhaustiveSearch::distToFeature(float dist) {

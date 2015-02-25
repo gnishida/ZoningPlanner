@@ -495,24 +495,24 @@ void MainWindow::onHCSimulation() {
 
 
 	// 店、                   学校、                     レストラン、               公園、                    アミューズメント、          図書館、                  工場、                     地価
-	// 主婦A（赤ちゃん）
-	preference[0][0] = 0.378; preference[0][1] = 0.000; preference[0][2] = 0.100; preference[0][3] = 0.378; preference[0][4] =-0.200; preference[0][5] = 0.100; preference[0][6] = -0.578; preference[0][7] = -0.278;
-	// 主婦B（小学生）
-	preference[1][0] = 0.200; preference[1][1] = 0.378; preference[1][2] = 0.000; preference[1][3] = 0.378; preference[1][4] = 0.000; preference[1][5] = 0.100; preference[1][6] = -0.578; preference[1][7] = -0.378;
-	// 主婦C（大学生）
-	preference[2][0] = 0.200; preference[2][1] = 0.278; preference[2][2] = 0.100; preference[2][3] = 0.378; preference[2][4] = 0.100; preference[2][5] = 0.100; preference[2][6] = -0.578; preference[2][7] = -0.378;
-	// 学生A
-	preference[3][0] = 0.178; preference[3][1] = 0.578; preference[3][2] = 0.178; preference[3][3] = 0.000; preference[3][4] = 0.000; preference[3][5] = 0.378; preference[3][6] = -0.278; preference[3][7] = -0.378;
-	// 学生B
-	preference[4][0] = 0.378; preference[4][1] = 0.578; preference[4][2] = 0.378; preference[4][3] = 0.000; preference[4][4] = 0.378; preference[4][5] = 0.000; preference[4][6] = -0.278; preference[4][7] = -0.100;
-	// サラリーマンA（独身）
-	preference[5][0] = 0.378; preference[5][1] = 0.000; preference[5][2] = 0.378; preference[5][3] = 0.000; preference[5][4] = 0.278; preference[5][5] = 0.000; preference[5][6] = -0.378; preference[5][7] = -0.100;
-	// サラリーマンB（既婚、赤ちゃん）
-	preference[6][0] = 0.178; preference[6][1] = 0.000; preference[6][2] = 0.178; preference[6][3] = 0.378; preference[6][4] = 0.000; preference[6][5] = 0.100; preference[6][6] = -0.378; preference[6][7] = -0.378;
-	// サラリーマンC（既婚、中学生）
-	preference[7][0] = 0.278; preference[7][1] = 0.378; preference[7][2] = 0.078; preference[7][3] = 0.378; preference[7][4] = 0.000; preference[7][5] = 0.200; preference[7][6] = -0.378; preference[7][7] = -0.378;
-	// 老人A
-	preference[8][0] = 0.378; preference[8][1] = 0.100; preference[8][2] = 0.000; preference[8][3] = 0.278; preference[8][4] = 0.000; preference[8][5] = 0.178; preference[8][6] = -0.378; preference[8][7] = -0.378;
+	// 主婦A（店、公園　<-> アミューズメント、工場、ダウンタウン)
+	preference[0][0] = 0.400; preference[0][1] = 0.000; preference[0][2] = 0.000; preference[0][3] = 0.400; preference[0][4] =-0.300; preference[0][5] = 0.100; preference[0][6] = -0.578; preference[0][7] = -0.378;
+	// 主婦B（学校、公園　<-> 工場、ダウンタウン)
+	preference[1][0] = 0.100; preference[1][1] = 0.378; preference[1][2] = 0.000; preference[1][3] = 0.378; preference[1][4] = 0.000; preference[1][5] = 0.100; preference[1][6] = -0.578; preference[1][7] = -0.378;
+	// 主婦C（学校、公園　<-> 工場、ダウンタウン)
+	preference[2][0] = 0.100; preference[2][1] = 0.378; preference[2][2] = 0.000; preference[2][3] = 0.378; preference[2][4] = 0.000; preference[2][5] = 0.100; preference[2][6] = -0.578; preference[2][7] = -0.378;
+	// 学生A（学校、図書館、ダウンタウン　<-> 工場)
+	preference[3][0] = 0.000; preference[3][1] = 0.578; preference[3][2] = 0.000; preference[3][3] = 0.000; preference[3][4] = 0.000; preference[3][5] = 0.378; preference[3][6] = -0.278; preference[3][7] =  3.000;
+	// 学生B（店、学校、レストラン、アミューズメント、ダウンタウン　<-> 工場)
+	preference[4][0] = 0.378; preference[4][1] = 0.578; preference[4][2] = 0.378; preference[4][3] = 0.000; preference[4][4] = 0.378; preference[4][5] = 0.000; preference[4][6] = -0.278; preference[4][7] =  3.000;
+	// サラリーマンA（店、レストラン、アミューズメント　<-> 工場)
+	preference[5][0] = 0.378; preference[5][1] = 0.000; preference[5][2] = 0.378; preference[5][3] = 0.000; preference[5][4] = 0.278; preference[5][5] = 0.000; preference[5][6] = -0.378; preference[5][7] =  1.000;
+	// サラリーマンB（店、公園、　<-> ダウンタウン、工場)
+	preference[6][0] = 0.278; preference[6][1] = 0.000; preference[6][2] = 0.000; preference[6][3] = 0.378; preference[6][4] = 0.000; preference[6][5] = 0.100; preference[6][6] = -0.378; preference[6][7] = -0.378;
+	// サラリーマンC（店、学校、公園、図書館　<-> ダウンタウン、工場)
+	preference[7][0] = 0.278; preference[7][1] = 0.378; preference[7][2] = 0.000; preference[7][3] = 0.378; preference[7][4] = 0.000; preference[7][5] = 0.200; preference[7][6] = -0.378; preference[7][7] = -0.378;
+	// 老人A（店、公園　<-> ダウンタウン、工場)
+	preference[8][0] = 0.378; preference[8][1] = 0.000; preference[8][2] = 0.000; preference[8][3] = 0.278; preference[8][4] = 0.000; preference[8][5] = 0.000; preference[8][6] = -0.378; preference[8][7] = -0.378;
 
 	// normalize
 	for (int i = 0; i < 9; ++i) {

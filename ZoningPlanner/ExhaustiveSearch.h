@@ -33,6 +33,7 @@ public:
 	void saveZoneImage(int city_size, int* zones, char* filename);
 	void dumpDist(int city_size, int* dist, int featureId);
 	float computePriceIndex(std::vector<float>& feature);
+	float computePriceIndex2(int city_size, int s);
 	void computeFeature(int city_size, int* zones, int* dist, int s, std::vector<float>& feature);
 	static float distToFeature(float dist);
 	static std::vector<float> distToFeature(std::vector<float>& dist);
