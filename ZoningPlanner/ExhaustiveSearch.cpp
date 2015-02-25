@@ -68,8 +68,10 @@ void ExhaustiveSearch::findOptimalPlan(int** zones, std::vector<float>& zoneType
 			}
 			if (++count % 10000 == 0) {
 				clock_t now = clock();
-				printf("searching [count = %ld/%ld (%.2lf %%)] (%lf sec)\n", count, expected_num, (float)count / expected_num * 100, (double)(now - start) / CLOCKS_PER_SEC);
-				start = now;
+				int sec = (double)(now - start) / CLOCKS_PER_SEC;
+				int mi = sec / 60;
+				sec = sec - mi * 60;
+				printf("searching [count = %ld/%ld (%.2lf %%)] (%d min %d sec)\n", count, expected_num, (float)count / expected_num * 100, mi, sec);
 			}
 		}
 	} while (std::next_permutation((*zones), (*zones) + numCells));
