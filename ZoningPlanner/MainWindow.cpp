@@ -240,7 +240,7 @@ void MainWindow::onBestPlan() {
 		preferences.push_back(preference);
 	}
 	
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 5, 5);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 4, 1);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
@@ -489,45 +489,42 @@ void MainWindow::onFileUpload() {
 }
 
 void MainWindow::onHCSimulation() {
-	std::vector<std::vector<float> > preference;
-	preference.resize(9);
-	for (int i = 0; i < 9; ++i) preference[i].resize(8);
+	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
+	if (filename.isEmpty()) return;
+	
+	QFile file(filename);
+	file.open(QIODevice::ReadOnly);
+ 
+	// preference vectorを読み込む
+	std::vector<std::vector<float> > preferences;
 
+	QTextStream in(&file);
+	while (true) {
+		QString str = in.readLine(0);
+		if (str == NULL) break;
 
-	// 店、                   学校、                     レストラン、               公園、                    アミューズメント、          図書館、                  工場、                     地価
-	// 主婦A（店、公園　<-> アミューズメント、工場、ダウンタウン)
-	preference[0][0] = 0.400; preference[0][1] = 0.000; preference[0][2] = 0.000; preference[0][3] = 0.400; preference[0][4] =-0.300; preference[0][5] = 0.100; preference[0][6] = -0.578; preference[0][7] = -0.378;
-	// 主婦B（学校、公園　<-> 工場、ダウンタウン)
-	preference[1][0] = 0.100; preference[1][1] = 0.378; preference[1][2] = 0.000; preference[1][3] = 0.378; preference[1][4] = 0.000; preference[1][5] = 0.100; preference[1][6] = -0.578; preference[1][7] = -0.378;
-	// 主婦C（学校、公園　<-> 工場、ダウンタウン)
-	preference[2][0] = 0.100; preference[2][1] = 0.378; preference[2][2] = 0.000; preference[2][3] = 0.378; preference[2][4] = 0.000; preference[2][5] = 0.100; preference[2][6] = -0.578; preference[2][7] = -0.378;
-	// 学生A（学校、図書館、ダウンタウン　<-> 工場)
-	preference[3][0] = 0.000; preference[3][1] = 0.578; preference[3][2] = 0.000; preference[3][3] = 0.000; preference[3][4] = 0.000; preference[3][5] = 0.378; preference[3][6] = -0.278; preference[3][7] =  3.000;
-	// 学生B（店、学校、レストラン、アミューズメント、ダウンタウン　<-> 工場)
-	preference[4][0] = 0.378; preference[4][1] = 0.578; preference[4][2] = 0.378; preference[4][3] = 0.000; preference[4][4] = 0.378; preference[4][5] = 0.000; preference[4][6] = -0.278; preference[4][7] =  3.000;
-	// サラリーマンA（店、レストラン、アミューズメント　<-> 工場)
-	preference[5][0] = 0.378; preference[5][1] = 0.000; preference[5][2] = 0.378; preference[5][3] = 0.000; preference[5][4] = 0.278; preference[5][5] = 0.000; preference[5][6] = -0.378; preference[5][7] =  1.000;
-	// サラリーマンB（店、公園、　<-> ダウンタウン、工場)
-	preference[6][0] = 0.278; preference[6][1] = 0.000; preference[6][2] = 0.000; preference[6][3] = 0.378; preference[6][4] = 0.000; preference[6][5] = 0.100; preference[6][6] = -0.378; preference[6][7] = -0.378;
-	// サラリーマンC（店、学校、公園、図書館　<-> ダウンタウン、工場)
-	preference[7][0] = 0.278; preference[7][1] = 0.378; preference[7][2] = 0.000; preference[7][3] = 0.378; preference[7][4] = 0.000; preference[7][5] = 0.200; preference[7][6] = -0.378; preference[7][7] = -0.378;
-	// 老人A（店、公園　<-> ダウンタウン、工場)
-	preference[8][0] = 0.378; preference[8][1] = 0.000; preference[8][2] = 0.000; preference[8][3] = 0.278; preference[8][4] = 0.000; preference[8][5] = 0.000; preference[8][6] = -0.378; preference[8][7] = -0.378;
+		QStringList preference_list = str.split("\t")[1].split(",");
+		std::vector<float> preference;
+		for (int i = 0; i < preference_list.size(); ++i) {
+			preference.push_back(preference_list[i].toFloat());
+		}
 
+		preferences.push_back(preference);
+	}
 	// normalize
 	for (int i = 0; i < 9; ++i) {
 		float total = 0.0f;
 		for (int j = 0; j < 8; ++j) {
-			total += preference[i][j] * preference[i][j];
+			total += preferences[i][j] * preferences[i][j];
 		}
 		total = sqrtf(total);
 
 		for (int j = 0; j < 8; ++j) {
-			preference[i][j] /= total;
+			preferences[i][j] /= total;
 		}
 	}
 
 	// ゾーンプランを作成する
-	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preference, 4);
+	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 4);
 
 }

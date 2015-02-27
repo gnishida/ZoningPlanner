@@ -1,4 +1,5 @@
 ﻿#include "MCMC4.h"
+#include "Util.h"
 
 namespace mcmc4 {
 
@@ -39,7 +40,7 @@ void MCMC4::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTy
 	generateFixedZoning(*city_size, init_zones, &fixed_zones);
 	generateZoningPlan(*city_size, *zones, zoneTypeDistribution, fixed_zones);
 
-	int max_iterations = 10000;
+	int max_iterations = 50000;
 
 	for (int layer = 0; layer < num_layers; ++layer) {
 		if (layer == 0) {
@@ -69,7 +70,7 @@ void MCMC4::findBestPlan(int** zones, int* city_size, std::vector<float>& zoneTy
 			}
 		}
 
-		max_iterations *= 0.5;
+		//max_iterations *= 0.5;
 
 		free(tmpZones);
 	}
@@ -209,56 +210,6 @@ std::vector<float> MCMC4::featureToDist(std::vector<float>& feature) {
 	return ret;
 }
 
-float MCMC4::dot(std::vector<float> v1, std::vector<float> v2) {
-	float ret = 0.0f;
-
-	for (int i = 0; i < v1.size(); ++i) {
-		ret += v1[i] * v2[i];
-	}
-
-	return ret;
-}
-
-
-
-
-
-
-
-float MCMC4::randf() {
-	return (float)rand() / RAND_MAX;
-}
-
-float MCMC4::randf(float a, float b) {
-	return randf() * (b - a) + a;
-}
-
-int MCMC4::sampleFromCdf(float* cdf, int num) {
-	float rnd = randf(0, cdf[num-1]);
-
-	for (int i = 0; i < num; ++i) {
-		if (rnd <= cdf[i]) return i;
-	}
-
-	return num - 1;
-}
-
-int MCMC4::sampleFromPdf(float* pdf, int num) {
-	if (num == 0) return 0;
-
-	float cdf[40];
-	cdf[0] = pdf[0];
-	for (int i = 1; i < num; ++i) {
-		if (pdf[i] >= 0) {
-			cdf[i] = cdf[i - 1] + pdf[i];
-		} else {
-			cdf[i] = cdf[i - 1];
-		}
-	}
-
-	return sampleFromCdf(cdf, num);
-}
-
 inline bool MCMC4::isOcc(int* obst, int s, int featureId) {
 	return obst[s * NUM_FEATURES + featureId] == s;
 }
@@ -364,8 +315,8 @@ float MCMC4::min3(float distToStore, float distToAmusement, float distToFactory)
  * 価格インデックスは、おおむね 0から1 ぐらいの範囲になる。
  * 実際の価格は、アパートの場合、価格インデックス x 1000、一戸建ての場合、価格インデックス x 300K とする。
  */
-float MCMC4::computePriceIndex(std::vector<float>& feature) {
-	float s = dot(preference_for_land_value, feature) + 0.3;
+float MCMC4::computePriceIndex(const std::vector<float>& feature) {
+	float s = Util::dot(preference_for_land_value, feature) + 0.3;
 	if (s < 0) s = 0;
 	return sqrtf(s);
 }
@@ -413,7 +364,7 @@ float MCMC4::computeScore(int city_size, int* zones, int* dist) {
 		computeFeature(city_size, zones, dist, s, feature);
 
 		for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
-			float score = dot(feature, preferences[peopleType]);
+			float score = Util::dot(feature, preferences[peopleType]);
 
 			all_scores[peopleType].push_back(std::make_pair(score, s));
 		}
@@ -539,24 +490,46 @@ void MCMC4::generateZoningPlan(int city_size, int* zones, std::vector<float> zon
 		}
 	}
 
-	std::vector<float> numRemainings(NUM_FEATURES + 1);
+	std::vector<int> numRemainings(NUM_FEATURES + 1);
+	int actualNumCells = 0;
+
+	// 一時的に、fixedゾーンを使わないようにする
+	numCells = city_size * city_size;
+
 	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
-		numRemainings[i] = numCells * zoneTypeDistribution[i];
+		numRemainings[i] = numCells * zoneTypeDistribution[i] + 0.5f;
+		actualNumCells += numRemainings[i];
+	}
+
+	if (actualNumCells != numCells) {
+		numRemainings[0] += numCells - actualNumCells;
 	}
 
 	for (int r = 0; r < city_size; ++r) {
 		for (int c = 0; c < city_size; ++c) {
 			// 除隊対象か？
-			if (fixed_zones[r * city_size + c] != ZoneType::TYPE_UNDEFINED) {
+
+			// 一時的に、fixedゾーンを使わないようにする
+			/*if (fixed_zones[r * city_size + c] != ZoneType::TYPE_UNDEFINED) {
 				zones[r * city_size + c] = fixed_zones[r * city_size + c];
 				continue;
-			}
+			}*/
 
-			int type = sampleFromPdf(numRemainings.data(), numRemainings.size());
+			int type = Util::sampleFromPdf(numRemainings);
 			zones[r * city_size + c] = type;
 			numRemainings[type] -= 1;
 		}
 	}
+}
+
+bool MCMC4::accept(float current_score, float proposed_score) {
+	const float alpha = 100.0f;
+	if (proposed_score > current_score || Util::genRand() < expf(alpha * proposed_score) / expf(alpha * current_score)) { 
+		return true;
+	} else {
+		return false;
+	}
+		
 }
 
 /**
@@ -600,6 +573,7 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 	float bestScore = curScore;
 	memcpy(bestZone, zone, sizeof(int) * city_size * city_size);
 
+	std::vector<float> scores;
 	float beta = 1.0f;
 	for (int iter = 0; iter < max_iterations; ++iter) {
 		queue.clear();
@@ -642,7 +616,7 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 
 		//printf("%lf -> %lf (best: %lf)\n", curScore, proposedScore, bestScore);
 
-		if (proposedScore > curScore || randf() < expf(proposedScore) / expf(curScore)) { // accept
+		if (accept(curScore, proposedScore)) { // accept
 			curScore = proposedScore;
 		} else { // reject
 			// rollback
@@ -650,6 +624,8 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 			memcpy(dist, tmpDist, sizeof(int) * city_size * city_size * NUM_FEATURES);
 			memcpy(obst, tmpObst, sizeof(int) * city_size * city_size * NUM_FEATURES);
 		}
+
+		scores.push_back(curScore);
 	}
 
 	printf("city_size: %d, score: %lf\n", city_size, bestScore);
@@ -658,6 +634,13 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 	sprintf(filename, "zone_%d.png", city_size);
 	saveZoneImage(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
+
+	sprintf(filename, "zone_%d_scores.txt", city_size);
+	FILE* fp = fopen(filename, "w");
+	for (int i = 0; i < scores.size(); ++i) {
+		fprintf(fp, "%lf\n", scores[i]);
+	}
+	fclose(fp);
 
 	free(tmpZone);
 	free(tmpDist);
@@ -712,6 +695,7 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 	float bestScore = curScore;
 	memcpy(bestZone, zone, sizeof(int) * city_size * city_size);
 
+	std::vector<float> scores;
 	float beta = 1.0f;
 	int adj[4];
 	adj[0] = -1; adj[1] = 1; adj[2] = -city_size; adj[3] = city_size;
@@ -778,7 +762,7 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 
 		//printf("%lf -> %lf (best: %lf)\n", curScore, proposedScore, bestScore);
 
-		if (proposedScore > curScore || randf() < proposedScore / curScore) { // accept
+		if (accept(curScore, proposedScore)) { // accept
 			curScore = proposedScore;
 		} else { // reject
 			// rollback
@@ -786,6 +770,8 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 			memcpy(dist, tmpDist, sizeof(int) * city_size * city_size * NUM_FEATURES);
 			memcpy(obst, tmpObst, sizeof(int) * city_size * city_size * NUM_FEATURES);
 		}
+
+		scores.push_back(curScore);
 	}
 
 	printf("city_size: %d, score: %lf\n", city_size, bestScore);
@@ -794,6 +780,13 @@ void MCMC4::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 	sprintf(filename, "zone_%d.png", city_size);
 	saveZoneImage(city_size, bestZone, filename);
 	//saveZone(city_size, bestZone);
+
+	sprintf(filename, "zone_%d_scores.txt", city_size);
+	FILE* fp = fopen(filename, "w");
+	for (int i = 0; i < scores.size(); ++i) {
+		fprintf(fp, "%lf\n", scores[i]);
+	}
+	fclose(fp);
 
 	free(tmpZone);
 	free(tmpDist);

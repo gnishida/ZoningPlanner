@@ -195,7 +195,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 		int s = zones.positionToIndex(QVector2D(pt.x(), pt.y()));
 		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
 
-		float score = mcmc4::MCMC4::dot(feature, preference);
+		float score = Util::dot(feature, preference);
 
 		if (score > best_score) {
 			best_score = score;

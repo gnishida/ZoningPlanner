@@ -45,7 +45,7 @@ public:
 	void saveZoneImage(int city_size, int* zones, char* filename);
 	void loadZone(int city_size, int* zones, char* filename);
 	void saveZone(int city_size, int* zones, char* filename);
-	float computePriceIndex(std::vector<float>& feature);
+	float computePriceIndex(const std::vector<float>& feature);
 	void computeFeature(int city_size, int* zones, int* dist, int s, std::vector<float>& feature);
 	//void computeRawFeature(int city_size, int* zones, int* dist, int s, std::vector<float> feature);
 	void dumpZone(int city_size, int* zones);
@@ -55,13 +55,8 @@ public:
 	static float featureToDist(float feature);
 	static std::vector<float> featureToDist(std::vector<float>& dist);
 	static float priceToFeature(float priceIndex);
-	static float dot(std::vector<float> v1, std::vector<float> v2);
 
 private:
-	float randf();
-	float randf(float a, float b);
-	int sampleFromCdf(float* cdf, int num);
-	int sampleFromPdf(float* pdf, int num);
 	bool isOcc(int* obst, int s, int featureId);
 	int distance(int city_size, int pos1, int pos2);
 	void clearCell(int* dist, int* obst, int s, int featureId);
@@ -76,6 +71,7 @@ private:
 	int check(int city_size, int* zones, int* dist);
 	void generateFixedZoning(int city_size, std::vector<std::pair<Polygon2D, ZoneType> >& init_zones, int** fixed_zones);
 	void generateZoningPlan(int city_size, int* zones, std::vector<float> zoneTypeDistribution, int* fixed_zones);
+	bool accept(float current_score, float proposed_score);
 	void optimize(int city_size, int max_iterations, int* fixed_zones, int* bestZone);
 	void optimize2(int city_size, int max_iterations, int* fixed_zones, int* bestZone);
 	QVector2D indexToPosition(int index, int city_size) const;
