@@ -260,7 +260,16 @@
       <Filter>VBO</Filter>
     </ClCompile>
     <ClCompile Include="ExhaustiveSearch.cpp">
-      <Filter>Generated Files</Filter>
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MCMC5.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MCMCUtil.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushFire.cpp">
+      <Filter>Main Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -495,7 +504,16 @@
       <Filter>VBO</Filter>
     </ClInclude>
     <ClInclude Include="ExhaustiveSearch.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MCMCUtil.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MCMC5.h">
+      <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushFire.h">
+      <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

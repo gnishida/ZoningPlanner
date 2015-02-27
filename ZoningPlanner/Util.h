@@ -98,6 +98,18 @@ public:
 		return ret;
 	}
 
+	template<typename T>
+	static void normalize(std::vector<T>& v) {
+		T len = dot(v, v);
+
+		if (len == 0) return;
+		len = sqrt(len);
+
+		for (int i = 0; i < v.size(); ++i) {
+			v[i] /= len;
+		}
+	}
+
 	// Barycentric interpolation
 	static float barycentricInterpolation(const QVector3D& p0, const QVector3D& p1, const QVector3D& p2, const QVector2D& p);
 

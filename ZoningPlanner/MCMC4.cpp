@@ -472,6 +472,9 @@ void MCMC4::generateFixedZoning(int city_size, std::vector<std::pair<Polygon2D, 
 			} else {
 				(*fixed_zones)[r * city_size + c] = ZoneType::TYPE_UNDEFINED;
 			}
+
+			// 一時的に、固定ゾーンを使用しないことにする
+			(*fixed_zones)[r * city_size + c] = ZoneType::TYPE_UNDEFINED;
 		}
 	}
 }
@@ -523,7 +526,7 @@ void MCMC4::generateZoningPlan(int city_size, int* zones, std::vector<float> zon
 }
 
 bool MCMC4::accept(float current_score, float proposed_score) {
-	const float alpha = 100.0f;
+	const float alpha = 1.0f;
 	if (proposed_score > current_score || Util::genRand() < expf(alpha * proposed_score) / expf(alpha * current_score)) { 
 		return true;
 	} else {
@@ -586,11 +589,15 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 		// ２つのセルのゾーンタイプを交換
 		int s1, s2;
 		while (true) {
-			s1 = rand() % (city_size * city_size);
+			s1 = Util::genRand(0, city_size * city_size);
+
+			// s1として、住宅タイプ以外のゾーンを選択
 			if (fixed_zones[s1] == ZoneType::TYPE_UNDEFINED && zone[s1] > 0) break;
 		}
 		while (true) {
-			s2 = rand() % (city_size * city_size);
+			s2 = Util::genRand(0, city_size * city_size);
+
+			// s2として、住宅ゾーンの１つを選択
 			if (fixed_zones[s2] == ZoneType::TYPE_UNDEFINED && zone[s2] == 0) break;
 		}
 
@@ -601,6 +608,19 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 		zone[s2] = featureId + 1;
 		setStore(queue, zone, dist, obst, toRaise, s2, featureId);
 		updateDistanceMap(city_size, queue, zone, dist, obst, toRaise);
+
+
+
+		// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+		// debug
+		if (zone[0] == 2 || zone[city_size-1] == 2 || zone[(city_size - 1) * city_size] == 2 || zone[city_size * city_size - 1] == 2) {
+			// コーナーに工場がある！
+			int xxx = 0;
+			//dumpZone(city_size, zone);
+			//dumpDist(city_size, dist, 4);
+		}
+
+
 		
 		//dumpZone(city_size, zone);
 		//dumpDist(city_size, dist, 4);
@@ -625,7 +645,7 @@ void MCMC4::optimize(int city_size, int max_iterations, int* fixed_zones, int* b
 			memcpy(obst, tmpObst, sizeof(int) * city_size * city_size * NUM_FEATURES);
 		}
 
-		scores.push_back(curScore);
+		scores.push_back(bestScore);
 	}
 
 	printf("city_size: %d, score: %lf\n", city_size, bestScore);

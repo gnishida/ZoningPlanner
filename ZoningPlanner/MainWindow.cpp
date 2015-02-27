@@ -21,6 +21,7 @@
 #include "JSON.h"
 #include "GradientDescent.h"
 #include "MCMC4.h"
+#include "MCMC5.h"
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionViewZoning, SIGNAL(triggered()), this, SLOT(onViewZoning()));
 
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
+	connect(ui.actionExhaustiveSearch, SIGNAL(triggered()), this, SLOT(onExhaustiveSearch()));
 	connect(ui.actionCameraDefault, SIGNAL(triggered()), this, SLOT(onCameraDefault()));
 	connect(ui.actionCameraTest, SIGNAL(triggered()), this, SLOT(onCameraTest()));
 
@@ -59,8 +61,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionHCResults, SIGNAL(triggered()), this, SLOT(onHCResults()));
 	connect(ui.actionHCNext, SIGNAL(triggered()), this, SLOT(onHCNext()));
 	connect(ui.actionFileUpload, SIGNAL(triggered()), this, SLOT(onFileUpload()));
-
-	connect(ui.actionHCSimulation, SIGNAL(triggered()), this, SLOT(onHCSimulation()));
 
 	// setup the GL widget
 	glWidget = new GLWidget3D(this);
@@ -237,6 +237,9 @@ void MainWindow::onBestPlan() {
 			preference.push_back(preference_list[i].toFloat());
 		}
 
+		// normalize
+		Util::normalize(preference);
+
 		preferences.push_back(preference);
 	}
 	
@@ -246,6 +249,38 @@ void MainWindow::onBestPlan() {
 	urbanGeometry->generateBlocks();
 	glWidget->shadow.makeShadowMap(glWidget);
 	glWidget->updateGL();
+}
+
+void MainWindow::onExhaustiveSearch() {
+	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
+	if (filename.isEmpty()) return;
+	
+	QFile file(filename);
+	file.open(QIODevice::ReadOnly);
+ 
+	// preference vectorを読み込む
+	std::vector<std::vector<float> > preferences;
+
+	QTextStream in(&file);
+	while (true) {
+		QString str = in.readLine(0);
+		if (str == NULL) break;
+
+		QStringList preference_list = str.split("\t")[1].split(",");
+		std::vector<float> preference;
+		for (int i = 0; i < preference_list.size(); ++i) {
+			preference.push_back(preference_list[i].toFloat());
+		}
+
+		// normalize
+		Util::normalize(preference);
+
+		preferences.push_back(preference);
+	}
+
+	// ゾーンプランを作成する
+	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 4);
+
 }
 
 /**
@@ -488,43 +523,3 @@ void MainWindow::onFileUpload() {
 	}
 }
 
-void MainWindow::onHCSimulation() {
-	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
-	if (filename.isEmpty()) return;
-	
-	QFile file(filename);
-	file.open(QIODevice::ReadOnly);
- 
-	// preference vectorを読み込む
-	std::vector<std::vector<float> > preferences;
-
-	QTextStream in(&file);
-	while (true) {
-		QString str = in.readLine(0);
-		if (str == NULL) break;
-
-		QStringList preference_list = str.split("\t")[1].split(",");
-		std::vector<float> preference;
-		for (int i = 0; i < preference_list.size(); ++i) {
-			preference.push_back(preference_list[i].toFloat());
-		}
-
-		preferences.push_back(preference);
-	}
-	// normalize
-	for (int i = 0; i < 9; ++i) {
-		float total = 0.0f;
-		for (int j = 0; j < 8; ++j) {
-			total += preferences[i][j] * preferences[i][j];
-		}
-		total = sqrtf(total);
-
-		for (int j = 0; j < 8; ++j) {
-			preferences[i][j] /= total;
-		}
-	}
-
-	// ゾーンプランを作成する
-	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 4);
-
-}

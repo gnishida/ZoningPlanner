@@ -135,6 +135,7 @@
     <ClCompile Include="BBox.cpp" />
     <ClCompile Include="BlockMeshGenerator.cpp" />
     <ClCompile Include="BlockSet.cpp" />
+    <ClCompile Include="BrushFire.cpp" />
     <ClCompile Include="BuildingMeshGenerator.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CarCamera.cpp" />
@@ -194,6 +195,8 @@
     <ClCompile Include="MCMC2.cpp" />
     <ClCompile Include="MCMC3.cpp" />
     <ClCompile Include="MCMC4.cpp" />
+    <ClCompile Include="MCMC5.cpp" />
+    <ClCompile Include="MCMCUtil.cpp" />
     <ClCompile Include="nvModel\nvModel.cpp" />
     <ClCompile Include="nvModel\nvModelObj.cpp" />
     <ClCompile Include="nvModel\nvModelQuery.cpp" />
@@ -279,6 +282,7 @@
     <ClInclude Include="BBox.h" />
     <ClInclude Include="BlockMeshGenerator.h" />
     <ClInclude Include="BlockSet.h" />
+    <ClInclude Include="BrushFire.h" />
     <ClInclude Include="BuildingMeshGenerator.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Camera2D.h" />
@@ -341,6 +345,8 @@
     <ClInclude Include="MCMC2.h" />
     <ClInclude Include="MCMC3.h" />
     <ClInclude Include="MCMC4.h" />
+    <ClInclude Include="MCMC5.h" />
+    <ClInclude Include="MCMCUtil.h" />
     <ClInclude Include="nvModel\nvMath.h" />
     <ClInclude Include="nvModel\nvMatrix.h" />
     <ClInclude Include="nvModel\nvModel.h" />

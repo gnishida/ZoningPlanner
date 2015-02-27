@@ -88,6 +88,7 @@
      <string>Tool</string>
     </property>
     <addaction name="actionBestPlan"/>
+    <addaction name="actionExhaustiveSearch"/>
    </widget>
    <widget class="QMenu" name="menuQuestionaire">
     <property name="title">
@@ -97,8 +98,6 @@
     <addaction name="actionHCResults"/>
     <addaction name="actionHCNext"/>
     <addaction name="actionFileUpload"/>
-    <addaction name="separator"/>
-    <addaction name="actionHCSimulation"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPM"/>
@@ -488,6 +487,11 @@
   <action name="actionHCSimulation">
    <property name="text">
     <string>Simulation</string>
+   </property>
+  </action>
+  <action name="actionExhaustiveSearch">
+   <property name="text">
+    <string>Exhaustive Search</string>
    </property>
   </action>
  </widget>

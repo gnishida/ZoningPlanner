@@ -23,6 +23,7 @@
 #include "BuildingMeshGenerator.h"
 #include "ZoneMeshGenerator.h"
 #include "ExhaustiveSearch.h"
+#include "MCMC5.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -146,17 +147,12 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 		zoneTypeDistribution[i] = distribution[i].toFloat();
 	}
 
-	// 価格を決定するためのpreference vectorを取得
-	QStringList pref_for_land_value = G::g["preference_for_land_value"].toString().split(",");
-	std::vector<float> preference_for_land_value(pref_for_land_value.size());
-	for (int i = 0; i < pref_for_land_value.size(); ++i) {
-		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
-	}
-
-	mcmc4::MCMC4 mcmc(renderManager.side);
+	mcmc5::MCMC5 mcmc(renderManager.side);
 	mcmc.setPreferences(preferences);
-	mcmc.setPreferenceForLandValue(preference_for_land_value);
-	mcmc.findBestPlan(&zones.zones, &zones.zone_size, zoneTypeDistribution, zoning_start_size, zoning_num_layers, zones.init_zones);
+
+	std::vector<uchar> zones;
+	int zone_size;
+	mcmc.findBestPlan(zones, zone_size, zoneTypeDistribution, zoning_start_size, zoning_num_layers);
 }
 
 /**
@@ -296,7 +292,8 @@ void UrbanGeometry::findOptimalPlan(VBORenderManager& renderManager, std::vector
 
 	exhaustive_search::ExhaustiveSearch es;
 	es.setPreferences(preference);
-	es.setPreferenceForLandValue(preference_for_land_value);
-	es.findOptimalPlan(&zones.zones, zoneTypeDistribution, zoning_start_size);
-	zones.zone_size = zoning_start_size;
+
+	vector<uchar> zones;
+	es.findOptimalPlan(zones, zoneTypeDistribution, zoning_start_size);
+	//zones.zone_size = zoning_start_size;
 }
