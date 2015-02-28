@@ -243,7 +243,7 @@ void MainWindow::onBestPlan() {
 		preferences.push_back(preference);
 	}
 	
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 4, 2);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 4, 3);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
@@ -279,7 +279,7 @@ void MainWindow::onExhaustiveSearch() {
 	}
 
 	// ゾーンプランを作成する
-	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 4);
+	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 8);
 
 }
 

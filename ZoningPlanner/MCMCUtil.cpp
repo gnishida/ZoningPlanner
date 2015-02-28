@@ -23,8 +23,8 @@ void MCMCUtil::computeFeature(int city_size, int num_features, vector<uchar>& zo
 		//feature[i] = 1.0 / dist[i][s];
 
 		// ガウス分布を使ってみよう
-		float K = 1.6f;
-		float sigma = (float)city_size * 0.25;
+		float K = 1.4f;
+		float sigma = (float)city_size * 0.32;
 		feature[i] = K * expf(-(float)dist[i][s]*(float)dist[i][s]/2.0/sigma/sigma);
 	}
 }
