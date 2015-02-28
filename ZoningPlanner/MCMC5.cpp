@@ -72,31 +72,6 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 	//saveZone(city_size, zone, "zone_final.txt");
 }
 
-/*void MCMC5::computeDistanceMap(int city_size, vector<uchar>& zones, vector<vector<int> >& dist) {
-
-	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, zones);
-
-	dist.resize(NUM_FEATURES, vector<int>(city_size * city_size, 0));
-	for (int i = 0; i < NUM_FEATURES; ++i) {
-		copy(bf.distMap()[i].begin(), bf.distMap()[i].end(), dist[i].begin());
-	}
-}*/
-
-/*float MCMC5::featureToDist(float feature) {
-	return -logf(feature) / K;
-}*/
-
-/*std::vector<float> MCMC5::featureToDist(std::vector<float>& feature) {
-	std::vector<float> ret(feature.size());
-
-	for (int i = 0; i < 7; ++i) {
-		ret[i] = featureToDist(feature[i]);
-	}
-	ret[7] = feature[7];
-
-	return ret;
-}*/
-
 /**
  * 指定されたサイズ、指定されたタイプ分布に基づき、ゾーンプランを生成する。
  *
