@@ -243,7 +243,7 @@ void MainWindow::onBestPlan() {
 		preferences.push_back(preference);
 	}
 	
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 4, 1);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 4, 2);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();

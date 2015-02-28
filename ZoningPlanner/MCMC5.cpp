@@ -39,17 +39,17 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 
 	mcmcutil::MCMCUtil::dumpZone(city_size, zones);
 
-	int max_iterations = 20000;
+	int max_iterations = 200000;
 
 	for (int layer = 0; layer < num_layers; ++layer) {
 		if (layer == 0) {
-			optimize(city_size, max_iterations, zones);
+			optimize2(city_size, max_iterations, zones);
 		} else {
-			optimize(city_size, max_iterations, zones);
+			optimize2(city_size, max_iterations, zones);
 		}
 
 		vector<uchar> tmpZones(city_size * city_size);
-		copy(zones.begin(), zones.end(), back_inserter(tmpZones));
+		copy(zones.begin(), zones.end(), tmpZones.begin());
 
 		// ゾーンマップを、たて、よこ、２倍ずつに増やす
 		city_size *= 2;
@@ -63,6 +63,8 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 			}
 		}
 
+		mcmcutil::MCMCUtil::dumpZone(city_size, zones);
+
 		//max_iterations *= 0.5;
 	}
 	
@@ -70,21 +72,21 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 	//saveZone(city_size, zone, "zone_final.txt");
 }
 
-void MCMC5::computeDistanceMap(int city_size, vector<uchar>& zones, vector<vector<int> >& dist) {
+/*void MCMC5::computeDistanceMap(int city_size, vector<uchar>& zones, vector<vector<int> >& dist) {
 
 	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, zones);
 
 	dist.resize(NUM_FEATURES, vector<int>(city_size * city_size, 0));
 	for (int i = 0; i < NUM_FEATURES; ++i) {
-		copy(bf.distMap()[i].begin(), bf.distMap()[i].end(), back_inserter(dist[i]));
+		copy(bf.distMap()[i].begin(), bf.distMap()[i].end(), dist[i].begin());
 	}
-}
+}*/
 
-float MCMC5::featureToDist(float feature) {
+/*float MCMC5::featureToDist(float feature) {
 	return -logf(feature) / K;
-}
+}*/
 
-std::vector<float> MCMC5::featureToDist(std::vector<float>& feature) {
+/*std::vector<float> MCMC5::featureToDist(std::vector<float>& feature) {
 	std::vector<float> ret(feature.size());
 
 	for (int i = 0; i < 7; ++i) {
@@ -93,7 +95,7 @@ std::vector<float> MCMC5::featureToDist(std::vector<float>& feature) {
 	ret[7] = feature[7];
 
 	return ret;
-}
+}*/
 
 /**
  * 指定されたサイズ、指定されたタイプ分布に基づき、ゾーンプランを生成する。
@@ -148,13 +150,9 @@ bool MCMC5::accept(float current_score, float proposed_score) {
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  */
 void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone) {
-	mcmcutil::MCMCUtil::dumpZone(city_size, bestZone);
+	time_t start = clock();
 
 	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, bestZone);
-
-	/*for (int i = 0; i < NUM_FEATURES; ++i) {
-		mcmcutil::MCMCUtil::dumpDist(city_size, bf.distMap(), i);
-	}*/
 	
 	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
 	float bestScore = curScore;
@@ -168,34 +166,35 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone)
 		// ２つのセルのゾーンタイプを交換
 		int s1, s2;
 		while (true) {
-			s1 = Util::genRand(0, city_size * city_size);
+			while (true) {
+				s1 = Util::genRand(0, city_size * city_size);
 
-			// s1として、住宅タイプ以外のゾーンを選択
-			if (bf.zones()[s1] > 0) break;
-		}
-		while (true) {
-			s2 = Util::genRand(0, city_size * city_size);
+				// s1として、住宅タイプ以外のゾーンを選択
+				if (bf.zones()[s1] > 0) break;
+			}
 
-			// s2として、住宅ゾーンの１つを選択
+			int dir = Util::genRand(0, 4);
+			if (dir == 0) {
+				s2 = s1 - 1;
+			} else if (dir == 1) {
+				s2 = s1 + 1;
+			} else if (dir == 2) {
+				s2 = s1 - city_size;
+			} else {
+				s2 = s1 + city_size;
+			}
+
+			if (s2 < 0 || s2 >= city_size * city_size) continue;
+
+			// s2として、住宅ゾーンを選択
 			if (bf.zones()[s2] == 0) break;
 		}
 
 		// move a store
 		int featureId = bf.zones()[s1] - 1;
-		//zone[s1] = 0;
 		bf.removeStore(s1, featureId);
-		//zone[s2] = featureId + 1;
 		bf.setStore(s2, featureId);
 		bf.updateDistanceMap();
-
-		// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-		// debug
-		if (bf.zones()[0] == 2 || bf.zones()[city_size-1] == 2 || bf.zones()[(city_size - 1) * city_size] == 2 || bf.zones()[city_size * city_size - 1] == 2) {
-			// コーナーに工場がある！
-			int xxx = 0;
-			//dumpZone(city_size, zone);
-			//dumpDist(city_size, dist, 4);
-		}
 
 		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
 
@@ -217,12 +216,12 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone)
 		scores.push_back(bestScore);
 	}
 
-	printf("city_size: %d, score: %lf\n", city_size, bestScore);
+	time_t end = clock();
+	printf("city_size: %d, best score: %lf, elapsed: %lf\n", city_size, bestScore, (double)(end - start) / CLOCKS_PER_SEC);
 
 	char filename[256];
 	sprintf(filename, "zone_%d.png", city_size);
 	mcmcutil::MCMCUtil::saveZoneImage(city_size, bestZone, filename);
-	//saveZone(city_size, bestZone);
 
 	sprintf(filename, "zone_%d_scores.txt", city_size);
 	FILE* fp = fopen(filename, "w");
@@ -238,68 +237,32 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone)
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  * 各ステップでは、隣接セルをランダムに選択し、ゾーンを交換する。
  */
-/*
-void MCMC5::optimize2(int city_size, int max_iterations, int* fixed_zones, int* bestZone) {
-	int* zone = (int*)malloc(sizeof(int) * city_size * city_size);
-	int* dist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	int* obst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	bool* toRaise = (bool*)malloc(city_size * city_size * NUM_FEATURES);
+void MCMC5::optimize2(int city_size, int max_iterations, vector<uchar>& bestZone) {
+	time_t start = clock();
 
-	memcpy(zone, bestZone, sizeof(int) * city_size * city_size);
-
-	// for backup
-	int* tmpZone = (int*)malloc(sizeof(int) * city_size * city_size);
-	int* tmpDist = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-	int* tmpObst = (int*)malloc(sizeof(int) * city_size * city_size * NUM_FEATURES);
-
-	// キューのセットアップ
-	std::list<std::pair<int, int> > queue;
-	for (int i = 0; i < city_size * city_size; ++i) {
-		for (int k = 0; k < NUM_FEATURES; ++k) {
-			toRaise[i * NUM_FEATURES + k] = false;
-			if (zone[i] - 1 == k) {
-				setStore(queue, zone, dist, obst, toRaise, i, k);
-			} else {
-				dist[i * NUM_FEATURES + k] = MAX_DIST;
-				obst[i * NUM_FEATURES + k] = BF_CLEARED;
-			}
-		}
-	}
-
-	updateDistanceMap(city_size, queue, zone, dist, obst, toRaise);
-
-	//dumpZone(city_size, zone);
-	//dumpDist(city_size, dist, 4);
-	//check(city_size, zone, dist);
-
-	float curScore = computeScore(city_size, zone, dist);
+	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, bestZone);
+	
+	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
 	float bestScore = curScore;
-	memcpy(bestZone, zone, sizeof(int) * city_size * city_size);
 
 	std::vector<float> scores;
 	float beta = 1.0f;
 	int adj[4];
 	adj[0] = -1; adj[1] = 1; adj[2] = -city_size; adj[3] = city_size;
 	for (int iter = 0; iter < max_iterations; ++iter) {
-		queue.clear();
-
 		// バックアップ
-		memcpy(tmpZone, zone, sizeof(int) * city_size * city_size);
-		memcpy(tmpDist, dist, sizeof(int) * city_size * city_size * NUM_FEATURES);
-		memcpy(tmpObst, obst, sizeof(int) * city_size * city_size * NUM_FEATURES);
+		brushfire::BrushFire tempBf = bf;
 
 		// ２つの隣接セルを選択
 		int s1, s2;
 		while (true) {
 			s1 = rand() % (city_size * city_size);
-			if (fixed_zones[s1] != ZoneType::TYPE_UNDEFINED) continue;
 
 			int u = rand() % 4;
 			s2 = s1 + adj[u];
 
 			if (s2 < 0 || s2 >= city_size * city_size) continue;
-			if (fixed_zones[s2] != ZoneType::TYPE_UNDEFINED) continue;
-			if (zone[s1] == zone[s2]) continue;
+			if (bf.zones()[s1] == bf.zones()[s2]) continue;
 
 			int x1 = s1 % city_size;
 			int y1 = s1 / city_size;
@@ -311,56 +274,48 @@ void MCMC5::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 		}
 
 		// ２つのセルのゾーンタイプを交換
-		int f1 = zone[s1] - 1;
-		int f2 = zone[s2] - 1;
-		zone[s1] = f2 + 1;
+		int f1 = bf.zones()[s1] - 1;
+		int f2 = bf.zones()[s2] - 1;
+		bf.zones()[s1] = f2 + 1;
 		if (f1 >= 0) {
-			removeStore(queue, zone, dist, obst, toRaise, s1, f1);
+			bf.removeStore(s1, f1);
 		}
 		if (f2 >= 0) {
-			setStore(queue, zone, dist, obst, toRaise, s1, f2);
+			bf.setStore(s1, f2);
 		}
-		zone[s2] = f1 + 1;
+		bf.zones()[s2] = f1 + 1;
 		if (f2 >= 0) {
-			removeStore(queue, zone, dist, obst, toRaise, s2, f2);
+			bf.removeStore(s2, f2);
 		}
 		if (f1 >= 0) {
-			setStore(queue, zone, dist, obst, toRaise, s2, f1);
+			bf.setStore(s2, f1);
 		}
-		updateDistanceMap(city_size, queue, zone, dist, obst, toRaise);
+		bf.updateDistanceMap();
 		
-		//dumpZone(city_size, zone);
-		//dumpDist(city_size, dist, 4);
-		//if (check(city_size, zone, dist) > 0) break;
-
-		float proposedScore = computeScore(city_size, zone, dist);
+		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
 
 		// ベストゾーンを更新
 		if (proposedScore > bestScore) {
 			bestScore = proposedScore;
-			memcpy(bestZone, zone, sizeof(int) * city_size * city_size);
+			copy(bf.zones().begin(), bf.zones().end(), bestZone.begin());
 		}
-
-		//printf("%lf -> %lf (best: %lf)\n", curScore, proposedScore, bestScore);
 
 		if (accept(curScore, proposedScore)) { // accept
 			curScore = proposedScore;
 		} else { // reject
 			// rollback
-			memcpy(zone, tmpZone, sizeof(int) * city_size * city_size);
-			memcpy(dist, tmpDist, sizeof(int) * city_size * city_size * NUM_FEATURES);
-			memcpy(obst, tmpObst, sizeof(int) * city_size * city_size * NUM_FEATURES);
+			bf = tempBf;
 		}
 
-		scores.push_back(curScore);
+		scores.push_back(bestScore);
 	}
 
-	printf("city_size: %d, score: %lf\n", city_size, bestScore);
+	time_t end = clock();
+	printf("city_size: %d, best score: %lf, elapsed: %lf\n", city_size, bestScore, (double)(end - start) / CLOCKS_PER_SEC);
 
 	char filename[256];
 	sprintf(filename, "zone_%d.png", city_size);
-	saveZoneImage(city_size, bestZone, filename);
-	//saveZone(city_size, bestZone);
+	mcmcutil::MCMCUtil::saveZoneImage(city_size, bestZone, filename);
 
 	sprintf(filename, "zone_%d_scores.txt", city_size);
 	FILE* fp = fopen(filename, "w");
@@ -368,29 +323,6 @@ void MCMC5::optimize2(int city_size, int max_iterations, int* fixed_zones, int* 
 		fprintf(fp, "%lf\n", scores[i]);
 	}
 	fclose(fp);
-
-	free(tmpZone);
-	free(tmpDist);
-	free(tmpObst);
-
-	free(zone);
-	free(dist);
-	free(obst);
-	free(toRaise);
 }
-*/
-
-/**
- * zonesのインデックス番号を座標に変換する。
- */
-QVector2D MCMC5::indexToPosition(int index, int city_size) const {
-	int cell_len = city_length / city_size;
-
-	int c = index % city_size;
-	int r = index / city_size;
-
-	return QVector2D(((float)c + 0.5) * cell_len - city_length * 0.5, ((float)r + 0.5) * cell_len - city_length * 0.5);
-}
-
 
 };

@@ -193,6 +193,8 @@ bool VBOPmBlocks::generateBlocks(Zoning& zoning, RoadGraph &roadGraph, BlockSet 
 	blocksPtr = &blocks.blocks;
 	blocksPtr->clear();
 
+	if (boost::num_edges(roadGraph.graph) == 0) return true;
+
 	bool isPlanar = false;
 	bool converges = true;
 

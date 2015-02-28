@@ -19,7 +19,13 @@ void MCMCUtil::computeFeature(int city_size, int num_features, vector<uchar>& zo
 
 	feature.resize(num_features);
 	for (int i = 0; i < num_features; ++i) {
-		feature[i] = 1.0 / dist[i][s];
+		// 距離の逆数
+		//feature[i] = 1.0 / dist[i][s];
+
+		// ガウス分布を使ってみよう
+		float K = 1.6f;
+		float sigma = (float)city_size * 0.25;
+		feature[i] = K * expf(-dist[i][s]*dist[i][s]/2/sigma/sigma);
 	}
 }
 
