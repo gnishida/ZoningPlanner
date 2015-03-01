@@ -18,6 +18,7 @@
 #include <QMessageBox>
 #include "HTTPClient.h"
 #include "HCStartWidget.h"
+#include "MCMCSetupWidget.h"
 #include "JSON.h"
 #include "GradientDescent.h"
 #include "MCMC4.h"
@@ -217,6 +218,11 @@ void MainWindow::onViewZoning() {
  * preference vectorをファイルから読み込み、それに基づいてベストのプランを計算する。
  */
 void MainWindow::onBestPlan() {
+	MCMCSetupWidget dlg(this);
+	if (dlg.exec() != QDialog::Accepted) {
+		return;
+	}
+
 	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
 	if (filename.isEmpty()) return;
 	
@@ -243,7 +249,7 @@ void MainWindow::onBestPlan() {
 		preferences.push_back(preference);
 	}
 	
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 8, 1);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, dlg.initialGridSize, dlg.numStages, dlg.MCMCSteps, dlg.upscaleFactor);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
@@ -279,7 +285,7 @@ void MainWindow::onExhaustiveSearch() {
 	}
 
 	// ゾーンプランを作成する
-	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 8);
+	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 4);
 
 }
 
@@ -321,7 +327,7 @@ void MainWindow::onHCStart() {
 	preference[0][0] = 0.378; preference[0][1] = 0.378; preference[0][2] = 0.378; preference[0][3] = 0.378; preference[0][4] = 0.378; preference[0][5] = 0.378; preference[0][6] = -0.378; preference[0][7] = -0.378;
 
 	// ゾーンプランを作成する
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference, 5, 5);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference, 5, 5, 20000, 1.0);
 
 	// HC初期化
 	HTTPClient client;
@@ -447,7 +453,7 @@ void MainWindow::onHCResults() {
 	savePreferences(user_ids, preferences, filename);
 
 	// ベストプランを計算する
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 5, 5);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, 5, 5, 20000, 1.0);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();

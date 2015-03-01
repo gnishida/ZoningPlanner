@@ -38,6 +38,7 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 		}
 	}
 
+	/*
 	zones[0] = 0;
 	zones[1] = 0;
 	zones[2] = 0;
@@ -54,6 +55,7 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 	zones[13] = 3;
 	zones[14] = 3;
 	zones[15] = 5;
+	*/
 
 	// 予想される全組合せ数
 	unsigned long expected_num = 1;

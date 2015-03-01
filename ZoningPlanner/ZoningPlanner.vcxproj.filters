@@ -271,6 +271,15 @@
     <ClCompile Include="BrushFire.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
+    <ClCompile Include="MCMCSetupWidget.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MCMCSetupWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MCMCSetupWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -292,6 +301,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="HCStartWidget.h">
+      <Filter>Main Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MCMCSetupWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MCMCSetupWidget.h">
       <Filter>Main Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -514,6 +529,9 @@
     </ClInclude>
     <ClInclude Include="BrushFire.h">
       <Filter>Main Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_MCMCSetupWidget.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

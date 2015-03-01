@@ -24,10 +24,11 @@ void MCMC5::addPreference(std::vector<float>& preference) {
  * @param city_size	[OUT]		返却されるプランのグリッドの一辺の長さ
  * @param zoneTypeDistribution	各ゾーンタイプの割合
  * @param start_size			初期時のグリッドの一辺の長さ
- * @param num_layers			MCMCの繰り返し数
- * @param init_zones			ユーザ指定のゾーン
+ * @param num_layers			階層のステージ数
+ * @param max_iterations		MCMCのステップ数
+ * @param upscale_factor		次のステージに行った時に、どのぐらいMCMCステップ数を増やすか？
  */
-void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector<float>& zoneTypeDistribution, int start_size, int num_layers) {
+void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector<float>& zoneTypeDistribution, int start_size, int num_layers, int max_iterations, float upscale_factor) {
 	srand(10);
 	city_size = start_size;
 
@@ -37,15 +38,64 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 	int* fixed_zones;
 	generateZoningPlan(city_size, zoneTypeDistribution, zones);
 
-	mcmcutil::MCMCUtil::dumpZone(city_size, zones);
 
-	int max_iterations = 200000;
+	//for (int i= 0; i < city_size * city_size; ++i) zones[i] = 0;
+	/* mcmc results (score: 0.1934)
+	zones[0] = 2;
+	zones[1] = 2;
+	zones[2] = 3;
+	zones[4] = 1;
+	zones[9] = 2;
+	zones[10] = 4;
+	zones[11] = 3;
+	zones[12] = 1;
+	zones[13] = 1;
+	zones[14] = 3;
+	zones[17] = 4;
+	zones[18] = 1;
+	zones[20] = 5;
+	zones[25] = 3;
+	zones[26] = 5;
+	zones[29] = 3;
+	zones[34] = 1;
+	zones[38] = 1;
+	zones[41] = 3;
+	zones[43] = 5;
+	zones[45] = 4;
+	*/
+
+	/* optimal (score: 0.356)
+	zones[0] = 2;
+	zones[1] = 2;
+	zones[2] = 1;
+	zones[3] = 4;
+	zones[4] = 5;
+	zones[8] = 2;
+	zones[9] = 4;
+	zones[10] = 3;
+	zones[14] = 3;
+	zones[16] = 1;
+	zones[17] = 4;
+	zones[19] = 3;
+	zones[25] = 3;
+	zones[26] = 1;
+	zones[29] = 1;
+	zones[32] = 5;
+	zones[33] = 1;
+	zones[34] = 1;
+	zones[41] = 3;
+	zones[60] = 3;
+	zones[62] = 5;
+	*/
+
+
+	mcmcutil::MCMCUtil::dumpZone(city_size, zones);
 
 	for (int layer = 0; layer < num_layers; ++layer) {
 		if (layer == 0) {
-			optimize2(city_size, max_iterations, zones);
+			optimize(city_size, max_iterations, zones);
 		} else {
-			optimize2(city_size, max_iterations, zones);
+			optimize(city_size, max_iterations, zones);
 		}
 
 		vector<uchar> tmpZones(city_size * city_size);
@@ -64,8 +114,10 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 		}
 
 		mcmcutil::MCMCUtil::dumpZone(city_size, zones);
+		adjustZoningPlan(city_size, zoneTypeDistribution, zones);
+		mcmcutil::MCMCUtil::dumpZone(city_size, zones);
 
-		//max_iterations *= 0.5;
+		max_iterations *= upscale_factor;
 	}
 	
 	mcmcutil::MCMCUtil::saveZoneImage(city_size, zones, "zone_final.png");
@@ -99,6 +151,67 @@ void MCMC5::generateZoningPlan(int city_size, const vector<float>& zoneTypeDistr
 			int type = Util::sampleFromPdf(numRemainings);
 			zones[r * city_size + c] = type;
 			numRemainings[type] -= 1;
+		}
+	}
+}
+
+/**
+ * 指定されたサイズ、指定されたタイプ分布に基づき、ゾーンプランを調整する。
+ * 期待される数より多いゾーンタイプに対して、期待される数より少ないゾーンタイプに、ランダムに変更する。
+ *                          ***** へたな実装。要改善。。。 *****
+ *
+ * @param city_size				グリッドの一辺のサイズ
+ * @param zoneTypeDistribution	指定されたタイプ分布
+ * @param zones					現在のゾーンプラン（更新される）
+ */
+void MCMC5::adjustZoningPlan(int city_size, const vector<float>& zoneTypeDistribution, vector<uchar>& zones) {
+	std::vector<int> numExpected(NUM_FEATURES + 1);
+	int numCells = city_size * city_size;
+	zones.resize(numCells);
+
+	int actualNumCells = 0;
+	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
+		numExpected[i] = numCells * zoneTypeDistribution[i] + 0.5f;
+		actualNumCells += numExpected[i];
+	}
+
+	if (actualNumCells != numCells) {
+		numExpected[0] += numCells - actualNumCells;
+	}
+
+	// 各ゾーンタイプの数を計算する
+	std::vector<int> numZones(NUM_FEATURES + 1);
+	for (int i = 0; i < city_size * city_size; ++i) {
+		numZones[zones[i]]++;
+	}
+
+	// 余剰分について、空きゾーンに設定する
+	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
+		for (int j = 0; j < numZones[i] - numExpected[i]; ++j) {
+			int s;
+			while (true) {
+				int s1 = Util::genRand(0, city_size * city_size);
+				if (zones[s1] == i) {
+					s = s1;
+					break;
+				}
+			}
+			zones[s] = 100; // 空きゾーンという意味で。。。
+		}
+	}
+
+	// 不足分を、空きゾーンに当てはめる
+	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
+		for (int j = 0; j < numExpected[i] - numZones[i]; ++j) {
+			int s;
+			while (true) {
+				int s1 = Util::genRand(0, city_size * city_size);
+				if (zones[s1] == 100) {
+					s = s1;
+					break;
+				}
+			}
+			zones[s] = i; // 空きゾーンという意味で。。。
 		}
 	}
 }
