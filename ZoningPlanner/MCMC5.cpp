@@ -24,11 +24,11 @@ void MCMC5::addPreference(std::vector<float>& preference) {
  * @param city_size	[OUT]		返却されるプランのグリッドの一辺の長さ
  * @param zoneTypeDistribution	各ゾーンタイプの割合
  * @param start_size			初期時のグリッドの一辺の長さ
- * @param num_layers			階層のステージ数
+ * @param num_stages			階層のステージ数
  * @param max_iterations		MCMCのステップ数
  * @param upscale_factor		次のステージに行った時に、どのぐらいMCMCステップ数を増やすか？
  */
-void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector<float>& zoneTypeDistribution, int start_size, int num_layers, int max_iterations, float upscale_factor) {
+void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector<float>& zoneTypeDistribution, int start_size, int num_stages, int max_iterations, float upscale_factor) {
 	srand(10);
 	city_size = start_size;
 
@@ -91,7 +91,7 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 
 	mcmcutil::MCMCUtil::dumpZone(city_size, zones);
 
-	for (int layer = 0; layer < num_layers; ++layer) {
+	for (int layer = 0; layer < num_stages; ++layer) {
 		if (layer == 0) {
 			optimize(city_size, max_iterations, zones);
 		} else {
@@ -113,9 +113,7 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 			}
 		}
 
-		mcmcutil::MCMCUtil::dumpZone(city_size, zones);
-		adjustZoningPlan(city_size, zoneTypeDistribution, zones);
-		mcmcutil::MCMCUtil::dumpZone(city_size, zones);
+		//adjustZoningPlan(city_size, zoneTypeDistribution, zones);
 
 		max_iterations *= upscale_factor;
 	}
