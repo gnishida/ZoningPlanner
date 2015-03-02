@@ -17,8 +17,9 @@
 #include <QNetworkReply>
 #include <QMessageBox>
 #include "HTTPClient.h"
-#include "HCStartWidget.h"
 #include "MCMCSetupWidget.h"
+#include "ExhaustiveSearchSetupWidget.h"
+#include "HCStartWidget.h"
 #include "JSON.h"
 #include "GradientDescent.h"
 #include "MCMC4.h"
@@ -258,6 +259,11 @@ void MainWindow::onBestPlan() {
 }
 
 void MainWindow::onExhaustiveSearch() {
+	ExhaustiveSearchSetupWidget dlg(this);
+	if (dlg.exec() != QDialog::Accepted) {
+		return;
+	}
+
 	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
 	if (filename.isEmpty()) return;
 	
@@ -285,7 +291,7 @@ void MainWindow::onExhaustiveSearch() {
 	}
 
 	// ゾーンプランを作成する
-	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, 4);
+	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, dlg.gridSize);
 
 }
 

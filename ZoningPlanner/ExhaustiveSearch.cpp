@@ -10,13 +10,21 @@ void ExhaustiveSearch::setPreferences(std::vector<std::vector<float> >& preferen
 	this->preferences = preference;
 }
 
+/**
+ * 指定されたグリッドサイズ、ゾーンタイプ分布、user preferenceベクトルに対して、ベストのゾーンプランを探し、返却する。
+ * また、ベストのゾーン（複数の可能性有り）をファイルに保存する。「zone_exhaustive_optimal_??.png」
+ *
+ * @param zones					ベストのゾーンプランを返却する
+ * @param zoneTypeDistribution	ゾーンタイプ分布
+ * @param city_size				グリッドの一辺のサイズ
+ */
 void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zoneTypeDistribution, int city_size) {
 	srand(10);
 
 	int numCells = city_size * city_size;
 	zones.resize(numCells);
 
-	vector<uchar> best_zones(numCells);
+	vector<vector<uchar> > best_zones(1, vector<uchar>(numCells));
 	
 	// 各ゾーンタイプの数を計算
 	std::vector<int> numRemainings(NUM_FEATURES + 1);
@@ -37,25 +45,6 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 			zones[index++] = i;
 		}
 	}
-
-	/*
-	zones[0] = 0;
-	zones[1] = 0;
-	zones[2] = 0;
-	zones[3] = 0;
-	zones[4] = 4;
-	zones[5] = 0;
-	zones[6] = 0;
-	zones[7] = 1;
-	zones[8] = 2;
-	zones[9] = 0;
-	zones[10] = 0;
-	zones[11] = 1;
-	zones[12] = 0;
-	zones[13] = 3;
-	zones[14] = 3;
-	zones[15] = 5;
-	*/
 
 	// 予想される全組合せ数
 	unsigned long expected_num = 1;
@@ -82,7 +71,12 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 			float score = computeScore(city_size, zones);
 			if (score > best_score) {
 				best_score = score;
-				copy(zones.begin(), zones.end(), best_zones.begin());
+				best_zones.resize(1, vector<uchar>(numCells));
+				copy(zones.begin(), zones.end(), best_zones[0].begin());
+			} else if (score == best_score) {
+				int index = best_zones.size();
+				best_zones.resize(index + 1, vector<uchar>(numCells));
+				copy(zones.begin(), zones.end(), best_zones[index].begin());
 			}
 			if (++count % 10000 == 0) {
 				clock_t now = clock();
@@ -96,9 +90,13 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 
 	printf("seraching best done. [count = %d], [best_score = %lf]\n", count, best_score);
 
-	copy(best_zones.begin(), best_zones.end(), zones.begin());
+	copy(best_zones[0].begin(), best_zones[0].end(), zones.begin());
 
-	mcmcutil::MCMCUtil::saveZoneImage(city_size, zones, "zone_optimal.png");
+	for (int i = 0; i < best_zones.size(); ++i) {
+		char filename[256];
+		sprintf(filename, "zone_exhaustive_optimal_%d.png", i);
+		mcmcutil::MCMCUtil::saveZoneImage(city_size, zones, filename);
+	}
 }
 
 /**

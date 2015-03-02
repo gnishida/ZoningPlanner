@@ -38,57 +38,6 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 	int* fixed_zones;
 	generateZoningPlan(city_size, zoneTypeDistribution, zones);
 
-
-	//for (int i= 0; i < city_size * city_size; ++i) zones[i] = 0;
-	/* mcmc results (score: 0.1934)
-	zones[0] = 2;
-	zones[1] = 2;
-	zones[2] = 3;
-	zones[4] = 1;
-	zones[9] = 2;
-	zones[10] = 4;
-	zones[11] = 3;
-	zones[12] = 1;
-	zones[13] = 1;
-	zones[14] = 3;
-	zones[17] = 4;
-	zones[18] = 1;
-	zones[20] = 5;
-	zones[25] = 3;
-	zones[26] = 5;
-	zones[29] = 3;
-	zones[34] = 1;
-	zones[38] = 1;
-	zones[41] = 3;
-	zones[43] = 5;
-	zones[45] = 4;
-	*/
-
-	/* optimal (score: 0.356)
-	zones[0] = 2;
-	zones[1] = 2;
-	zones[2] = 1;
-	zones[3] = 4;
-	zones[4] = 5;
-	zones[8] = 2;
-	zones[9] = 4;
-	zones[10] = 3;
-	zones[14] = 3;
-	zones[16] = 1;
-	zones[17] = 4;
-	zones[19] = 3;
-	zones[25] = 3;
-	zones[26] = 1;
-	zones[29] = 1;
-	zones[32] = 5;
-	zones[33] = 1;
-	zones[34] = 1;
-	zones[41] = 3;
-	zones[60] = 3;
-	zones[62] = 5;
-	*/
-
-
 	mcmcutil::MCMCUtil::dumpZone(city_size, zones);
 
 	for (int layer = 0; layer < num_stages; ++layer) {

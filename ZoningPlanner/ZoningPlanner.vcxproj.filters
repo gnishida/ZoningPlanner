@@ -280,6 +280,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MCMCSetupWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="ExhaustiveSearchSetupWidget.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ExhaustiveSearchSetupWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ExhaustiveSearchSetupWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -307,6 +316,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="MCMCSetupWidget.h">
+      <Filter>Main Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ExhaustiveSearchSetupWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ExhaustiveSearchSetupWidget.h">
       <Filter>Main Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -531,6 +546,9 @@
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_MCMCSetupWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ExhaustiveSearchSetupWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
