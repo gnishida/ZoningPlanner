@@ -95,7 +95,7 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 	for (int i = 0; i < best_zones.size(); ++i) {
 		char filename[256];
 		sprintf(filename, "zone_exhaustive_optimal_%d.png", i);
-		mcmcutil::MCMCUtil::saveZoneImage(city_size, zones, filename);
+		mcmcutil::MCMCUtil::saveZoneImage(city_size, best_zones[i], filename);
 	}
 }
 
