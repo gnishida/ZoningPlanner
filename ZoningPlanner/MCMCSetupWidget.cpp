@@ -5,9 +5,9 @@ MCMCSetupWidget::MCMCSetupWidget(QWidget* parent) : QDialog((QWidget*)parent) {
 	ui.setupUi(this);
 
 	ui.lineEditInitialGridSize->setText("4");
-	ui.lineEditNumStages->setText("3");
+	ui.lineEditNumStages->setText("5");
 	ui.lineEditMCMCSteps->setText("200000");
-	ui.lineEditUpscaleFactor->setText("4");
+	ui.lineEditUpscaleFactor->setText("1");
 
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(onOK()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(reject()));

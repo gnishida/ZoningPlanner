@@ -34,7 +34,7 @@ private:
 	void generateZoningPlan(int city_size, const vector<float>& zoneTypeDistribution, vector<uchar>& zones);
 	void adjustZoningPlan(int city_size, const vector<float>& zoneTypeDistribution, vector<uchar>& zones);
 	bool accept(float current_score, float proposed_score);
-	void optimize(int city_size, int max_iterations, vector<uchar>& bestZone);
+	void optimize(int city_size, int max_iterations, vector<uchar>& bestZone, std::vector<float>& scores);
 	void optimize2(int city_size, int max_iterations, vector<uchar>& bestZone);
 };
 

@@ -40,11 +40,12 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 
 	mcmcutil::MCMCUtil::dumpZone(city_size, zones);
 
+	std::vector<float> scores;
 	for (int layer = 0; layer < num_stages; ++layer) {
 		if (layer == 0) {
-			optimize(city_size, max_iterations, zones);
+			optimize(city_size, max_iterations, zones, scores);
 		} else {
-			optimize(city_size, max_iterations, zones);
+			optimize(city_size, max_iterations, zones, scores);
 		}
 
 		vector<uchar> tmpZones(city_size * city_size);
@@ -62,13 +63,17 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 			}
 		}
 
-		//adjustZoningPlan(city_size, zoneTypeDistribution, zones);
-
 		max_iterations *= upscale_factor;
 	}
 	
 	mcmcutil::MCMCUtil::saveZoneImage(city_size, zones, "zone_final.png");
 	//saveZone(city_size, zone, "zone_final.txt");
+
+	FILE* fp = fopen("zone_mcmc_scores.txt", "w");
+	for (int i = 0; i < scores.size(); ++i) {
+		fprintf(fp, "%lf\n", scores[i]);
+	}
+	fclose(fp);
 }
 
 /**
@@ -103,67 +108,6 @@ void MCMC5::generateZoningPlan(int city_size, const vector<float>& zoneTypeDistr
 }
 
 /**
- * 指定されたサイズ、指定されたタイプ分布に基づき、ゾーンプランを調整する。
- * 期待される数より多いゾーンタイプに対して、期待される数より少ないゾーンタイプに、ランダムに変更する。
- *                          ***** へたな実装。要改善。。。 *****
- *
- * @param city_size				グリッドの一辺のサイズ
- * @param zoneTypeDistribution	指定されたタイプ分布
- * @param zones					現在のゾーンプラン（更新される）
- */
-void MCMC5::adjustZoningPlan(int city_size, const vector<float>& zoneTypeDistribution, vector<uchar>& zones) {
-	std::vector<int> numExpected(NUM_FEATURES + 1);
-	int numCells = city_size * city_size;
-	zones.resize(numCells);
-
-	int actualNumCells = 0;
-	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
-		numExpected[i] = numCells * zoneTypeDistribution[i] + 0.5f;
-		actualNumCells += numExpected[i];
-	}
-
-	if (actualNumCells != numCells) {
-		numExpected[0] += numCells - actualNumCells;
-	}
-
-	// 各ゾーンタイプの数を計算する
-	std::vector<int> numZones(NUM_FEATURES + 1);
-	for (int i = 0; i < city_size * city_size; ++i) {
-		numZones[zones[i]]++;
-	}
-
-	// 余剰分について、空きゾーンに設定する
-	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
-		for (int j = 0; j < numZones[i] - numExpected[i]; ++j) {
-			int s;
-			while (true) {
-				int s1 = Util::genRand(0, city_size * city_size);
-				if (zones[s1] == i) {
-					s = s1;
-					break;
-				}
-			}
-			zones[s] = 100; // 空きゾーンという意味で。。。
-		}
-	}
-
-	// 不足分を、空きゾーンに当てはめる
-	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
-		for (int j = 0; j < numExpected[i] - numZones[i]; ++j) {
-			int s;
-			while (true) {
-				int s1 = Util::genRand(0, city_size * city_size);
-				if (zones[s1] == 100) {
-					s = s1;
-					break;
-				}
-			}
-			zones[s] = i; // 空きゾーンという意味で。。。
-		}
-	}
-}
-
-/**
  * Metropolis Hastingsアルゴリズムに基づき、提案プランをacceptするかどうか決定する。
  *
  * @param current_score		現在プランのスコア
@@ -184,7 +128,7 @@ bool MCMC5::accept(float current_score, float proposed_score) {
  * bestZoneに、初期ゾーンプランが入っている。
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  */
-void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone) {
+void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone, std::vector<float>& scores) {
 	time_t start = clock();
 
 	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, bestZone);
@@ -192,7 +136,6 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone)
 	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
 	float bestScore = curScore;
 
-	std::vector<float> scores;
 	float beta = 1.0f;
 	for (int iter = 0; iter < max_iterations; ++iter) {
 		// バックアップ
@@ -257,13 +200,6 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone)
 	char filename[256];
 	sprintf(filename, "zone_%d.png", city_size);
 	mcmcutil::MCMCUtil::saveZoneImage(city_size, bestZone, filename);
-
-	sprintf(filename, "zone_%d_scores.txt", city_size);
-	FILE* fp = fopen(filename, "w");
-	for (int i = 0; i < scores.size(); ++i) {
-		fprintf(fp, "%lf\n", scores[i]);
-	}
-	fclose(fp);
 }
 
 
