@@ -88,6 +88,60 @@ float MCMCUtil::computeScore(int city_size, int num_features, vector<uchar>& zon
 	return score / num_zones;
 }
 
+vector<vector<float> > MCMCUtil::readPreferences(const QString& filename) {
+	QFile file(filename);
+	file.open(QIODevice::ReadOnly);
+ 
+	// preference vectorを読み込む
+	std::vector<std::vector<float> > preferences;
+
+	QTextStream in(&file);
+	while (true) {
+		QString str = in.readLine(0);
+		if (str == NULL) break;
+
+		QStringList preference_list = str.split("\t")[1].split(",");
+		std::vector<float> preference;
+		for (int i = 0; i < preference_list.size(); ++i) {
+			preference.push_back(preference_list[i].toFloat());
+		}
+
+		// normalize
+		Util::normalize(preference);
+
+		preferences.push_back(preference);
+	}
+
+	return preferences;
+}
+
+/**
+ * ファイルからゾーンプランを読み込む。
+ * ファイルには、カンマ区切りで、ＮｘＮの形式でゾーンタイプが記録されていること。
+ *
+ * @filename	file name
+ * @return		ゾーンプラン
+ */
+vector<uchar> MCMCUtil::readZone(const QString& filename) {
+	QFile file(filename);
+	file.open(QIODevice::ReadOnly);
+ 
+	std::vector<uchar> zones;
+
+	QTextStream in(&file);
+	while (true) {
+		QString str = in.readLine(0);
+		if (str == NULL) break;
+
+		QStringList zone_list = str.split(",");
+		for (int i = 0; i < zone_list.size(); ++i) {
+			zones.push_back(zone_list[i].toUInt());
+		}
+	}
+
+	return zones;
+}
+
 void MCMCUtil::saveZoneImage(int city_size, vector<uchar>& zones, char* filename) {
 	cv::Mat m(city_size, city_size, CV_8UC3);
 	for (int r = 0; r < city_size; ++r) {

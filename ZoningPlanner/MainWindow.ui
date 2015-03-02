@@ -89,6 +89,7 @@
     </property>
     <addaction name="actionBestPlan"/>
     <addaction name="actionExhaustiveSearch"/>
+    <addaction name="actionScoreTest"/>
    </widget>
    <widget class="QMenu" name="menuQuestionaire">
     <property name="title">
@@ -492,6 +493,11 @@
   <action name="actionExhaustiveSearch">
    <property name="text">
     <string>Exhaustive Search</string>
+   </property>
+  </action>
+  <action name="actionScoreTest">
+   <property name="text">
+    <string>Score Test</string>
    </property>
   </action>
  </widget>

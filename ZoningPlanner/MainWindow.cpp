@@ -24,6 +24,8 @@
 #include "GradientDescent.h"
 #include "MCMC4.h"
 #include "MCMC5.h"
+#include "MCMCUtil.h"
+#include "BrushFire.h"
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
@@ -56,6 +58,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 
 	connect(ui.actionBestPlan, SIGNAL(triggered()), this, SLOT(onBestPlan()));
 	connect(ui.actionExhaustiveSearch, SIGNAL(triggered()), this, SLOT(onExhaustiveSearch()));
+	connect(ui.actionScoreTest, SIGNAL(triggered()), this, SLOT(onScoreTest()));
+
 	connect(ui.actionCameraDefault, SIGNAL(triggered()), this, SLOT(onCameraDefault()));
 	connect(ui.actionCameraTest, SIGNAL(triggered()), this, SLOT(onCameraTest()));
 
@@ -227,28 +231,8 @@ void MainWindow::onBestPlan() {
 	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
 	if (filename.isEmpty()) return;
 	
-	QFile file(filename);
-	file.open(QIODevice::ReadOnly);
- 
 	// preference vectorを読み込む
-	std::vector<std::vector<float> > preferences;
-
-	QTextStream in(&file);
-	while (true) {
-		QString str = in.readLine(0);
-		if (str == NULL) break;
-
-		QStringList preference_list = str.split("\t")[1].split(",");
-		std::vector<float> preference;
-		for (int i = 0; i < preference_list.size(); ++i) {
-			preference.push_back(preference_list[i].toFloat());
-		}
-
-		// normalize
-		Util::normalize(preference);
-
-		preferences.push_back(preference);
-	}
+	std::vector<std::vector<float> > preferences = mcmcutil::MCMCUtil::readPreferences(filename);
 	
 	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, dlg.initialGridSize, dlg.numStages, dlg.MCMCSteps, dlg.upscaleFactor);
 
@@ -266,33 +250,38 @@ void MainWindow::onExhaustiveSearch() {
 
 	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
 	if (filename.isEmpty()) return;
-	
-	QFile file(filename);
-	file.open(QIODevice::ReadOnly);
- 
+	 
 	// preference vectorを読み込む
-	std::vector<std::vector<float> > preferences;
-
-	QTextStream in(&file);
-	while (true) {
-		QString str = in.readLine(0);
-		if (str == NULL) break;
-
-		QStringList preference_list = str.split("\t")[1].split(",");
-		std::vector<float> preference;
-		for (int i = 0; i < preference_list.size(); ++i) {
-			preference.push_back(preference_list[i].toFloat());
-		}
-
-		// normalize
-		Util::normalize(preference);
-
-		preferences.push_back(preference);
-	}
+	std::vector<std::vector<float> > preferences = mcmcutil::MCMCUtil::readPreferences(filename);
 
 	// ゾーンプランを作成する
 	urbanGeometry->findOptimalPlan(glWidget->vboRenderManager, preferences, dlg.gridSize);
 
+}
+
+void MainWindow::onScoreTest() {
+	QString filename = QFileDialog::getOpenFileName(this, tr("Load preference file..."), "", tr("Preference files (*.txt)"));
+	if (filename.isEmpty()) return;
+	
+	// preference vectorを読み込む
+	std::vector<std::vector<float> > preferences = mcmcutil::MCMCUtil::readPreferences(filename);
+
+	filename = QFileDialog::getOpenFileName(this, tr("Load zone file..."), "", tr("Zone files (*.txt)"));
+	if (filename.isEmpty()) return;
+	
+	std::vector<uchar> zones = mcmcutil::MCMCUtil::readZone(filename);
+	int city_size = sqrtf(zones.size());
+
+	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, zones);
+	
+	float score = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
+
+	static float best_score = -100;
+	if (score > best_score) {
+		best_score = score;
+	}
+
+	printf("Score: %lf\n", score);
 }
 
 /**

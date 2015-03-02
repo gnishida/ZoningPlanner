@@ -132,7 +132,6 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone,
 	time_t start = clock();
 
 	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, bestZone);
-	
 	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
 	float bestScore = curScore;
 
@@ -173,7 +172,7 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone,
 		bf.removeStore(s1, featureId);
 		bf.setStore(s2, featureId);
 		bf.updateDistanceMap();
-
+		
 		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
 
 		// ベストゾーンを更新

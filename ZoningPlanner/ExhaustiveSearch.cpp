@@ -56,7 +56,10 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 		}
 	}
 
+	const float delta = 0.0000001;
+
 	float best_score = -std::numeric_limits<float>::max();
+	vector<float> scores;
 	unsigned long count = 0;
 	QMap<QString, bool> checked_zones;
 	clock_t start = clock();
@@ -69,11 +72,14 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 
 		if (!checked_zones.contains(zones_str)) {
 			float score = computeScore(city_size, zones);
-			if (score > best_score) {
-				best_score = score;
+			scores.push_back(score);
+
+			if (score > best_score + delta) {
+				best_score = max(score, best_score);
 				best_zones.resize(1, vector<uchar>(numCells));
 				copy(zones.begin(), zones.end(), best_zones[0].begin());
-			} else if (score == best_score) {
+			} else if (score > best_score - delta) {
+				best_score = max(score, best_score);
 				int index = best_zones.size();
 				best_zones.resize(index + 1, vector<uchar>(numCells));
 				copy(zones.begin(), zones.end(), best_zones[index].begin());
@@ -92,11 +98,19 @@ void ExhaustiveSearch::findOptimalPlan(vector<uchar>& zones, vector<float>& zone
 
 	copy(best_zones[0].begin(), best_zones[0].end(), zones.begin());
 
+	// ベストのプランを画像にして保存する
 	for (int i = 0; i < best_zones.size(); ++i) {
 		char filename[256];
 		sprintf(filename, "zone_exhaustive_optimal_%d.png", i);
 		mcmcutil::MCMCUtil::saveZoneImage(city_size, best_zones[i], filename);
 	}
+
+	// 全スコアをファイルに保存する
+	FILE* fp = fopen("zone_exhaustive_scores.txt", "w");
+	for (int i = 0; i < scores.size(); ++i) {
+		fprintf(fp, "%lf\n", scores[i]);
+	}
+	fclose(fp);
 }
 
 /**

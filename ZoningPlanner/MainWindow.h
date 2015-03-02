@@ -46,6 +46,7 @@ public slots:
 	void onViewZoning();
 	void onBestPlan();
 	void onExhaustiveSearch();
+	void onScoreTest();
 	void onCameraDefault();
 	void onCameraTest();
 	void onHCStart();
