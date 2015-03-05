@@ -16,6 +16,7 @@ protected:
 
 public:
 	static bool GreaterScore(const std::pair<float, int>& rLeft, const std::pair<float, int>& rRight);
+	static float distToFeature(int city_size, float distance);
 	static void computeFeature(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, int s, std::vector<float>& feature);
 	static float computeScore(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences);
 	static float computeScore2(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences);

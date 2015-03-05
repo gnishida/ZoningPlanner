@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "BrushFire.h"
 #include "MCMCUtil.h"
+#include "Zoning.h"
 
 namespace mcmc5 {
 
@@ -84,12 +85,12 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
  * @param zoneTypeDistribution	指定されたタイプ分布
  */
 void MCMC5::generateZoningPlan(int city_size, const vector<float>& zoneTypeDistribution, vector<uchar>& zones) {
-	std::vector<int> numRemainings(NUM_FEATURES + 1);
+	std::vector<int> numRemainings(Zoning::NUM_COMPONENTS + 1);
 	int numCells = city_size * city_size;
 	zones.resize(numCells);
 
 	int actualNumCells = 0;
-	for (int i = 0; i < NUM_FEATURES + 1; ++i) {
+	for (int i = 0; i < Zoning::NUM_COMPONENTS + 1; ++i) {
 		numRemainings[i] = numCells * zoneTypeDistribution[i] + 0.5f;
 		actualNumCells += numRemainings[i];
 	}
@@ -131,8 +132,8 @@ bool MCMC5::accept(float current_score, float proposed_score) {
 void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone, std::vector<float>& scores) {
 	time_t start = clock();
 
-	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, bestZone);
-	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
+	brushfire::BrushFire bf(city_size, city_size, Zoning::NUM_COMPONENTS, bestZone);
+	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
 	float bestScore = curScore;
 
 	float beta = 1.0f;
@@ -173,7 +174,7 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone,
 		bf.setStore(s2, featureId);
 		bf.updateDistanceMap();
 		
-		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
+		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
 
 		// ベストゾーンを更新
 		if (proposedScore > bestScore) {
@@ -210,9 +211,9 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone,
 void MCMC5::optimize2(int city_size, int max_iterations, vector<uchar>& bestZone) {
 	time_t start = clock();
 
-	brushfire::BrushFire bf(city_size, city_size, NUM_FEATURES, bestZone);
+	brushfire::BrushFire bf(city_size, city_size, Zoning::NUM_COMPONENTS, bestZone);
 	
-	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
+	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
 	float bestScore = curScore;
 
 	std::vector<float> scores;
@@ -262,7 +263,7 @@ void MCMC5::optimize2(int city_size, int max_iterations, vector<uchar>& bestZone
 		}
 		bf.updateDistanceMap();
 		
-		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, NUM_FEATURES, bf.zones(), bf.distMap(), preferences);
+		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
 
 		// ベストゾーンを更新
 		if (proposedScore > bestScore) {

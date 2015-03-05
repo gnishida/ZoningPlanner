@@ -204,15 +204,12 @@
     <ClCompile Include="HCStartWidget.cpp" />
     <ClCompile Include="HeatMapColorTable.cpp" />
     <ClCompile Include="HTTPClient.cpp" />
+    <ClCompile Include="HumanComputation.cpp" />
     <ClCompile Include="JSON.cpp" />
     <ClCompile Include="LC_Layer.cpp" />
     <ClCompile Include="LPSolver.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="MCMC.cpp" />
-    <ClCompile Include="MCMC2.cpp" />
-    <ClCompile Include="MCMC3.cpp" />
-    <ClCompile Include="MCMC4.cpp" />
     <ClCompile Include="MCMC5.cpp" />
     <ClCompile Include="MCMCSetupWidget.cpp" />
     <ClCompile Include="MCMCUtil.cpp" />
@@ -378,13 +375,10 @@
     </CustomBuild>
     <ClInclude Include="HeatMapColorTable.h" />
     <ClInclude Include="HTTPClient.h" />
+    <ClInclude Include="HumanComputation.h" />
     <ClInclude Include="JSON.h" />
     <ClInclude Include="LC_Layer.h" />
     <ClInclude Include="LPSolver.h" />
-    <ClInclude Include="MCMC.h" />
-    <ClInclude Include="MCMC2.h" />
-    <ClInclude Include="MCMC3.h" />
-    <ClInclude Include="MCMC4.h" />
     <ClInclude Include="MCMC5.h" />
     <CustomBuild Include="MCMCSetupWidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

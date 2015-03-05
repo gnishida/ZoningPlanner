@@ -214,9 +214,6 @@
     <ClCompile Include="PMBuildingTower.cpp">
       <Filter>PMBuilding</Filter>
     </ClCompile>
-    <ClCompile Include="MCMC.cpp">
-      <Filter>Main Files</Filter>
-    </ClCompile>
     <ClCompile Include="HTTPClient.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
@@ -233,15 +230,6 @@
       <Filter>Main Files</Filter>
     </ClCompile>
     <ClCompile Include="GradientDescent.cpp">
-      <Filter>Main Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MCMC2.cpp">
-      <Filter>Main Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MCMC3.cpp">
-      <Filter>Main Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MCMC4.cpp">
       <Filter>Main Files</Filter>
     </ClCompile>
     <ClCompile Include="BlockMeshGenerator.cpp">
@@ -290,7 +278,10 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="LPSolver.cpp">
-      <Filter>Main Files</Filter>
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="HumanComputation.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -497,9 +488,6 @@
     <ClInclude Include="VBOBuilding.h">
       <Filter>VBO</Filter>
     </ClInclude>
-    <ClInclude Include="MCMC.h">
-      <Filter>Main Files</Filter>
-    </ClInclude>
     <ClInclude Include="HTTPClient.h">
       <Filter>Main Files</Filter>
     </ClInclude>
@@ -510,15 +498,6 @@
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="GradientDescent.h">
-      <Filter>Main Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MCMC2.h">
-      <Filter>Main Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MCMC3.h">
-      <Filter>Main Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MCMC4.h">
       <Filter>Main Files</Filter>
     </ClInclude>
     <ClInclude Include="BlockMeshGenerator.h">
@@ -555,7 +534,10 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="LPSolver.h">
-      <Filter>Main Files</Filter>
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="HumanComputation.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

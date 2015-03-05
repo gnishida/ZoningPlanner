@@ -8,8 +8,9 @@
 
 class Zoning {
 public:
+	static int NUM_COMPONENTS;
 	int city_length;
-	int* zones;
+	std::vector<uchar> zones;
 	int zone_size;
 
 	std::vector<std::pair<Polygon2D, ZoneType> > init_zones;

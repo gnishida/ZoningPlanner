@@ -4,13 +4,14 @@
 #include "Util.h"
 #include "BlockSet.h"
 
+int Zoning::NUM_COMPONENTS = 5;
+
 Zoning::Zoning() {
-	zone_size = 0;
-	zones = 0;
+	zone_size = 64;
+	zones.resize(zone_size * zone_size, 0);
 }
 
 Zoning::~Zoning() {
-	if (zones != 0) delete [] zones;
 }
 
 ZoneType Zoning::getZone(const QVector2D& pt) const {
@@ -62,12 +63,6 @@ void Zoning::loadInitZones(const QString& filename) {
  * また、レベルは現在1固定。
  */
 void Zoning::load(const QString& filename) {
-	// メモリ解放
-	if (zones != 0) {
-		delete [] zones;
-		zones = 0;
-	}
-
 	QFile file(filename); 
     if (!file.open(QFile::ReadOnly| QFile::Truncate)) return;
 
@@ -80,7 +75,7 @@ void Zoning::load(const QString& filename) {
 
 	city_length = root.toElement().attribute("city_length").toInt();
 	zone_size = root.toElement().attribute("zone_size").toInt();
-	zones = new int[zone_size * zone_size];
+	zones.resize(zone_size * zone_size);
 
 	int count = 0;
 	QDomNode nodeZone = root.firstChild();
@@ -130,7 +125,6 @@ void Zoning::save(const QString& filename) {
  * @return					インデックス番号
  */
 int Zoning::positionToIndex(const QVector2D& pt) const {
-	if (zones == 0) return -1;
 	if (zone_size == 0) return -1;
 
 	int cell_len = city_length / zone_size;

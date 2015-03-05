@@ -7,6 +7,23 @@ namespace mcmcutil {
 bool MCMCUtil::GreaterScore(const std::pair<float, int>& rLeft, const std::pair<float, int>& rRight) { return rLeft.first > rRight.first; }
 
 /**
+ * ガウス分布を使って、距離を特徴量に変換する。
+ *
+ * @param city_size	グリッドの一辺の長さ
+ * @param distance	距離
+ * @return			特徴量
+ */
+float MCMCUtil::distToFeature(int city_size, float distance) {
+	// ガウス分布を使ってみよう
+	float K = 1.4f;
+	float sigma = (float)city_size * 0.32;
+
+	return K * expf(-distance*distance/2.0/sigma/sigma);
+}
+
+
+
+/**
  * 指定されたインデックスのセルのfeatureを計算し、返却する。
  *
  * @param city_size			グリッドの一辺の長さ
@@ -26,7 +43,7 @@ void MCMCUtil::computeFeature(int city_size, int num_features, vector<uchar>& zo
 		// ガウス分布を使ってみよう
 		float K = 1.4f;
 		float sigma = (float)city_size * 0.32;
-		feature[i] = K * expf(-(float)dist[i][s]*(float)dist[i][s]/2.0/sigma/sigma);
+		feature[i] = distToFeature(city_size, dist[i][s]);
 	}
 }
 

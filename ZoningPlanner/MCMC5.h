@@ -13,8 +13,7 @@ using namespace cv;
 
 namespace mcmc5 {
 
-#define NUM_FEATURES 5
-#define K 0.0005
+//#define NUM_FEATURES 5
 
 class MCMC5 {
 private:

@@ -27,7 +27,7 @@ protected:
 
 public:
 	QImage generatePictureOfBestPlace(std::vector<float>& preference);
-	bool savePreferences(std::vector<int>& user_ids, std::vector<std::vector<float> >& preferences, const QString& filename);
+	bool savePreferences(QMap<int, std::vector<float> >& preferences, const QString& filename);
 
 public slots:
 	void onLoadZoning();

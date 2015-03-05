@@ -14,7 +14,6 @@
 #include <numeric>
 #include <boost/thread.hpp>   
 #include <boost/date_time.hpp>
-#include "MCMC4.h"
 #include "global.h"
 #include "RoadMeshGenerator.h"
 #include "BlockMeshGenerator.h"
@@ -24,6 +23,8 @@
 #include "ZoneMeshGenerator.h"
 #include "ExhaustiveSearch.h"
 #include "MCMC5.h"
+#include "MCMCUtil.h"
+#include "BrushFire.h"
 
 UrbanGeometry::UrbanGeometry(MainWindow* mainWin) {
 	this->mainWin = mainWin;
@@ -167,19 +168,10 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
  * ブロックも生成済みである必要がある。
  */
 QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vector<float>& preference) {
-	// 価格を決定するためのpreference vectorを取得
-	QStringList pref_for_land_value = G::g["preference_for_land_value"].toString().split(",");
-	std::vector<float> preference_for_land_value(pref_for_land_value.size());
-	for (int i = 0; i < pref_for_land_value.size(); ++i) {
-		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
-	}
-
-	mcmc4::MCMC4 mcmc(renderManager.side);
-	mcmc.setPreferenceForLandValue(preference_for_land_value);
+	mcmc5::MCMC5 mcmc(renderManager.side);
 
 	// 距離マップを生成する
-	int* dist;
-	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);
+	brushfire::BrushFire bf(zones.zone_size, zones.zone_size, Zoning::NUM_COMPONENTS, zones.zones);
 
 	int cell_len = renderManager.side / zones.zone_size;
 
@@ -195,7 +187,7 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 		// 当該ブロックのfeatureを取得
 		std::vector<float> feature;
 		int s = zones.positionToIndex(QVector2D(pt.x(), pt.y()));
-		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
+		mcmcutil::MCMCUtil::computeFeature(zones.zone_size, Zoning::NUM_COMPONENTS, zones.zones, bf.distMap(), s, feature);
 
 		float score = Util::dot(feature, preference);
 
@@ -205,8 +197,6 @@ QVector2D UrbanGeometry::findBestPlace(VBORenderManager& renderManager, std::vec
 			ret.setY(pt.y());
 		}
 	}
-
-	free(dist);
 
 	return ret;
 }
@@ -224,46 +214,45 @@ std::vector<std::pair<std::vector<float>, std::vector<float> > > UrbanGeometry::
 		preference_for_land_value[i] = pref_for_land_value[i].toFloat();
 	}
 
-	mcmc4::MCMC4 mcmc(renderManager.side);
-	int* dist;
-	mcmc.setPreferenceForLandValue(preference_for_land_value);
-	mcmc.computeDistanceMap(zones.zone_size, zones.zones, &dist);
+	brushfire::BrushFire bf(zones.zone_size, zones.zone_size, Zoning::NUM_COMPONENTS, zones.zones);
+	mcmc5::MCMC5 mcmc(renderManager.side);
 
 	std::vector<std::vector<float> > features;
 	for (int s = 0; s < zones.zone_size * zones.zone_size; ++s) {
 		if (zones.zones[s] != ZoneType::TYPE_RESIDENTIAL) continue;
 
 		std::vector<float> feature;
-		mcmc.computeFeature(zones.zone_size, zones.zones, dist, s, feature);
+		mcmcutil::MCMCUtil::computeFeature(zones.zone_size, Zoning::NUM_COMPONENTS, zones.zones, bf.distMap(), s, feature);
 
 		features.push_back(feature);
 	}
 
-	free(dist);
-
 	std::vector<std::pair<std::vector<float>, std::vector<float> > > ret;
 
 	for (int iter = 0; iter < num; ++iter) {
-		int com1 = Util::genRand(0, 7);
-		int com2 = Util::genRand(0, 7);
+		int com1 = Util::genRand(0, Zoning::NUM_COMPONENTS);
+		int com2 = Util::genRand(0, Zoning::NUM_COMPONENTS);
 
-		int r1 = Util::genRand(0, features.size());
+		int r1 = Util::genRand(0, zones.zone_size * zones.zone_size);
 		int r2;
-				
+
 		std::vector<float> option1;
 		std::vector<float> option2;
+
+		for (int k = 0; k < Zoning::NUM_COMPONENTS; ++k) {
+			option1[k] = bf.distMap()[k][r1];
+		}
+
 		while (true) {
-			r2 = Util::genRand(0, features.size());
+			r2 = Util::genRand(0, zones.zone_size * zones.zone_size);
 			if (r2 == r1) continue;
 
-			std::vector<float> f2 = features[r2];
-			f2[com1] = features[r1][com1];
-			f2[com2] = features[r1][com2];
+			for (int k = 0; k < Zoning::NUM_COMPONENTS; ++k) {
+				option2[k] = bf.distMap()[k][r1];
+			}
 
-			f2[7] = mcmc.computePriceIndex(f2);
-
-			option1 = mcmc4::MCMC4::featureToDist(features[r1]);
-			option2 = mcmc4::MCMC4::featureToDist(f2);
+			option2[com1] = option1[com1];
+			option2[com2] = option1[com2];
 
 			// ２つのoptionが近すぎる場合は、棄却
 			float len = 0.0f;
