@@ -1,5 +1,6 @@
 ﻿#include "MCMCUtil.h"
 #include "Util.h"
+#include "LPSolver.h"
 
 namespace mcmcutil {
 
@@ -30,7 +31,8 @@ void MCMCUtil::computeFeature(int city_size, int num_features, vector<uchar>& zo
 }
 
 /** 
- * ゾーンのスコアを計算する。
+ * 人を最適配置して、ゾーンプランのスコアを計算する。
+ * 人の最適配置は、greedyアルゴリズムで実施する。
  */
 float MCMCUtil::computeScore(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences) {
 	int num_zones = 0;
@@ -86,6 +88,75 @@ float MCMCUtil::computeScore(int city_size, int num_features, vector<uchar>& zon
 	free(pointer);
 
 	return score / num_zones;
+}
+
+/** 
+ * 人を最適配置して、ゾーンプランのスコアを計算する。
+ * 人の最適配置は、Linear programmingで実施する。
+ */
+float MCMCUtil::computeScore2(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences) {
+	int num_zones = 0;
+
+	// 住宅ゾーンのセルの数をカウントする
+	std::vector<std::vector<std::pair<float, int> > > all_scores(preferences.size());
+	for (int s = 0; s < city_size * city_size; ++s) {
+		if (zones[s] == 0) num_zones++;
+	}
+
+	LPSolver lp(preferences.size() * num_zones);
+
+	// 制約をセット
+	for (int i = 0; i < preferences.size(); ++i) {
+		std::vector<int> colno(num_zones);
+		std::vector<double> row(num_zones);
+		for (int j = 0; j < num_zones; ++j) {
+			colno[j] = i * num_zones + j + 1;
+			row[j] = 1.0;
+		}
+		lp.addConstraint(EQ, row, colno, (float)num_zones / (float)preferences.size());
+	}
+	for (int i = 0; i < num_zones; ++i) {
+		std::vector<int> colno(preferences.size());
+		std::vector<double> row(preferences.size());
+		for (int j = 0; j < preferences.size(); ++j) {
+			colno[j] = i + j * num_zones + 1;
+			row[j] = 1.0;
+		}
+		lp.addConstraint(EQ, row, colno, 1.0);
+	}
+
+	// Ojbective関数をセット
+	{
+		int index = 0;
+		std::vector<double> row(preferences.size() * num_zones);
+		for (int s = 0; s < city_size * city_size; ++s) {
+			if (zones[s] != 0) continue;
+
+			std::vector<float> feature;
+			computeFeature(city_size, num_features, zones, dist, s, feature);
+
+			for (int p = 0; p < preferences.size(); ++p) {
+				float score = Util::dot(feature, preferences[p]);
+
+				row[p * num_zones + index] = score;
+			}
+
+			index++;
+		}
+
+		lp.setObjective(row);
+	}
+
+	// upper boundをセット
+	{
+		std::vector<double> values(preferences.size() * num_zones, 1.0);
+		lp.setUpperBound(values);
+	}
+
+	lp.maximize();
+	//lp.displaySolution();
+
+	return lp.getObjective() / num_zones;
 }
 
 vector<vector<float> > MCMCUtil::readPreferences(const QString& filename) {

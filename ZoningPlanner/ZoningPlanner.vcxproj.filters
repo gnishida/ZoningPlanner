@@ -289,6 +289,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ExhaustiveSearchSetupWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="LPSolver.cpp">
+      <Filter>Main Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -550,6 +553,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ExhaustiveSearchSetupWidget.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LPSolver.h">
+      <Filter>Main Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
