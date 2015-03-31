@@ -234,7 +234,7 @@ void MainWindow::onBestPlan() {
 	// preference vectorを読み込む
 	std::vector<std::vector<float> > preferences = mcmcutil::MCMCUtil::readPreferences(filename);
 	
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, dlg.initialGridSize, dlg.numStages, dlg.MCMCSteps, dlg.upscaleFactor, 10.0f);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, dlg.initialGridSize, dlg.numStages, dlg.MCMCSteps, dlg.upscaleFactor, dlg.acceptanceRateParameter);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();

@@ -14,6 +14,7 @@ public:
 	int numStages;
 	int MCMCSteps;
 	float upscaleFactor;
+	float acceptanceRateParameter;
 
 public:
 	MCMCSetupWidget(QWidget* parent);
