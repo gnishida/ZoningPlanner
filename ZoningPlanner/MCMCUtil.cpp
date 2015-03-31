@@ -1,6 +1,7 @@
 ﻿#include "MCMCUtil.h"
 #include "Util.h"
 #include "LPSolver.h"
+#include "people_allocation.cuh"
 
 namespace mcmcutil {
 
@@ -109,9 +110,83 @@ float MCMCUtil::computeScore(int city_size, int num_features, vector<uchar>& zon
 
 /** 
  * 人を最適配置して、ゾーンプランのスコアを計算する。
+ * 人の最適配置は、greedyアルゴリズムで実施する。
+ */
+float MCMCUtil::computeScoreCUDA(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences) {
+	int num_zones = 0;
+
+	vector<vector<float> > features;
+	for (int s = 0; s < city_size * city_size; ++s) {
+		if (zones[s] != 0) continue;
+
+		num_zones++;
+
+		std::vector<float> feature;
+		computeFeature(city_size, num_features, zones, dist, s, feature);
+
+		features.push_back(feature);
+	}
+
+	// CUDAで、各セルの、各ユーザによるスコアを計算する
+	float* results;
+	allocate_people(preferences, features, &results);
+
+	num_zones = 0;
+	std::vector<std::vector<std::pair<float, int> > > all_scores(preferences.size());
+	for (int s = 0; s < city_size * city_size; ++s) {
+		if (zones[s] != 0) continue;
+
+		for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
+			float score = results[peopleType * features.size() + num_zones];
+
+			all_scores[peopleType].push_back(std::make_pair(score, s));
+		}
+		num_zones++;
+	}
+
+	// ソート
+	for (int peopleType = 0; peopleType < preferences.size(); ++peopleType) {
+		std::sort(all_scores[peopleType].begin(), all_scores[peopleType].end(), GreaterScore);
+	}
+
+	// 使用済みチェック用
+	int* used = (int*)malloc(sizeof(int) * city_size * city_size);
+	memset(used, 0, sizeof(int) * city_size * city_size);
+
+	// ポインタ
+	int* pointer = (int*)malloc(sizeof(int) * preferences.size());
+	memset(pointer, 0, sizeof(int) * preferences.size());
+
+	float score = 0.0f;
+	int count = num_zones;
+	while (count > 0) {
+		for (int peopleType = 0; peopleType < preferences.size() && count > 0; ++peopleType) {
+			int cell;
+			float sc;
+			do {
+				cell = all_scores[peopleType][pointer[peopleType]].second;
+				sc = all_scores[peopleType][pointer[peopleType]].first;
+				pointer[peopleType]++;
+			} while (used[cell] == 1);
+
+			used[cell] = 1;
+			score += sc;
+			count--;
+		}
+	}
+
+	// メモリ解放
+	free(used);
+	free(pointer);
+
+	return 0;
+}
+
+/** 
+ * 人を最適配置して、ゾーンプランのスコアを計算する。
  * 人の最適配置は、Linear programmingで実施する。
  */
-float MCMCUtil::computeScore2(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences) {
+float MCMCUtil::computeScoreLP(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences) {
 	int num_zones = 0;
 
 	// 住宅ゾーンのセルの数をカウントする

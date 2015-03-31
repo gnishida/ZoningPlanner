@@ -145,8 +145,9 @@ void UrbanGeometry::update(VBORenderManager& vboRenderManager) {
  * @param zoning_num_stages		階層のステージ数
  * @param mcmc_steps			MCMCのステップ数
  * @param upscale_factor		次のステージに行った時に、どのぐらいMCMCステップ数を増やすか？
+ * @param beta					MCMCのacceptance rate式で使用する係数
  */
-void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences, int zoning_start_size, int zoning_num_stages, int mcmc_steps, float upscale_factor) {
+void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<std::vector<float> >& preferences, int zoning_start_size, int zoning_num_stages, int mcmc_steps, float upscale_factor, float beta) {
 	// 各種ゾーンの配分を取得（住宅、商業、工場、公園、アミューズメント、学校・図書館）
 	QStringList distribution = G::g["zoning_type_distribution"].toString().split(",");
 	std::vector<float> zoneTypeDistribution(distribution.size());
@@ -159,7 +160,7 @@ void UrbanGeometry::findBestPlan(VBORenderManager& renderManager, std::vector<st
 
 	std::vector<uchar> zones;
 	int zone_size;
-	mcmc.findBestPlan(zones, zone_size, zoneTypeDistribution, zoning_start_size, zoning_num_stages, mcmc_steps, upscale_factor);
+	mcmc.findBestPlan(zones, zone_size, zoneTypeDistribution, zoning_start_size, zoning_num_stages, mcmc_steps, upscale_factor, beta);
 }
 
 /**

@@ -28,8 +28,9 @@ void MCMC5::addPreference(std::vector<float>& preference) {
  * @param num_stages			階層のステージ数
  * @param max_iterations		MCMCのステップ数
  * @param upscale_factor		次のステージに行った時に、どのぐらいMCMCステップ数を増やすか？
+ * @param beta					MCMCのacceptance rate式で使用する係数
  */
-void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector<float>& zoneTypeDistribution, int start_size, int num_stages, int max_iterations, float upscale_factor) {
+void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector<float>& zoneTypeDistribution, int start_size, int num_stages, int max_iterations, float upscale_factor, float beta) {
 	srand(10);
 	city_size = start_size;
 
@@ -44,9 +45,9 @@ void MCMC5::findBestPlan(vector<uchar>& zones, int& city_size, const std::vector
 	std::vector<float> scores;
 	for (int layer = 0; layer < num_stages; ++layer) {
 		if (layer == 0) {
-			optimize(city_size, max_iterations, zones, scores);
+			optimize(city_size, max_iterations, zones, scores, beta);
 		} else {
-			optimize(city_size, max_iterations, zones, scores);
+			optimize(city_size, max_iterations, zones, scores, beta);
 		}
 
 		vector<uchar> tmpZones(city_size * city_size);
@@ -113,11 +114,11 @@ void MCMC5::generateZoningPlan(int city_size, const vector<float>& zoneTypeDistr
  *
  * @param current_score		現在プランのスコア
  * @param proposed_score	提案プランのスコア
+ * @param beta				係数
  * @return					acceptならtrue
  */
-bool MCMC5::accept(float current_score, float proposed_score) {
-	const float alpha = 1.0f;
-	if (proposed_score > current_score || Util::genRand() < expf(alpha * proposed_score) / expf(alpha * current_score)) { 
+bool MCMC5::accept(float current_score, float proposed_score, float beta) {
+	if (proposed_score > current_score || Util::genRand() < expf(beta * (proposed_score - current_score))) { 
 		return true;
 	} else {
 		return false;
@@ -128,15 +129,21 @@ bool MCMC5::accept(float current_score, float proposed_score) {
 /**
  * bestZoneに、初期ゾーンプランが入っている。
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
+ *
+ * @param city_size			都市の一辺の長さ [m]
+ * @param max_iterations	MCMCのiteration数
+ * @param bestZone [OUT]	最適ゾーニング
+ * @param scores [OUT]		最適ゾーニングのスコア
+ * @param beta				MCMCのacceptance rate式で使用する係数
  */
-void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone, std::vector<float>& scores) {
+void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone, std::vector<float>& scores, float beta) {
 	time_t start = clock();
 
 	brushfire::BrushFire bf(city_size, city_size, Zoning::NUM_COMPONENTS, bestZone);
 	float curScore = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
+	//float curScore = mcmcutil::MCMCUtil::computeScoreCUDA(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
 	float bestScore = curScore;
 
-	float beta = 1.0f;
 	for (int iter = 0; iter < max_iterations; ++iter) {
 		// バックアップ
 		brushfire::BrushFire tempBf = bf;
@@ -175,6 +182,7 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone,
 		bf.updateDistanceMap();
 		
 		float proposedScore = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
+		//float proposedScore = mcmcutil::MCMCUtil::computeScoreCUDA(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
 
 		// ベストゾーンを更新
 		if (proposedScore > bestScore) {
@@ -184,7 +192,7 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone,
 
 		//printf("%lf -> %lf (best: %lf)\n", curScore, proposedScore, bestScore);
 
-		if (accept(curScore, proposedScore)) { // accept
+		if (accept(curScore, proposedScore, beta)) { // accept
 			curScore = proposedScore;
 		} else { // reject
 			// rollback
@@ -207,8 +215,13 @@ void MCMC5::optimize(int city_size, int max_iterations, vector<uchar>& bestZone,
  * bestZoneに、初期ゾーンプランが入っている。
  * MCMCを使って、最適なゾーンプランを探し、bestZoneに格納して返却する。
  * 各ステップでは、隣接セルをランダムに選択し、ゾーンを交換する。
+ *
+ * @param city_size			都市の一辺の長さ [m]
+ * @param max_iterations	MCMCのiteration数
+ * @param bestZone [OUT]	最適ゾーニング
+ * @param beta				MCMCのacceptance rate式で使用する係数
  */
-void MCMC5::optimize2(int city_size, int max_iterations, vector<uchar>& bestZone) {
+void MCMC5::optimize2(int city_size, int max_iterations, vector<uchar>& bestZone, float beta) {
 	time_t start = clock();
 
 	brushfire::BrushFire bf(city_size, city_size, Zoning::NUM_COMPONENTS, bestZone);
@@ -217,7 +230,6 @@ void MCMC5::optimize2(int city_size, int max_iterations, vector<uchar>& bestZone
 	float bestScore = curScore;
 
 	std::vector<float> scores;
-	float beta = 1.0f;
 	int adj[4];
 	adj[0] = -1; adj[1] = 1; adj[2] = -city_size; adj[3] = city_size;
 	for (int iter = 0; iter < max_iterations; ++iter) {
@@ -271,7 +283,7 @@ void MCMC5::optimize2(int city_size, int max_iterations, vector<uchar>& bestZone
 			copy(bf.zones().begin(), bf.zones().end(), bestZone.begin());
 		}
 
-		if (accept(curScore, proposedScore)) { // accept
+		if (accept(curScore, proposedScore, beta)) { // accept
 			curScore = proposedScore;
 		} else { // reject
 			// rollback

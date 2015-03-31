@@ -539,6 +539,9 @@
     <ClInclude Include="HumanComputation.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="people_allocation.cuh">
+      <Filter>Main Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\data\shaders\lc_fragment_sk.glsl">
@@ -547,5 +550,10 @@
     <None Include="..\data\shaders\lc_vertex_sk.glsl">
       <Filter>VBO</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="people_allocation.cu">
+      <Filter>Main Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

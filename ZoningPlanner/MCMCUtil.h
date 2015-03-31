@@ -19,7 +19,8 @@ public:
 	static float distToFeature(int city_size, float distance);
 	static void computeFeature(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, int s, std::vector<float>& feature);
 	static float computeScore(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences);
-	static float computeScore2(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences);
+	static float MCMCUtil::computeScoreCUDA(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences);
+	static float computeScoreLP(int city_size, int num_features, vector<uchar>& zones, vector<vector<int> >& dist, vector<vector<float> > preferences);
 	static vector<vector<float> > readPreferences(const QString& filename);
 	static vector<uchar> readZone(const QString& filename);
 	static void saveZoneImage(int city_size, vector<uchar>& zones, char* filename);

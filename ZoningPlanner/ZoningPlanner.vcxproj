@@ -128,7 +128,7 @@
       <AdditionalDependencies>qtmain.lib;QtCore4.lib;QtGui4.lib;QtXml4.lib;QtOpenGL4.lib;QtNetwork4.lib;opengl32.lib;glu32.lib;opencv_core249.lib;opencv_highgui249.lib;opencv_imgproc249.lib;opencv_legacy249.lib;opencv_ml249.lib;opencv_photo249.lib;opencv_video249.lib;glew32.lib;libboost_thread-vc100-mt-1_53.lib;cudart.lib;CGAL-vc100-mt-gd-4.5.1.lib;CGAL_Core-vc100-mt-gd-4.5.1.lib;CGAL_ImageIO-vc100-mt-gd-4.5.1.lib;CGAL_Qt4-vc100-mt-gd-4.5.1.lib;libgmp-10.lib;libmpfr-4.lib;lpsolve55.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CudaCompile>
-      <CodeGeneration>%(CodeGeneration)</CodeGeneration>
+      <CodeGeneration>compute_11,sm_11;compute_20,sm_20;compute_30,sm_30;%(CodeGeneration)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -324,6 +324,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe" -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED  -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_OPENGL_LIB  "-I$(BOOST_ROOT)\." "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtNetwork" "-I.\..\opencv\include" "-I.\..\glew\include\GL" "-IC:\cgal4.5\include" "-IC:\cgal4.5\auxiliary\gmp\include" "-I.\..\lpsolve"</Command>
     </CustomBuild>
+    <ClInclude Include="people_allocation.cuh" />
     <ClInclude Include="ConvexHull.h" />
     <ClInclude Include="ExhaustiveSearch.h" />
     <CustomBuild Include="ExhaustiveSearchSetupWidget.h">
@@ -542,6 +543,9 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
       <SubType>Designer</SubType>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="people_allocation.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

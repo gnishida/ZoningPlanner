@@ -234,7 +234,7 @@ void MainWindow::onBestPlan() {
 	// preference vectorを読み込む
 	std::vector<std::vector<float> > preferences = mcmcutil::MCMCUtil::readPreferences(filename);
 	
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, dlg.initialGridSize, dlg.numStages, dlg.MCMCSteps, dlg.upscaleFactor);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences, dlg.initialGridSize, dlg.numStages, dlg.MCMCSteps, dlg.upscaleFactor, 10.0f);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
@@ -274,7 +274,8 @@ void MainWindow::onScoreTest() {
 
 	brushfire::BrushFire bf(city_size, city_size, Zoning::NUM_COMPONENTS, zones);
 	
-	float score = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
+	//float score = mcmcutil::MCMCUtil::computeScore(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
+	float score = mcmcutil::MCMCUtil::computeScoreCUDA(city_size, Zoning::NUM_COMPONENTS, bf.zones(), bf.distMap(), preferences);
 
 	static float best_score = -100;
 	if (score > best_score) {
@@ -320,7 +321,7 @@ void MainWindow::onHCStart() {
 	preference[0][0] = 0.378; preference[0][1] = -0.378; preference[0][2] = 0.378; preference[0][3] = -0.378; preference[0][4] = 0.378;
 
 	// ゾーンプランを作成する
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference, 4, 5, 200000, 1.0);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preference, 4, 5, 200000, 1.0, 10.0f);
 
 	// HC初期化
 	HumanComputation hc;
@@ -363,7 +364,7 @@ void MainWindow::onHCResults() {
 	}
 
 	// ベストプランを計算する
-	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences2, 5, 5, 20000, 1.0);
+	urbanGeometry->findBestPlan(glWidget->vboRenderManager, preferences2, 5, 5, 20000, 1.0, 10.0f);
 
 	// 3D更新
 	urbanGeometry->generateBlocks();
